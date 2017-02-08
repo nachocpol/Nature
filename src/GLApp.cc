@@ -9,6 +9,7 @@
 #include "GlApp.h"
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
+#include "gtc/matrix_transform.hpp"
 
 GLApp::GLApp()
 {
@@ -45,20 +46,11 @@ bool GLApp::Init()
     mPassConst.Init();
 
     // Init scene render target
-    mBaseRt.Init(glm::vec2(mViewport.z, mViewport.w), true);
-
-    // Init water render target
-    mWaterReflecRt.Init(glm::vec2(mViewport.z, mViewport.w), true);
-    mWaterRefracRt.Init(glm::vec2(mViewport.z, mViewport.w), true);
-
-    // Init clouds 
-    mCloudsFboMat.Init("../data/shaders/clouds.vs", 
-                "../data/shaders/clouds.fs");
     std::vector<BasicVertex> vert =
     {
         BasicVertex(-1,-1,0,    0,0),
-        BasicVertex( 1,-1,0,    1,0),
-        BasicVertex( 1, 1,0,    1,1),
+        BasicVertex(1,-1,0,    1,0),
+        BasicVertex(1, 1,0,    1,1),
         BasicVertex(-1, 1,0,    0,1)
     };
     std::vector<unsigned int> ele =
@@ -66,8 +58,32 @@ bool GLApp::Init()
         0,1,2,
         0,2,3
     };
-    mCloudsFboQuad.Init(vert, ele);
+    mBaseRt.Init(glm::vec2(mViewport.z, mViewport.w), true);
+    mBaseMatRt.Init("../data/shaders/rt.vs", "../data/shaders/rt.fs");
+    mBaseQuadRt.Init(vert, ele);
 
+    // Init clouds 
+    std::vector<BasicVertex> wVert =
+    {
+        BasicVertex(-1.0f,0.0f,-1.0f,     0.0f,0.0f),
+        BasicVertex(1.0f,0.0f,-1.0f,     1.0f,0.0f),
+        BasicVertex(1.0f,0.0f, 1.0f,     1.0f,1.0f),
+        BasicVertex(-1.0f,0.0f, 1.0f,     0.0f,1.0f)
+    };
+    std::vector<unsigned int> cele =
+    {
+        0,1,2,
+        0,2,3
+    };
+    mCloudsMat.Init("../data/shaders/clouds.vs",
+                    "../data/shaders/clouds.fs");
+    mCloudsPlane.Init(wVert, cele);
+
+    // Init water
+    mWaterReflecRt.Init(glm::vec2(mViewport.z, mViewport.w), true);
+    mWaterRefracRt.Init(glm::vec2(mViewport.z, mViewport.w), true);
+    mWaterMesh.Init(wVert, ele);
+    mWaterMaterial.Init("../data/shaders/water.vs", "../data/shaders/water.fs");
     return true;
 }
 
@@ -110,56 +126,31 @@ void GLApp::Render()
     // Render scene
     mBaseRt.Enable();
     {
+        // Terrain
         mTerrain.Draw(false);
+
+        // Clouds
+        glDisable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        mCloudsMat.Use();
+        glm::mat4 ctrans = glm::mat4();
+        ctrans = glm::translate(ctrans, glm::vec3(0.0f, 500.0f, 0.0f));
+        ctrans = glm::scale(ctrans, glm::vec3(1000.0f));
+        glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
+        mCloudsPlane.Draw();
+        glDisable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
     }
     mBaseRt.Disable();
 
-    // Water reflections
-    float wOff = mCamera.GetPosition().y - mWaterHeight;
-    mCamera.Move(0.0f, -wOff, 0.0f);
-    mCamera.SetPitch(-mCamera.GetPitch());
-    mCamera.UpdateView();
-    mPassConst.PView = mCamera.View;
-    mPassConst.Update();
-    mWaterReflecRt.Enable();
-    {
-        mTerrain.Draw(true,glm::vec4(0.0f,1.0f,0.0f,-mWaterHeight));
-
-        // Clouds
-        /*
-        mCloudsFboMat.Use();
-        glActiveTexture(GL_TEXTURE0 + 0);
-        glBindTexture(GL_TEXTURE_2D, mBaseRt.RenderTexture.Id);
-        glUniform1i(glGetUniformLocation(mCloudsFboMat.Id, "uBaseTexture"), 0);
-        glActiveTexture(GL_TEXTURE0 + 1);
-        glBindTexture(GL_TEXTURE_2D, mBaseRt.DepthTexture.Id);
-        glUniform1i(glGetUniformLocation(mCloudsFboMat.Id, "uDepthTexture"), 1);
-        mCloudsFboQuad.Draw();
-        */
-    }
-    mWaterReflecRt.Disable();
-
-    // Water refractions
-    mCamera.Move(0.0f, wOff, 0.0f);
-    mCamera.SetPitch(-mCamera.GetPitch());
-    mCamera.UpdateView();
-    mPassConst.PView = mCamera.View;
-    mPassConst.Update();
-    mWaterRefracRt.Enable();
-    {
-        mTerrain.Draw(true, glm::vec4(0.0f, -1.0f, 0.0f, mWaterHeight));
-    }
-    mWaterRefracRt.Disable();
-
-    // Clouds
-    mCloudsFboMat.Use();
+    // Draw
+    mBaseMatRt.Use();
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D, mBaseRt.RenderTexture.Id);
-    glUniform1i(glGetUniformLocation(mCloudsFboMat.Id, "uBaseTexture"), 0);
-    glActiveTexture(GL_TEXTURE0 + 1);
-    glBindTexture(GL_TEXTURE_2D, mBaseRt.DepthTexture.Id);
-    glUniform1i(glGetUniformLocation(mCloudsFboMat.Id, "uDepthTexture"), 1);
-    mCloudsFboQuad.Draw();
+    glUniform1i(glGetUniformLocation(mBaseMatRt.Id, "uColorTexture"), 0);
+    mBaseQuadRt.Draw();
+
 
     RenderUi();
     mWindow.Swap();

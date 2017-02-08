@@ -30,13 +30,18 @@ private:
     Camera mCamera;
     glw::PassConstants mPassConst;
     glw::RenderTarget mBaseRt;
+    glw::Material mBaseMatRt;
+    glw::Mesh mBaseQuadRt;
 
     // Clouds
-    glw::Material mCloudsFboMat;
-    glw::Mesh mCloudsFboQuad;
+    glw::Material mCloudsMat;
+    glw::Mesh mCloudsPlane;
 
     // Water
     float mWaterHeight = 5.0f;
+    float mWaterScale = 100.0f;
     glw::RenderTarget mWaterReflecRt;
     glw::RenderTarget mWaterRefracRt;
+    glw::Mesh mWaterMesh;
+    glw::Material mWaterMaterial;
 };

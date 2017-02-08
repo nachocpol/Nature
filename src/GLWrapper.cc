@@ -46,6 +46,12 @@ void glw::SetClipPlane(GLint indx, glm::vec4 plane, GLuint program)
     glUniform4fv(loc, 1, &plane.x);
 }
 
+void glw::SetTransform(GLint program, float* trans)
+{
+    GLuint loc = glGetUniformLocation(program, "uModel");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, trans);
+}
+
 void glw::Mesh::Init(std::vector<BasicVertex> vertex, std::vector<unsigned int> ele)
 {
     GLsizeiptr eleSize = sizeof(unsigned int) * ele.size();

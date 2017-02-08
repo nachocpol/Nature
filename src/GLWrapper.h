@@ -21,6 +21,8 @@ namespace glw
 
     void SetClipPlane(GLint indx, glm::vec4 plane,GLuint program);
 
+    void SetTransform(GLint program, float* trans);
+
     struct Mesh
     {
         void Init(std::vector<BasicVertex> vertex,std::vector<unsigned int> ele);

@@ -57,6 +57,7 @@ void Terrain::Draw(bool useClip, glm::vec4 plane)
     {
         glw::SetClipPlane(0, glm::vec4(0.0f, 1.0f, 0.0f, 99999.0f), mTerrainMaterial.Id);
     }
+    
 
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D, mGrassTexture.Id);

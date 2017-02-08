@@ -12,6 +12,7 @@ uniform sampler2D uNoiseTexture;
 uniform sampler2D uDepthTexture;
 
 in vec2 iTexcoord;
+in vec3 iWPos;
 
 out vec4 oColor;
 
@@ -137,6 +138,15 @@ float GetFade(float dist)
 
 void main()
 {
+	vec3 sunDir = vec3(0.4f,0.6f,0.0f);
+	vec2 w = vec2(0.5f,0.5f) * uTime;
+	vec3 p = iWPos / 50.0f;
+	p.x += w.x; 
+	p.y += w.y;
+
+	float n = Scattering(p,normalize(p + sunDir));
+	oColor = vec4(vec3(n),(n - 1.0f) * -1.0f);
+	/*
 	vec2 uv = iTexcoord * 2.0f - 1.0f;
 	vec3 rd = GetCamera(uv);
 	vec3 ro = vec3(uCampos.x,uCampos.y,uCampos.z);
@@ -150,8 +160,8 @@ void main()
 	// Set initial values of color
 	vec3 cFinal = vec3(0.0f);
 	vec3 baseColor = texture(uBaseTexture,iTexcoord).xyz;
-	//baseColor = vec3(0.0f);
-	oColor = vec4(baseColor,1.0f);
+	baseColor = vec3(0.0f,0.0f,0.0f);
+	oColor = vec4(baseColor,0.0f);
 
 	// Hack, if we have something in the current texel,dont draw 
 	// anything. Do this with stencil?
@@ -173,8 +183,10 @@ void main()
 		float s = Scattering(cPos,rd);
 		s = mix(0.0f,s,GetFade(cDist));
 		cFinal = mix(baseColor,mix(uCloudBrig,uCloudDark,sqrt(s)) * 2.0f,s);
-		oColor = vec4(cFinal,1.0f);
+		oColor = vec4(cFinal,(s - 1.0f) * -1.0f);
 	}
+	// If we dont hit the cloud just output with alpha 0%
+	*/
 }
 
 
