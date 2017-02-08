@@ -1,0 +1,44 @@
+							
+							..:: Nature 3.0 TO-DO list ::..
+
+					[x]:not started 	[-]:in progress 	[✓]:done
+
+
+	+ Hot relaod shaders											[x]
+	+ Generate terrain mesh (grid)									[✓]	29 / 1 / 2017
+		+ Split into chunks											[✓]	29 / 1 / 2017
+	+ Input callback/system											[✓] 30 / 1 / 2017
+	+ Resize callback												[✓] 2  / 2 / 2017
+	+ First person camera (prototype)								[✓] 30 / 1 / 2017
+	+ FPS camera mouse look around									[✓]  4 / 2 / 2017
+	+ Uniform buffer for pass info (view,proj,time etc.)			[✓] 29 / 1 / 2017
+	+ Basic vertex support positions and uv?						[✓] 29 / 1 / 2017
+	+ Generic ubo class? (for now a class for pass constants)		[x]
+	+ Use layout location for ubos (remove one driver shity callb) 	[x]
+	+ Integrate IMGUI												[✓] 30 / 1 / 2017
+	+ Fix time for the app (delta time,fps)							[-]
+	+ Use IMGUI to log information about timming					[✓]	29 / 1 / 2017
+	+ Loading textures												[x]
+	+ Improve input class to handle,pressed released				[x]
+	+ Fustrum Class 												[x]
+	+ Obtain planes from the camera view and proj					[x]
+	+ Perform frustum culling with the terrain						[x]
+	+ Generic texture Class 										[✓] 31 / 1 / 2017
+ 	+ Setup postprocessing (fullscreen quad,fbo etc)				[✓]	31 / 1 / 2017
+	+ Beta version of the clouds									[✓] 31 / 1 / 2017
+	+ Port new clouds 												[✓]  2 / 2 / 2017
+	+ Error callback												[x]
+	+ Material should handle uniforms								[x]
+	+ Function to setup textures 									[x]
+	+ Add mouse position to input Class 							[✓] 4 / 2 / 2017
+	+ Fix clouds 													[✓] 5 / 2 / 2017
+	+ Add InvProj, InvViewRot										[x]
+	+ Clouds are being rendered above everything					[✓] 6 / 2 / 2017
+		+ Now if im above the clouds they are not rendered...		[x]
+	+ Fix grid generation											[✓] 6 / 2 / 2017
+	+ Use stencil instead of depth hack for the Clouds 				[x]
+	+ Add delta time to camera speed								[x]
+	+ Render target enable/disable (it will auto change				[x]	8 / 2 / 2017
+	  its parameters like viewport etc)
+	+ Add support for clipping planes								[x]
+	  	+ Improve it, more than one? UBO?							[x]

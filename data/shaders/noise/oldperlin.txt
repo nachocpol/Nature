@@ -1,0 +1,131 @@
+#version 430 core
+
+uniform sampler2D uColorTexture;
+
+in vec2 iTexcoord;
+
+out vec4 oColor;
+
+uniform int p[512]; 
+
+float Fade(float t)
+{
+	//return t;
+	return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
+}
+
+int Inc(int num) 
+{
+    num++;
+    //if (repeat > 0) num %= repeat;
+    return num;
+}
+
+float Grad1(int hash, vec3 seed) 
+{
+    int h = hash & 15;                                    
+    float u = h < 8.0f /* 0b1000 */ ? seed.x : seed.y;                
+    float v = 0.0f;                                             
+                                                         
+    if(h < 4 /* 0b0100 */)                                
+        v = seed.y;
+    else if(h == 12 /* 0b1100 */ || h == 14 /* 0b1110*/)  
+        v = seed.x;
+    else                                                  
+        v = seed.z;
+    
+    return ((h&1) == 0 ? u : -u)+((h&2) == 0 ? v : -v); 
+}
+
+float Grad(int hash, vec3 seed)
+{
+    switch(hash & 0xF)
+    {
+        case 0x0: return  seed.x + seed.y;
+        case 0x1: return -seed.x + seed.y;
+        case 0x2: return  seed.x - seed.y;
+        case 0x3: return -seed.x - seed.y;
+        case 0x4: return  seed.x + seed.z;
+        case 0x5: return -seed.x + seed.z;
+        case 0x6: return  seed.x - seed.z;
+        case 0x7: return -seed.x - seed.z;
+        case 0x8: return  seed.y + seed.z;
+        case 0x9: return -seed.y + seed.z;
+        case 0xA: return  seed.y - seed.z;
+        case 0xB: return -seed.y - seed.z;
+        case 0xC: return  seed.y + seed.x;
+        case 0xD: return -seed.y + seed.z;
+        case 0xE: return  seed.y - seed.x;
+        case 0xF: return -seed.y - seed.z;
+        default: return 0.0f; // never happens
+    }
+}
+
+float Noise(vec3 seed)
+{
+	int xi = int(seed.x) & 255;                              
+    int yi = int(seed.y) & 255;                              
+    int zi = int(seed.z) & 255;        
+
+    float xf = seed.x - int(seed.x);
+    float yf = seed.y - int(seed.y);
+    float zf = seed.z - int(seed.z);
+
+    float u = Fade(xf);
+    float v = Fade(yf);
+    float w = Fade(zf);
+
+    int aaa, aba, aab, abb, baa, bba, bab, bbb;
+    aaa = p[p[p[    xi ]+    yi ]+    zi ];
+    aba = p[p[p[    xi ]+Inc(yi)]+    zi ];
+    aab = p[p[p[    xi ]+    yi ]+Inc(zi)];
+    abb = p[p[p[    xi ]+Inc(yi)]+Inc(zi)];
+    baa = p[p[p[Inc(xi)]+    yi ]+    zi ];
+    bba = p[p[p[Inc(xi)]+Inc(yi)]+    zi ];
+    bab = p[p[p[Inc(xi)]+    yi ]+Inc(zi)];
+    bbb = p[p[p[Inc(xi)]+Inc(yi)]+Inc(zi)];
+
+    float x1, x2, y1, y2;
+    vec3 seedf = vec3(xf,yf,zf);	//nacho plox
+
+    x1 = mix(	Grad (aaa, seedf),           
+                Grad (baa, seedf + vec3(-1.0f,0.0f,0.0)),             
+                u);                                     
+    x2 = mix(	Grad (aba, seedf + vec3(0.0f,-1.0f,0.0f)),           
+                Grad (bba, seedf + vec3(-1.0f,-1.0f,0.0f)),             
+              	u);
+    y1 = mix(x1, x2, v);
+
+    x1 = mix(   Grad (aab, seedf + vec3(0.0f,0.0f,-1.0f)),
+                Grad (bab, seedf + vec3(-1.0f,0.0f,-1.0f)),
+                u);
+    x2 = mix(   Grad (abb, seedf + vec3(0.0f,-1.0f,-1.0f)),
+                Grad (bbb, seedf + vec3(-1.0f,-1.0f,-1.0f)),
+                u);
+    y2 = mix (x1, x2, v);
+    
+    return (mix (y1, y2, w) + 1.0f) / 2.0f;                      
+}
+
+float Fbm(vec3 seed, int octaves, float persistence) 
+{
+    float total = 0.0f;
+    float frequency = 1.0f;
+    float amplitude = 1.0f;
+    float maxValue = 0.0f;  
+    for(int i=0;i<octaves;i++) 
+    {
+        total += Noise(seed * frequency) * amplitude;
+        maxValue += amplitude;
+        amplitude *= persistence;
+        frequency *= 2.0f;
+    }
+    return total/maxValue;
+}
+
+void main()
+{
+	vec3 pos = vec3(iTexcoord.x,iTexcoord.y,0.0f);
+	float n = Fbm(pos * 20.0f,8,0.6f);
+	oColor = vec4(n,0.0f,0.0f,1.0f);
+}

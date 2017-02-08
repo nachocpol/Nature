@@ -1,0 +1,56 @@
+#version 430 core
+
+uniform sampler2D uColorTexture;
+
+in vec2 iTexcoord;
+
+out vec4 oColor;
+
+uniform int perm[512]; 
+
+float hash(vec3 p) 
+{
+  p  = fract( p*0.3183099+.1 );
+  p *= 17.0;
+  return fract( p.x*p.y*p.z*(p.x+p.y+p.z) );
+}
+
+float Noise( in vec3 x )
+{
+    vec3 p = floor(x);
+    vec3 f = fract(x);
+    f = f*f*(3.0-2.0*f);
+  
+    return mix(mix(mix( hash(p+vec3(0,0,0)), 
+                        hash(p+vec3(1,0,0)),f.x),
+                   mix( hash(p+vec3(0,1,0)), 
+                        hash(p+vec3(1,1,0)),f.x),f.y),
+               mix(mix( hash(p+vec3(0,0,1)), 
+                        hash(p+vec3(1,0,1)),f.x),
+                   mix( hash(p+vec3(0,1,1)), 
+                        hash(p+vec3(1,1,1)),f.x),f.y),f.z);
+}
+
+float Fbm(vec3 pos, int octaves, float persistence) 
+{
+
+    float total = 0.0f;
+    float frequency = 1.0f;
+    float amplitude = 1.0f;
+    float maxValue = 0.0f;  
+    for(int i=0;i<octaves;i++) 
+    {
+        total += Noise(pos * frequency) * amplitude;
+        maxValue += amplitude;
+        amplitude *= persistence;
+        frequency *= 2.0f;
+    }
+    return total/maxValue;
+}
+
+void main()
+{
+	vec3 pos = vec3(iTexcoord.x,iTexcoord.y,0.0f);
+	float n = Fbm(pos * 20.0f,4,0.6f);
+	oColor = vec4(n,0.0f,0.0f,1.0f);
+}
