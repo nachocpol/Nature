@@ -34,12 +34,13 @@ private:
     glw::Mesh mBaseQuadRt;
 
     // Clouds
+    float mCloudsHeight = 250.0f;
     glw::Material mCloudsMat;
     glw::Mesh mCloudsPlane;
 
     // Water
-    float mWaterHeight = 5.0f;
-    float mWaterScale = 100.0f;
+    float mWaterHeight = 10.0f;
+    float mWaterScale = 1000.0f;
     glw::RenderTarget mWaterReflecRt;
     glw::RenderTarget mWaterRefracRt;
     glw::Mesh mWaterMesh;

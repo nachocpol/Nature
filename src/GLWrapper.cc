@@ -11,9 +11,30 @@
 void glw::GetError()
 {
     GLenum er = glGetError();
+    const char* msg = ".";
     if (er != GL_NO_ERROR)
     {
-        printf(" GL_ERROR: An error ocurred (%i).", er);
+        switch (er)
+        {
+        case GL_INVALID_ENUM:
+            std::cout << "GL_ERROR:" << er << "(invalid enum):" << msg << std::endl;
+            break;
+        case GL_INVALID_VALUE:
+            std::cout << "GL_ERROR:" << er << "(invalid value):" << msg << std::endl;
+            break;
+        case GL_INVALID_OPERATION:
+            std::cout << "GL_ERROR:" << er << "(invalid operation):" << msg << std::endl;
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            std::cout << "GL_ERROR:" << er << "(invalid framebuffer operation):" << msg << std::endl;
+            break;
+        case GL_OUT_OF_MEMORY:
+            std::cout << "GL_ERROR:" << er << "(out of memory):" << msg << std::endl;
+            break;
+        default:
+            std::cout << "GL_ERROR:" << er << "(no description):" << msg << std::endl;
+            break;
+        }
     }
 }
 

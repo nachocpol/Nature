@@ -42,3 +42,4 @@
 	  its parameters like viewport etc)
 	+ Add support for clipping planes								[x]
 	  	+ Improve it, more than one? UBO?							[x]
+  	+ If a shader is not using uPass check it and dont set the uni  [x]

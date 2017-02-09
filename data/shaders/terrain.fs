@@ -184,8 +184,8 @@ vec4 texture2DNoTile( sampler2D samp, in vec2 uv )
 }
 vec3 GetBaseColor()
 {
-	float tiling1 = 100.0f;
-	float tiling2 = 50.0f;
+	float tiling1 = 200.0f;
+	float tiling2 = 100.0f;
 	vec3 splat = texture(uSplatTexture,iTexcoord).xyz;
 	vec3 grass = texture2DNoTile(uGrassTexture,iTexcoord * tiling1).xyz;
 	vec3 cliff = texture2DNoTile(uCliffTexture,iTexcoord * tiling2).xyz;
