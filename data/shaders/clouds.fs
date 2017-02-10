@@ -140,10 +140,10 @@ void main()
 {
 	vec3 sunDir = vec3(0.4f,0.6f,0.0f);
 	vec2 w = vec2(0.25f,0.25f) * uTime;
-	vec3 p = iWPos * 0.05f;
+	vec3 p = iWPos * 0.025f;
 
 	float camDist = distance(uCampos,iWPos);
-	if(camDist > 1500.0f)discard;
+	if(camDist > 4500.0f)discard;
 	
 	// First layer
 	p.x += w.x + 1000.0f; 
@@ -157,12 +157,17 @@ void main()
 
 	float n = mix(n1,n2,0.5f);
 
+	vec3 c1 = vec3(1.0f,0.0f,0.0f);
+	vec3 c2 = vec3(0.0f,0.0f,0.0f);
 	vec3 uCloudBrig = vec3(0.95f,0.95f,0.95f);//morning
 	//uCloudBrig = vec3(0.91f,0.65f,0.505f);//sunset
 	vec3 uCloudDark = vec3(0.57f,0.63f,0.7f);
-	vec3 cloudColor = mix(uCloudBrig,uCloudDark,sqrt(n));
+	//vec3 cloudColor = mix(uCloudBrig,uCloudDark,sqrt(n));
+
+	vec3 cloudColor = mix(uCloudBrig,uCloudDark,max(0.0f,n-0.2f)*2.0f);
 
 	oColor = vec4(cloudColor,(n - 1.0f) * -1.0f);
+
 	/*
 	vec2 uv = iTexcoord * 2.0f - 1.0f;
 	vec3 rd = GetCamera(uv);

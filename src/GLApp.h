@@ -45,4 +45,6 @@ private:
     glw::RenderTarget mWaterRefracRt;
     glw::Mesh mWaterMesh;
     glw::Material mWaterMaterial;
+    glw::Texture mWaterDuDvTexture;
+    glw::Texture mWaterNormTexture;
 };

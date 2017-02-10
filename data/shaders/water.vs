@@ -8,6 +8,8 @@ layout(std140)uniform uPass
 	mat4 uProjection;
 	vec3 uCampos;
 	float uTime;
+	float uCamnear;
+	float uCamfar;
 };
 
 uniform mat4 uModel;

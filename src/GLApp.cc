@@ -80,10 +80,12 @@ bool GLApp::Init()
     mCloudsPlane.Init(wVert, cele);
 
     // Init water
-    mWaterReflecRt.Init(glm::vec2(mViewport.z, mViewport.w), true);
-    mWaterRefracRt.Init(glm::vec2(mViewport.z, mViewport.w), true);
+    mWaterReflecRt.Init(glm::vec2(mViewport.z/2.0f, mViewport.w/2.0f), true);
+    mWaterRefracRt.Init(glm::vec2(mViewport.z / 2.0f, mViewport.w / 2.0f), true);
     mWaterMesh.Init(wVert, cele);
     mWaterMaterial.Init("../data/shaders/water.vs", "../data/shaders/water.fs");
+    mWaterDuDvTexture.Init(TextureDef("../data/textures/wdudv.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mWaterNormTexture.Init(TextureDef("../data/textures/wnorm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     return true;
 }
 
@@ -97,6 +99,8 @@ void GLApp::Update()
     mPassConst.PProjection = mCamera.Projection;
     mPassConst.PCamPos = mCamera.GetPosition();
     mPassConst.PTime = mTime;
+    mPassConst.PCamNear = mCamera.GetNear();
+    mPassConst.PCamFar = mCamera.GetFar();
     mPassConst.Update();
 }
 
@@ -132,7 +136,7 @@ void GLApp::Render()
     mPassConst.Update();
     mWaterReflecRt.Enable();
     {
-        mTerrain.Draw(true, glm::vec4(0.0f, 1.0f, 0.0f, -mWaterHeight));
+        mTerrain.Draw(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.01f)));
 
         // Clouds
         glDisable(GL_CULL_FACE);
@@ -141,7 +145,7 @@ void GLApp::Render()
         mCloudsMat.Use();
         glm::mat4 ctrans = glm::mat4();
         ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight, 512.0f));
-        ctrans = glm::scale(ctrans, glm::vec3(2048.0f));
+        ctrans = glm::scale(ctrans, glm::vec3(4096.0f));
         glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
         mCloudsPlane.Draw();
         glDisable(GL_BLEND);
@@ -157,7 +161,7 @@ void GLApp::Render()
     mPassConst.Update();
     mWaterRefracRt.Enable();
     {
-        mTerrain.Draw(true, glm::vec4(0.0f, -1.0f, 0.0f, mWaterHeight));
+        mTerrain.Draw(true, glm::vec4(0.0f, -1.0f, 0.0f, mWaterHeight + 0.01f));
     }
     mWaterRefracRt.Disable();
 
@@ -168,6 +172,8 @@ void GLApp::Render()
         mTerrain.Draw(false);
 
         // Water
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         mWaterMaterial.Use();
         glm::mat4 wtrans = glm::mat4();
         wtrans = glm::translate(wtrans, glm::vec3(512.0f,mWaterHeight, 512.0f));
@@ -184,7 +190,23 @@ void GLApp::Render()
         loc = glGetUniformLocation(mWaterMaterial.Id, "uRefractionTexture");
         glUniform1i(loc, 1);
 
+        glActiveTexture(GL_TEXTURE0 + 2);
+        glBindTexture(GL_TEXTURE_2D, mWaterDuDvTexture.Id);
+        loc = glGetUniformLocation(mWaterMaterial.Id, "uDudvTexture");
+        glUniform1i(loc, 2);
+
+        glActiveTexture(GL_TEXTURE0 + 3);
+        glBindTexture(GL_TEXTURE_2D, mWaterRefracRt.DepthTexture.Id);
+        loc = glGetUniformLocation(mWaterMaterial.Id, "uRefractDepth");
+        glUniform1i(loc, 3);
+
+        glActiveTexture(GL_TEXTURE0 + 4);
+        glBindTexture(GL_TEXTURE_2D, mWaterNormTexture.Id);
+        loc = glGetUniformLocation(mWaterMaterial.Id, "uNormTexture");
+        glUniform1i(loc, 4);
+
         mWaterMesh.Draw();
+        glDisable(GL_BLEND);
 
         // Clouds
         glDisable(GL_CULL_FACE);
@@ -193,7 +215,7 @@ void GLApp::Render()
         mCloudsMat.Use();
         glm::mat4 ctrans = glm::mat4();
         ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight, 512.0f));
-        ctrans = glm::scale(ctrans, glm::vec3(2048.0f));
+        ctrans = glm::scale(ctrans, glm::vec3(4096.0f));
         glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
         mCloudsPlane.Draw();
         glDisable(GL_BLEND);

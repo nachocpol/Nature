@@ -182,6 +182,7 @@ vec4 texture2DNoTile( sampler2D samp, in vec2 uv )
                 mix( texture2DGrad( samp, uvc, ddxc, ddyc ),
                      texture2DGrad( samp, uvd, ddxd, ddyd ), b.x), b.y );
 }
+
 vec3 GetBaseColor()
 {
 	float tiling1 = 200.0f;

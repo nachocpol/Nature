@@ -65,7 +65,8 @@ namespace glw
         glm::mat4 PProjection;
         glm::vec3 PCamPos;
         float PTime;
- 
+        float PCamNear;
+        float PCamFar;
     };
 
     struct Texture

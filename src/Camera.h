@@ -26,9 +26,11 @@ public:
     void SetYInverse(bool newInv);
     float GetPitch() { return mPitch; }
     void SetPitch(float p) { mPitch = p; }
+    float GetNear() { return mNear; }
+    float GetFar() { return mFar; }
+
     glm::mat4 View;
     glm::mat4 Projection;
-
     float Sensitivity = 0.25f;
     float Speed = 0.3f;
 

@@ -38,8 +38,9 @@
 	+ Fix grid generation											[✓] 6 / 2 / 2017
 	+ Use stencil instead of depth hack for the Clouds 				[x]
 	+ Add delta time to camera speed								[x]
-	+ Render target enable/disable (it will auto change				[x]	8 / 2 / 2017
+	+ Render target enable/disable (it will auto change				[✓]	8 / 2 / 2017
 	  its parameters like viewport etc)
-	+ Add support for clipping planes								[x]
+	+ Add support for clipping planes								[✓] 8 / 2 / 2017
 	  	+ Improve it, more than one? UBO?							[x]
   	+ If a shader is not using uPass check it and dont set the uni  [x]
+  	+ Water effect													[✓] 9 / 2 / 2017
