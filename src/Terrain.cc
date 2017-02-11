@@ -10,8 +10,8 @@
 
 Terrain::Terrain():
     ChunkSide(16),
-    ElementSide(64),
-    ElementSize(1.0f)
+    ElementSide(8),
+    ElementSize(9.0f)
 {
 }
 
@@ -21,8 +21,13 @@ Terrain::~Terrain()
 
 void Terrain::Init()
 {
-    mTerrainMaterial.Init("../data/shaders/terrain.vs",
-        "../data/shaders/terrain.fs");
+    mTerrainMaterial.Init
+    (
+        "../data/shaders/terrain.vs",
+        "../data/shaders/terrain.fs",
+        "../data/shaders/terrain.tc",
+        "../data/shaders/terrain.te"
+    );
 
     mGrassTexture.Init(TextureDef("../data/textures/grass.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
     mCliffTexture.Init(TextureDef("../data/textures/cliff.png", glm::vec2(0.0f), TextureUsage::kTexturing));
@@ -37,6 +42,7 @@ void Terrain::Init()
             unsigned int idx = i * ChunkSide + j;
             mChunks[idx].ChunkPosition = glm::vec2(i, j);
             InitMeshAsGrid(mChunks[idx].ChunkMesh, ElementSide, ElementSize);
+            mChunks[idx].ChunkMesh.DMode = DrawMode::kPatches3;
         }
     }
 }
@@ -58,7 +64,6 @@ void Terrain::Draw(bool useClip, glm::vec4 plane)
         glw::SetClipPlane(0, glm::vec4(0.0f, 1.0f, 0.0f, 99999.0f), mTerrainMaterial.Id);
     }
     
-
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D, mGrassTexture.Id);
     glUniform1i(glGetUniformLocation(mTerrainMaterial.Id, "uGrassTexture"), 0);
@@ -113,7 +118,7 @@ void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
         for (unsigned int x = 0; x < size; x++)
         {
             unsigned int index = x * size + z;
-            vertex[index].Position = glm::vec3(x , 0.0f, z);
+            vertex[index].Position = glm::vec3(x *eleSize, 0.0f, z*eleSize);    
         }
     }
 

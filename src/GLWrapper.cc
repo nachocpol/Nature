@@ -108,11 +108,26 @@ void glw::Mesh::Init(std::vector<BasicVertex> vertex, std::vector<unsigned int> 
 
 void glw::Mesh::Draw()
 {
-    glBindVertexArray(Id);
+    switch (DMode)
     {
-        glDrawElements(GL_TRIANGLES, NumElements, GL_UNSIGNED_INT, 0);
+    case kTriangles:
+        glBindVertexArray(Id);
+        {
+            glDrawElements(GL_TRIANGLES, NumElements, GL_UNSIGNED_INT, 0);
+        }
+        glBindVertexArray(0);
+        break;
+    case kPatches3:
+        glBindVertexArray(Id);
+        {
+            glPatchParameteri(GL_PATCH_VERTICES, 3);
+            glDrawElements(GL_PATCHES, NumElements, GL_UNSIGNED_INT, 0);
+        }
+        glBindVertexArray(0);
+        break;
+    default:
+        break;
     }
-    glBindVertexArray(0);
 }
 
 glw::Shader::Shader():
@@ -130,6 +145,12 @@ void glw::Shader::Init(const char * path, ShaderType type)
         break;
     case kFragment:
         t = GL_FRAGMENT_SHADER;
+        break;
+    case kTessControl:
+        t = GL_TESS_CONTROL_SHADER;
+        break;
+    case kTessEval:
+        t = GL_TESS_EVALUATION_SHADER;
         break;
     default:
         break;
@@ -200,6 +221,65 @@ void glw::Material::Release()
 {
     Vs.Release();
     Fs.Release();
+    glDeleteProgram(Id);
+}
+
+
+glw::MaterialTess::MaterialTess():
+    Id(0)
+{
+
+}
+
+bool glw::MaterialTess::Init(const char * vs, const char * fs, const char * tc, const char * te)
+{
+    // Vertex shader
+    Vs.Init(vs, ShaderType::kVertex);
+
+    // Fragment shader
+    Fs.Init(fs, ShaderType::kFragment);
+
+    // TessControl
+    Tc.Init(tc, ShaderType::kTessControl);
+
+    // TessEval
+    Te.Init(te, ShaderType::kTessEval);
+
+    // Program and link
+    GLint s = -1;
+    GLchar log[512];
+    Id = glCreateProgram();
+    glAttachShader(Id, Vs.Id);
+    glAttachShader(Id, Fs.Id);
+    glAttachShader(Id, Tc.Id);
+    glAttachShader(Id, Te.Id);
+    glLinkProgram(Id);
+    glGetProgramiv(Id, GL_LINK_STATUS, &s);
+    if (!s)
+    {
+        glGetProgramInfoLog(Id, 512, nullptr, log);
+        printf(" ERROR: Failed to create material:\n %s \n", log);
+        Release();
+        return false;
+    }
+
+    // Setup pass ubo
+    glUniformBlockBinding(Id, glGetUniformBlockIndex(Id, "uPass"), kPassBinding);
+
+    return true;
+}
+
+void glw::MaterialTess::Use()
+{
+    glUseProgram(Id);
+}
+
+void glw::MaterialTess::Release()
+{
+    Vs.Release();
+    Fs.Release();
+    Tc.Release();
+    Te.Release();
     glDeleteProgram(Id);
 }
 
@@ -399,4 +479,3 @@ void glw::RenderTarget::Disable()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-

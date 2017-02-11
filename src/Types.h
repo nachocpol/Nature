@@ -18,7 +18,9 @@ struct BasicVertex
 enum ShaderType
 {
     kVertex,
-    kFragment
+    kFragment,
+    kTessControl,
+    kTessEval
 };
 
 enum TextureUsage
@@ -26,6 +28,12 @@ enum TextureUsage
     kTexturing,
     KRenderTarget,
     kRenderTargetDepth
+};
+
+enum DrawMode
+{
+    kTriangles,
+    kPatches3
 };
 
 struct TextureDef

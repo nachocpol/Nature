@@ -44,3 +44,5 @@
 	  	+ Improve it, more than one? UBO?							[x]
   	+ If a shader is not using uPass check it and dont set the uni  [x]
   	+ Water effect													[✓] 9 / 2 / 2017
+  	+ Tessellation for the terrain									[-]
+  	+ Wireframe mode												[x]

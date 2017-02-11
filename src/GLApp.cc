@@ -126,7 +126,7 @@ void GLApp::Render()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    
     // Water reflections
     float wOff = mCamera.GetPosition().y - mWaterHeight;
     mCamera.Move(0.0f, -(wOff * 2.0f), 0.0f);
@@ -169,7 +169,9 @@ void GLApp::Render()
     mBaseRt.Enable();
     {
         // Terrain
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         mTerrain.Draw(false);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         // Water
         glEnable(GL_BLEND);
@@ -229,7 +231,6 @@ void GLApp::Render()
     glBindTexture(GL_TEXTURE_2D, mBaseRt.RenderTexture.Id);
     glUniform1i(glGetUniformLocation(mBaseMatRt.Id, "uColorTexture"), 0);
     mBaseQuadRt.Draw();
-
 
     RenderUi();
     mWindow.Swap();

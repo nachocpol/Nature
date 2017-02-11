@@ -25,6 +25,7 @@ namespace glw
 
     struct Mesh
     {
+        Mesh():DMode(kTriangles) {}
         void Init(std::vector<BasicVertex> vertex,std::vector<unsigned int> ele);
         void Draw();
 
@@ -32,6 +33,7 @@ namespace glw
         GLuint Ebo;
         GLuint Vbo;
         GLuint NumElements;
+        DrawMode DMode;
     };
 
     struct Shader
@@ -52,6 +54,21 @@ namespace glw
 
         Shader Vs;
         Shader Fs;
+        GLuint Id;
+    };
+
+    struct MaterialTess
+    {
+        MaterialTess();
+        bool Init(  const char* vs, const char* fs,
+                    const char* tc,const char* te);
+        void Use();
+        void Release();
+
+        Shader Vs;
+        Shader Fs;
+        Shader Tc;
+        Shader Te;
         GLuint Id;
     };
 
