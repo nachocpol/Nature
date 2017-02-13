@@ -23,7 +23,7 @@ float GetTess()
 {
 	float dist = distance(iPosition[0],uCampos);
 	float fact = min(dist/200.0f,1.0f);
-	return mix(4.0f,1.0f,fact);
+	return mix(15.0f,1.0f,fact);
 }
 
 void main()

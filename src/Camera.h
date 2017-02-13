@@ -5,6 +5,7 @@
 #pragma once
 
 #include "glm.hpp"
+#include "Types.h"
 
 class Camera
 {
@@ -31,6 +32,7 @@ public:
 
     glm::mat4 View;
     glm::mat4 Projection;
+    Frustrum CameraFrustrum;
     float Sensitivity = 0.25f;
     float Speed = 0.3f;
 

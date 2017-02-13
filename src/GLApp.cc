@@ -41,7 +41,7 @@ bool GLApp::Init()
     // Init IMGUI
     ImGui_ImplGlfwGL3_Init(mWindow.GetHandle(), true);
 
-    mCamera.Init(mViewport.z / mViewport.w);
+    mCamera.Init((float)mViewport.z / (float)mViewport.w);
     mTerrain.Init();
     mPassConst.Init();
 
@@ -94,6 +94,7 @@ void GLApp::Update()
     mRunning = !mWindow.Events();
 
     mCamera.Update();
+    mTerrain.Update(mCamera.CameraFrustrum);
 
     mPassConst.PView = mCamera.View;
     mPassConst.PProjection = mCamera.Projection;
@@ -136,7 +137,7 @@ void GLApp::Render()
     mPassConst.Update();
     mWaterReflecRt.Enable();
     {
-        mTerrain.Draw(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.01f)));
+        mTerrain.Render(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.01f)));
 
         // Clouds
         glDisable(GL_CULL_FACE);
@@ -161,7 +162,7 @@ void GLApp::Render()
     mPassConst.Update();
     mWaterRefracRt.Enable();
     {
-        mTerrain.Draw(true, glm::vec4(0.0f, -1.0f, 0.0f, mWaterHeight + 0.01f));
+        mTerrain.Render(true, glm::vec4(0.0f, -1.0f, 0.0f, mWaterHeight + 0.01f));
     }
     mWaterRefracRt.Disable();
 
@@ -169,10 +170,10 @@ void GLApp::Render()
     mBaseRt.Enable();
     {
         // Terrain
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        mTerrain.Draw(false);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        mTerrain.Render(false);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        
         // Water
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -248,8 +249,11 @@ void GLApp::RenderUi()
         ImGui::Separator();
         ImGui::DragFloat("Camera speed", &mCamera.Speed, 0.1f, 0.01f, 4.0f);
         ImGui::DragFloat("Camera sensitivity", &mCamera.Sensitivity, 0.05f, 0.1f, 1.0f);
+        ImGui::Separator();
     }
     ImGui::End();
+
+    mTerrain.RenderUi();
 
     ImGui::Render();
 }

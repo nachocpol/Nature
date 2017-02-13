@@ -9,8 +9,10 @@
 
 struct Chunk
 {
+    Chunk(){}
     glm::vec2 ChunkPosition;
     glw::Mesh ChunkMesh;
+    BoundingSphere BSphere;
 };
 
 class Terrain
@@ -19,9 +21,9 @@ public:
     Terrain();
     ~Terrain();
     void Init();
-    void Update();
-    void Draw(bool useClip,glm::vec4 plane = glm::vec4(0.0f))
-        ;
+    void Update(Frustrum viewFrust);
+    void Render(bool useClip,glm::vec4 plane = glm::vec4(0.0f));
+    void RenderUi();
     glw::MaterialTess* GetMaterial() { return &mTerrainMaterial; }
 
     // Number of chunks at each side of the
@@ -29,17 +31,30 @@ public:
     unsigned int ChunkSide;
     // How many elements (tris) has each chunk
     unsigned int ElementSide;
-    // Size of each tri
+    // Size of each tri (it is auto initialized)
     float ElementSize;
+    // Size of the heightmap used
+    unsigned int HeightMapSize = 1024;
+    bool FrustrumCulling = false;
 
 private:
     void InitMeshAsGrid(glw::Mesh& mesh,unsigned int size, float eleSize);
+    void RenderChunk(Chunk& c);
+
+    // Chunks
     std::vector<Chunk> mChunks;
-    //glw::Material mTerrainMaterial;
+    std::vector<Chunk> mChunksVisible;
+    
+    // Material
     glw::MaterialTess mTerrainMaterial;
 
+    // Textures
     glw::Texture mHeightMap;
     glw::Texture mSplatMap;
     glw::Texture mGrassTexture;
     glw::Texture mCliffTexture;
+
+    // Debug
+    glw::Mesh mSphereMesh;
+    glw::Material mSphereMat;
 };

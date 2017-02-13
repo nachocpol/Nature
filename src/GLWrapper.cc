@@ -125,6 +125,13 @@ void glw::Mesh::Draw()
         }
         glBindVertexArray(0);
         break;
+    case kQuad:
+        glBindVertexArray(Id);
+        {
+            glDrawElements(GL_QUADS, NumElements/4, GL_UNSIGNED_INT, 0);
+        }
+        glBindVertexArray(0);
+        break;
     default:
         break;
     }

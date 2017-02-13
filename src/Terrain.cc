@@ -1,17 +1,26 @@
 /*
     Terrain.cc nachocpol@gmail.com
+    When we tell request a grid of three elements,
+    we must have in mind that this is the
+    output:
+    ·   ·   ·
+    ·   ·   ·
+    ·   ·   ·
+    It will have 3 VERTEX on each side not 3 "quads"
+    that's why we have to use (ElementSide-1) when we
+    perform the translations etc
 */
 
 #include "Terrain.h"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/random.hpp"
+#include "imgui.h"
 
 #include <string>
 
 Terrain::Terrain():
     ChunkSide(16),
-    ElementSide(8),
-    ElementSize(9.0f)
+    ElementSide(4)
 {
 }
 
@@ -21,6 +30,13 @@ Terrain::~Terrain()
 
 void Terrain::Init()
 {
+    MeshBasicVertexData md;
+    GenerateSphere(1.0f, 10, md);
+    mSphereMesh.Init(md.vertex, md.ele);
+    mSphereMesh.DMode = kTriangles;
+    mSphereMat.Init("../data/shaders/default.vs", "../data/shaders/default.fs");
+
+    ElementSize = HeightMapSize / (ChunkSide*(ElementSide-1));
     mTerrainMaterial.Init
     (
         "../data/shaders/terrain.vs",
@@ -34,25 +50,42 @@ void Terrain::Init()
     mHeightMap.Init(TextureDef("../data/hmaps/hm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mSplatMap.Init(TextureDef("../data/hmaps/splat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
 
+    const glm::vec2 chunkCenter = glm::vec2((ElementSide - 1) * ElementSize) * 0.5f;
+
     mChunks.resize(ChunkSide * ChunkSide);
     for (unsigned int i = 0; i < ChunkSide; i++)
     {
         for (unsigned int j = 0; j < ChunkSide; j++)
         {
             unsigned int idx = i * ChunkSide + j;
-            mChunks[idx].ChunkPosition = glm::vec2(i, j);
+            glm::vec2 p = glm::vec2(i, j);
+            mChunks[idx].ChunkPosition = p;
             InitMeshAsGrid(mChunks[idx].ChunkMesh, ElementSide, ElementSize);
             mChunks[idx].ChunkMesh.DMode = DrawMode::kPatches3;
+            // Build bounding sphere
+            glm::vec2 tmpCC = chunkCenter * (p + glm::vec2(1.0f));
+            mChunks[idx].BSphere = BoundingSphere(glm::vec3(tmpCC.x,0.0f,tmpCC.y),chunkCenter.x);
         }
     }
 }
 
-void Terrain::Update()
+void Terrain::Update(Frustrum viewFrust)
 {
-
+    // Perform frustum culling
+    if (FrustrumCulling)
+    {
+        mChunksVisible.clear();
+        for (unsigned int i = 0; i < mChunks.size(); i++)
+        {
+            if (viewFrust.SphereInFrustrum(mChunks[i].BSphere) == kInside)
+            {
+                mChunksVisible.push_back(mChunks[i]);
+            }
+        }
+    }
 }
 
-void Terrain::Draw(bool useClip, glm::vec4 plane)
+void Terrain::Render(bool useClip, glm::vec4 plane)
 {
     mTerrainMaterial.Use();
     if (useClip)
@@ -80,28 +113,38 @@ void Terrain::Draw(bool useClip, glm::vec4 plane)
     glBindTexture(GL_TEXTURE_2D, mCliffTexture.Id);
     glUniform1i(glGetUniformLocation(mTerrainMaterial.Id, "uCliffTexture"), 3);
 
-    glm::mat4 curModel;
-    for (unsigned int i = 0; i < mChunks.size(); i++)
+    // Render visible chunks
+    if (FrustrumCulling)
     {
-        // Build model for current chunk
-        curModel = glm::mat4();
-        curModel = glm::translate
-        (  
-            curModel, 
-            glm::vec3
-            (  
-                mChunks[i].ChunkPosition.x * 63,
-                0.0f,
-                mChunks[i].ChunkPosition.y * 63
-            )
-        );
-
-        unsigned int loc = glGetUniformLocation(mTerrainMaterial.Id, "uModel");
-        glUniformMatrix4fv(loc, 1, GL_FALSE,&curModel[0][0]);
-        loc = glGetUniformLocation(mTerrainMaterial.Id, "uChunkPos");
-        glUniform2fv(loc, 1, &mChunks[i].ChunkPosition.x);
-        mChunks[i].ChunkMesh.Draw();
+        for (unsigned int i = 0; i < mChunksVisible.size(); i++)
+        {
+            RenderChunk(mChunksVisible[i]);
+        }
     }
+    // Render all chunks
+    else
+    {
+        for (unsigned int i = 0; i < mChunks.size(); i++)
+        {
+            RenderChunk(mChunks[i]);
+        }
+    }
+}
+
+void Terrain::RenderUi()
+{
+    ImGui::Begin("Nature 3.0");
+    {
+        ImGui::Text("Terrain");
+        ImGui::LabelText("ChunkSide", "%i", ChunkSide);
+        ImGui::LabelText("ElementSide", "%i", ElementSide);
+        ImGui::LabelText("ElementSize", "%f", ElementSize);
+        ImGui::LabelText("HeightMapSize", "%i", HeightMapSize);
+        ImGui::LabelText("Chunks", "%i/%i", mChunksVisible.size(), mChunks.size());
+        ImGui::Checkbox("Frustrum culling enabled:", &FrustrumCulling);
+        ImGui::Separator();
+    }
+    ImGui::End();
 }
 
 void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
@@ -123,12 +166,12 @@ void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
     }
 
     // Build index data
-    unsigned int faceCnt = (size - 1) * (size - 1) * 2;
+    unsigned int faceCnt = (size-1) * (size-1) * 2;
     ele.resize(faceCnt * 3);
     unsigned int k = 0;
-    for (unsigned int i = 0; i < size - 1; i++)  // -1 normal / -2 debug chunk border
+    for (unsigned int i = 0; i < size-1; i++)  // -1 normal / -2 debug chunk border
     {
-        for (unsigned int j = 0; j < size - 1; j++)
+        for (unsigned int j = 0; j < size-1; j++)
         {
             ele[k] = i * size + j;
             ele[k + 1] = i * size + j + 1;
@@ -143,5 +186,34 @@ void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
     }
 
     mesh.Init(vertex, ele);
+}
+
+void Terrain::RenderChunk(Chunk & c)
+{
+    // Build model for current chunk
+    glm::mat4 curModel;
+    curModel = glm::mat4();
+    curModel = glm::translate
+    (
+        curModel,
+        glm::vec3
+        (
+            c.ChunkPosition.x * (ElementSide - 1) * ElementSize,
+            0.0f,
+            c.ChunkPosition.y * (ElementSide - 1) * ElementSize
+        )
+    );
+
+    unsigned int loc = glGetUniformLocation(mTerrainMaterial.Id, "uModel");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, &curModel[0][0]);
+    loc = glGetUniformLocation(mTerrainMaterial.Id, "uChunkPos");
+    glUniform2fv(loc, 1, &c.ChunkPosition.x);
+    c.ChunkMesh.Draw();
+
+    // Draw debug sphere quad
+    //mSphereMat.Use();
+    //loc = glGetUniformLocation(mSphereMat.Id, "uModel");
+    //glUniformMatrix4fv(loc, 1, GL_FALSE, &curModel[0][0]);
+    //mSphereMesh.Draw();
 }
 

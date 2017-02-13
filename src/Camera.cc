@@ -25,11 +25,13 @@ void Camera::Init(float aspect)
 {
     Projection = glm::perspective(mFovRad, aspect, mNear, mFar);
     View = glm::lookAt(mPosition, mFront, mUp);
+    CameraFrustrum.SetCamProjection(mFovRad, aspect, mNear, mFar);
 }
 
 void Camera::Resize(float aspect)
 {
     Projection = glm::perspective(mFovRad, aspect, mNear, mFar);
+    CameraFrustrum.SetCamProjection(mFovRad, aspect, mNear, mFar);
 }
 
 void Camera::Update()
@@ -67,6 +69,7 @@ void Camera::UpdateView()
     View = glm::lookAt(mPosition,
         mPosition + mFront,
         mUp);
+    CameraFrustrum.SetCamVectors(mPosition, mFront, mUp);
 }
 
 void Camera::SetYInverse(bool newInv)

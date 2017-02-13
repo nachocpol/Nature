@@ -5,6 +5,7 @@
 #pragma once
 
 #include "glm.hpp"
+#include <vector>
 
 struct BasicVertex
 {
@@ -13,6 +14,12 @@ struct BasicVertex
                 float ux,float uy);
     glm::vec3 Position;
     glm::vec2 Uv;
+};
+
+struct MeshBasicVertexData
+{
+    std::vector<BasicVertex> vertex;
+    std::vector<unsigned int> ele;
 };
 
 enum ShaderType
@@ -33,7 +40,15 @@ enum TextureUsage
 enum DrawMode
 {
     kTriangles,
-    kPatches3
+    kPatches3,
+    kQuad
+};
+
+enum FrustrumResult
+{
+    kOutside,
+    kInside,
+    kIntersect
 };
 
 struct TextureDef
@@ -69,6 +84,41 @@ struct Color
     unsigned char A;
 };
 
+struct BoundingSphere
+{
+    BoundingSphere() {}
+    BoundingSphere(glm::vec3 p, float r) :Position(p), Radius(r) {}
+    glm::vec3 Position;
+    float Radius;
+};
+
+struct Frustrum
+{
+    void SetCamProjection(float angle, float aspect, float near, float far);
+    void SetCamVectors(glm::vec3 pos, glm::vec3 look, glm::vec3 up);
+    FrustrumResult SphereInFrustrum(BoundingSphere& bs);
+    FrustrumResult PointInFrustrum(glm::vec3 p);
+
+private:
+    glm::vec3 mCamPosition;
+    glm::vec3 mCamLook;
+    glm::vec3 mCamRight;
+    glm::vec3 mCamUp;
+    float mAspect;
+    float mNear;
+    float mFar;
+    float mWidth;
+    float mHeight;
+    
+    // For sphere test
+    float mSphereFactorX;
+    float mSphereFactorY;
+    float mTang;
+};
+
+void LoadMeshFromFile(const char* file,MeshBasicVertexData& md);
+
+void GenerateSphere(float radius, int div, MeshBasicVertexData& md);
 
 /* Printable keys */
 #define INPUT_KEY_SPACE              32
