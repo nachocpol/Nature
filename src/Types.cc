@@ -123,8 +123,8 @@ void LoadMeshFromFile(const char * file, MeshBasicVertexData& md)
         ux = uy = 0.0f;
         if (at.texcoords.size() > 0)
         {
-            ux = at.texcoords[i + 0];
-            uy = at.texcoords[i + 1];
+            //ux = at.texcoords[i + 0];
+            //uy = at.texcoords[i + 1];
         }
         // Normals
         md.vertex.push_back(BasicVertex(px, py, pz, ux, uy));

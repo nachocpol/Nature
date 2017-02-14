@@ -12,10 +12,9 @@ out vec3 iPosition;
 
 vec2 GetUv()
 {
-	// EleSize - 1 !!!
-	vec2 cPosStart = vec2(uChunkPos.x * 63.0f , uChunkPos.y * 63.0f);
-	vec2 curUv = vec2((aPosition.xz + cPosStart) / 1024.0f);
-	return curUv;
+	float uHeightMapSize = 2048.0f;;
+	vec2 p = (uModel * vec4(aPosition,1.0f)).xz;
+	return p/uHeightMapSize;
 }
 
 void main()
@@ -23,11 +22,5 @@ void main()
 	vec2 uv = GetUv();
 	iTexcoord = uv;
 	iPosition = (uModel * vec4(aPosition,1.0f)).xyz;
-	/*
-	vec4 wPos = uModel * vec4(aPosition,1.0f);
-	wPos.y = texture(uHeightMap,uv).x * 100.0f;
-	iPosition = wPos.xyz;
-	gl_Position = uProjection * uView * wPos;
-	gl_ClipDistance[0] = dot(wPos,uClipPlane);
-	*/
+	gl_ClipDistance[0] = dot(vec4(iPosition,1.0f),uClipPlane);
 }

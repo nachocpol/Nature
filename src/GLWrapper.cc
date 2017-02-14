@@ -58,6 +58,12 @@ void glw::SetTextureParameter(TextureDef def)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
+    case kSampling:
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        break;
     }
 }
 
@@ -383,6 +389,28 @@ void glw::Texture::Init(TextureDef def)
     case kRenderTargetDepth:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, Def.Size.x, Def.Size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, data);
         SetTextureParameter(Def);
+        break;
+    case kSampling:
+        switch (elePerPixel)
+        {
+        case 1:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, Def.Size.x, Def.Size.y, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+            SetTextureParameter(Def);
+            break;
+        case 3:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Def.Size.x, Def.Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            SetTextureParameter(Def);
+            break;
+        case 4:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Def.Size.x, Def.Size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            SetTextureParameter(Def);
+            break;
+        default:   //hack to work with procedural texture
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Def.Size.x, Def.Size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            SetTextureParameter(Def);
+            break;
+        }
+        break;
         break;
     }
     

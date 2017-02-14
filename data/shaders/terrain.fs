@@ -12,6 +12,7 @@ layout(std140)uniform uPass
 uniform sampler2D uGrassTexture;
 uniform sampler2D uCliffTexture;
 uniform sampler2D uSplatTexture;
+uniform sampler2D uHeightMap;
 
 in vec2 iTexcoord;
 in vec3 iPosition;
@@ -195,6 +196,7 @@ vec3 GetBaseColor()
 
 void main()
 {
+	//oColor = texture(uHeightMap,iTexcoord);
 	//oColor = vec4(iTexcoord.xy,0.0f,1.0f);
 	oColor = vec4(GetBaseColor(),1.0f) * CloudsShadowing();
 }

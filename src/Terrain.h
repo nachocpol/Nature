@@ -34,7 +34,7 @@ public:
     // Size of each tri (it is auto initialized)
     float ElementSize;
     // Size of the heightmap used
-    unsigned int HeightMapSize = 1024;
+    unsigned int HeightMapSize = 2048;
     bool FrustrumCulling = false;
     bool VisualDebug = false;
 

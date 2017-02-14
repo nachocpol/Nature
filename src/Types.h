@@ -34,7 +34,8 @@ enum TextureUsage
 {
     kTexturing,
     KRenderTarget,
-    kRenderTargetDepth
+    kRenderTargetDepth,
+    kSampling
 };
 
 enum DrawMode

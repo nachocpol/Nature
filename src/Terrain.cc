@@ -18,9 +18,11 @@
 
 #include <string>
 
+#include "GLFW/glfw3.h"
+
 Terrain::Terrain():
     ChunkSide(16),
-    ElementSide(8)
+    ElementSide(4)
 {
 }
 
@@ -33,8 +35,9 @@ void Terrain::Init()
     MeshBasicVertexData md;
     LoadMeshFromFile("../data/meshes/sphere.obj", md);
     mSphereMesh.Init(md.vertex, md.ele);
-    mSphereMat.Init("../data/shaders/default.vs", "../data/shaders/default.fs");
+    mSphereMat.Init("../data/shaders/debug.vs", "../data/shaders/debug.fs");
 
+    // Ignoring decimal part
     ElementSize = HeightMapSize / (ChunkSide*(ElementSide-1));
     mTerrainMaterial.Init
     (
@@ -46,19 +49,19 @@ void Terrain::Init()
 
     mGrassTexture.Init(TextureDef("../data/textures/grass.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
     mCliffTexture.Init(TextureDef("../data/textures/cliff.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mHeightMap.Init(TextureDef("../data/hmaps/hm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mSplatMap.Init(TextureDef("../data/hmaps/splat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mHeightMap.Init(TextureDef("../data/hmaps/hm2k.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mSplatMap.Init(TextureDef("../data/hmaps/splat2k.png", glm::vec2(0.0f), TextureUsage::kTexturing));
 
     // Load the hmpa so we can sample to find the chunks y pos
     TextureDef hMap;
-    hMap.Path = "../data/hmaps/hm.png";
+    hMap.Path = "../data/hmaps/hm2k.png";
     LoadTextureFromFile(hMap);
     
-    // Bounding sphere radius
+    // Bounding sphere radius (sin(45) because chunks are squares
     // hypotenuse = opposite / sin(angle)
-    float angleToRad = 3.141516f / 180.0f;
-    float diagonal = ((ElementSide - 1) * ElementSize) / sin(45.0f * angleToRad);
-    float radius = diagonal * 0.5;
+    float diagonal = ((ElementSide - 1) * ElementSize) / sin(45.0f);
+    float radius = diagonal * 0.5f;
+
     mChunks.resize(ChunkSide * ChunkSide);
     for (unsigned int i = 0; i < ChunkSide; i++)
     {
@@ -71,12 +74,19 @@ void Terrain::Init()
             mChunks[idx].ChunkMesh.DMode = DrawMode::kPatches3;
 
             // Build bounding sphere
+            // Set the chuks position as the initial position
             glm::vec3 bSpherePos = glm::vec3(p.x, 0.0f, p.y);
             bSpherePos *= (ElementSide - 1) * ElementSize;
-            bSpherePos += radius;
-            unsigned int yData = hMap.Data[(int)bSpherePos.y * 1024 + (int)bSpherePos.x];
+            // Translate it by the radius so it is centered
+            bSpherePos = glm::vec3(bSpherePos.x + radius, 0.0f, bSpherePos.z + radius);
+            // Find terrain height
+            unsigned int yDataIdx = (int)bSpherePos.z * HeightMapSize + (int)bSpherePos.x;
+            unsigned char yData = hMap.Data[yDataIdx];
             bSpherePos.y = ((float)yData / 255.0f) * 100.0f;
-            mChunks[idx].BSphere = BoundingSphere(bSpherePos, radius);
+            // printf("LOG:BSphere x:%f, y:%f ,z:%f \n", bSpherePos.x,bSpherePos.y, bSpherePos.z);
+            // We use the diagonal because the sphere mesh radius is 0.5
+            mChunks[idx].BSphere = BoundingSphere(bSpherePos, diagonal); 
+                                                                                
         }
     }
 }
@@ -86,6 +96,7 @@ void Terrain::Update(Frustrum viewFrust)
     // Perform frustum culling
     if (FrustrumCulling)
     {
+        float initTime = glfwGetTime();
         mChunksVisible.clear();
         for (unsigned int i = 0; i < mChunks.size(); i++)
         {
@@ -94,6 +105,8 @@ void Terrain::Update(Frustrum viewFrust)
                 mChunksVisible.push_back(mChunks[i]);
             }
         }
+        float elapsed = glfwGetTime() - initTime;
+        //printf(" LOG:Time to cull terrain:%f\n", elapsed * 1000.0f);
     }
 }
 
@@ -201,9 +214,9 @@ void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
     unsigned int faceCnt = (size-1) * (size-1) * 2;
     ele.resize(faceCnt * 3);
     unsigned int k = 0;
-    for (unsigned int i = 0; i < size-2; i++)  // -1 normal / -2 debug chunk border
+    for (unsigned int i = 0; i < size-1; i++)  // -1 normal / -2 debug chunk border
     {
-        for (unsigned int j = 0; j < size-2; j++)
+        for (unsigned int j = 0; j < size-1; j++)
         {
             ele[k] = i * size + j;
             ele[k + 1] = i * size + j + 1;

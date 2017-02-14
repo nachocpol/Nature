@@ -173,7 +173,7 @@ void GLApp::Render()
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         mTerrain.Render(false);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        
+
         // Water
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -249,6 +249,7 @@ void GLApp::RenderUi()
         ImGui::Separator();
         ImGui::DragFloat("Camera speed", &mCamera.Speed, 0.1f, 0.01f, 4.0f);
         ImGui::DragFloat("Camera sensitivity", &mCamera.Sensitivity, 0.05f, 0.1f, 1.0f);
+        ImGui::Checkbox("Camera Locked", &mCamera.LockMouse);
         ImGui::Separator();
     }
     ImGui::End();

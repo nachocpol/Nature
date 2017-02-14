@@ -36,6 +36,10 @@ void Camera::Resize(float aspect)
 
 void Camera::Update()
 {
+    if (Input::GetInstance()->GetKey(INPUT_KEY_L))
+    {
+        LockMouse != LockMouse;
+    }
     if (Input::GetInstance()->GetKey(INPUT_KEY_W))
     {
         mPosition += mFront * Speed;
@@ -79,6 +83,7 @@ void Camera::SetYInverse(bool newInv)
 
 void Camera::UpdateMouseLook()
 {
+    if (LockMouse)return;
     // Find mouse offset and cache values
     float curX = Input::GetInstance()->GetMouseX();
     float curY = Input::GetInstance()->GetMouseY();
