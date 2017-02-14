@@ -195,7 +195,7 @@ vec3 GetBaseColor()
 
 void main()
 {
-	oColor = vec4(iTexcoord.xy,0.0f,1.0f);
-	//oColor = vec4(GetBaseColor(),1.0f) * CloudsShadowing();
+	//oColor = vec4(iTexcoord.xy,0.0f,1.0f);
+	oColor = vec4(GetBaseColor(),1.0f) * CloudsShadowing();
 }
 

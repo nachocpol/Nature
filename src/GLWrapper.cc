@@ -8,6 +8,7 @@
 #include "stb_image.h"
 #include <iostream>
 
+
 void glw::GetError()
 {
     GLenum er = glGetError();
@@ -128,7 +129,7 @@ void glw::Mesh::Draw()
     case kQuad:
         glBindVertexArray(Id);
         {
-            glDrawElements(GL_QUADS, NumElements/4, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_QUADS, NumElements/1, GL_UNSIGNED_INT, 0);
         }
         glBindVertexArray(0);
         break;

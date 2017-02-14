@@ -57,8 +57,9 @@ struct TextureDef
     TextureDef(const char* p, glm::vec2 s, TextureUsage u) :
         Path(p), Size(s), Usage(u) {}
     const char* Path;
-    glm::vec2 Size;
+    glm::ivec2 Size;
     TextureUsage Usage;
+    int ElePerPixel;
     unsigned char* Data = nullptr;
 };
 
@@ -94,31 +95,28 @@ struct BoundingSphere
 
 struct Frustrum
 {
-    void SetCamProjection(float angle, float aspect, float near, float far);
-    void SetCamVectors(glm::vec3 pos, glm::vec3 look, glm::vec3 up);
-    FrustrumResult SphereInFrustrum(BoundingSphere& bs);
-    FrustrumResult PointInFrustrum(glm::vec3 p);
-
+public:
+    enum FrustrumPlanes
+    {
+        kNear   = 0,
+        kFar    = 1,
+        kBottom = 2,
+        kTop    = 3,
+        kLeft   = 4,
+        kRight  = 5
+    };
+    glm::vec4 Planes[6];
+    void SetPlanes(glm::mat4 vp);
+    FrustrumResult SphereTest(BoundingSphere& bs);
 private:
-    glm::vec3 mCamPosition;
-    glm::vec3 mCamLook;
-    glm::vec3 mCamRight;
-    glm::vec3 mCamUp;
-    float mAspect;
-    float mNear;
-    float mFar;
-    float mWidth;
-    float mHeight;
-    
-    // For sphere test
-    float mSphereFactorX;
-    float mSphereFactorY;
-    float mTang;
+    glm::vec4 SetValues(glm::vec4 p);
 };
 
 void LoadMeshFromFile(const char* file,MeshBasicVertexData& md);
 
 void GenerateSphere(float radius, int div, MeshBasicVertexData& md);
+
+void LoadTextureFromFile(TextureDef& def);
 
 /* Printable keys */
 #define INPUT_KEY_SPACE              32

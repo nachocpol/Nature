@@ -29,7 +29,7 @@
 	+ Port new clouds 												[✓]  2 / 2 / 2017
 	+ Error callback												[x]
 	+ Material should handle uniforms								[x]
-	+ Function to setup textures 									[x]
+	+ Function to setup textures 									[✓]
 	+ Add mouse position to input Class 							[✓] 4 / 2 / 2017
 	+ Fix clouds 													[✓] 5 / 2 / 2017
 	+ Add InvProj, InvViewRot										[x]
@@ -46,3 +46,5 @@
   	+ Water effect													[✓] 9 / 2 / 2017
   	+ Tessellation for the terrain									[-]
   	+ Wireframe mode												[x]
+  	+ Made function to load textures, now update the code
+  	  of gl texture creation to use it.								[x]

@@ -36,6 +36,7 @@ public:
     // Size of the heightmap used
     unsigned int HeightMapSize = 1024;
     bool FrustrumCulling = false;
+    bool VisualDebug = false;
 
 private:
     void InitMeshAsGrid(glw::Mesh& mesh,unsigned int size, float eleSize);
@@ -54,6 +55,8 @@ private:
     glw::Texture mGrassTexture;
     glw::Texture mCliffTexture;
 
+    // Frustrum culling
+    std::vector<float> mChunkHeight;
     // Debug
     glw::Mesh mSphereMesh;
     glw::Material mSphereMat;

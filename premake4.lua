@@ -1,5 +1,5 @@
 solution "Nature3.0"
-	configurations  {"Debug64","Release64"}
+	configurations  {"Debug64","Release64","Debug32"}
 
 project "Nature3.0App"
 	kind "ConsoleApp"
@@ -18,7 +18,8 @@ project "Nature3.0App"
 		"depen/glm/glm",
 		"depen/glew/include",
 		"depen/imgui",
-		"depen/stb"
+		"depen/stb",
+		"depen/tinyobj"
 	}
 	libdirs
 	{
@@ -53,3 +54,4 @@ project "Nature3.0App"
 		platforms "x64"
 		targetdir "build/Release64"
 		flags "Optimize"
+

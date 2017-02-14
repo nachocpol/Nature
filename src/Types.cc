@@ -3,6 +3,10 @@
 */
 
 #include "Types.h"
+#include "gtc/matrix_access.hpp"
+#include "stb_image.h"
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
 
 BasicVertex::BasicVertex(   float px, float py, float pz,
                             float ux, float uy)
@@ -11,94 +15,132 @@ BasicVertex::BasicVertex(   float px, float py, float pz,
     Uv = glm::vec2(ux, uy);
 }
 
-void Frustrum::SetCamProjection(float angle, float aspect, float near, float far)
+void Frustrum::SetPlanes(glm::mat4 vp)
 {
-    mAspect = aspect;
-    mNear = near;
-    mFar = far;
+    /*
+    Planes[kNear] = SetValues
+    (
+        vp[2][0] + vp[3][0],
+        vp[2][1] + vp[3][1],
+        vp[2][2] + vp[3][2],
+        vp[2][3] + vp[3][3]
+    );
+    Planes[kFar] = SetValues
+    (
+       -vp[2][0] + vp[3][0],
+       -vp[2][1] + vp[3][1],
+       -vp[2][2] + vp[3][2],
+       -vp[2][3] + vp[3][3]
+    );
+    Planes[kBottom] = SetValues
+    (
+        vp[1][0] + vp[3][0],
+        vp[1][1] + vp[3][1],
+        vp[1][2] + vp[3][2],
+        vp[1][3] + vp[3][3]
+    );
+    Planes[kTop] = SetValues
+    (
+       -vp[1][0] + vp[3][0],
+       -vp[1][1] + vp[3][1],
+       -vp[1][2] + vp[3][2],
+       -vp[1][3] + vp[3][3]
+    );
+    Planes[kLeft] = SetValues
+    (
+        vp[0][0] + vp[3][0],
+        vp[0][1] + vp[3][1],
+        vp[0][2] + vp[3][2],
+        vp[0][3] + vp[3][3]
+    );
+    Planes[kRight] = SetValues
+    (
+       -vp[0][0] + vp[3][0],
+       -vp[0][1] + vp[3][1],
+       -vp[0][2] + vp[3][2],
+       -vp[0][3] + vp[3][3]
+    );
+    */
 
-    // compute width and height of the near and far plane sections
-    mTang = tan(angle);
-    mSphereFactorY = 1.0f / cos(angle);
+    glm::vec4 rowX = glm::row(vp, 0);
+    glm::vec4 rowY = glm::row(vp, 1);
+    glm::vec4 rowZ = glm::row(vp, 2);
+    glm::vec4 rowW = glm::row(vp, 3);
 
-    // compute half of the the horizontal field of view and sphereFactorX
-    float anglex = atan(mTang*mAspect);
-    mSphereFactorX = 1.0f / cos(anglex);
+    Planes[0] = SetValues(rowW + rowX);
+    Planes[1] = SetValues(rowW - rowX);
+    Planes[2] = SetValues(rowW + rowY);
+    Planes[3] = SetValues(rowW - rowY);
+    Planes[4] = SetValues(rowW + rowZ);
+    Planes[5] = SetValues(rowW - rowZ);
 }
 
-void Frustrum::SetCamVectors(glm::vec3 pos, glm::vec3 look, glm::vec3 up)
+FrustrumResult Frustrum::SphereTest(BoundingSphere & bs)
 {
-    mCamPosition = pos;
-    mCamLook = glm::normalize(look - pos); 
-    mCamRight = glm::normalize(glm::cross(mCamLook, up));
-    mCamUp = glm::normalize(glm::cross(mCamRight, mCamLook));
-}
-
-FrustrumResult Frustrum::SphereInFrustrum(BoundingSphere & bs)
-{
-    float d;
-    float az, ax, ay;
-    FrustrumResult result = kInside;
-
-    glm::vec3 v = bs.Position - mCamPosition;
-   
-    az = v.x * -mCamLook.x + v.y * -mCamLook.y + v.z * -mCamLook.z;
-    if (az > mFar + bs.Radius || az < mNear - bs.Radius)
-        return kOutside;
-
-    if (az > mFar - bs.Radius || az < mNear + bs.Radius)
-        result = kIntersect;
-
-    ay = v.x * mCamUp.x + v.y * mCamUp.y + v.z * mCamUp.z;
-    d = mSphereFactorY * bs.Radius;
-    az *= mTang;
-    if (ay > az + d || ay < -az - d)
-        return kOutside;
-
-    if (ay > az - d || ay < -az + d)
-        result = kIntersect;
-
-    ax = v.x * mCamLook.x + v.y * mCamLook.y + v.z * mCamLook.z;
-    az *= mAspect;
-    d = mSphereFactorX * bs.Radius;
-    if (ax > az + d || ax < -az - d)
-        return kOutside;
-
-    if (ax > az - d || ax < -az + d)
-        result = kIntersect;
-
-    return result;
-}
-
-FrustrumResult Frustrum::PointInFrustrum(glm::vec3 p)
-{
-    float pcz, pcx, pcy, aux;
-
-    // compute vector from camera position to p
-    glm::vec3 v = p - mCamPosition;
-
-    // compute and test the Z coordinate
-    pcz = v.x * -mCamLook.x + v.y * -mCamLook.y + v.z * -mCamLook.z;
-    if (pcz > mFar || pcz < mNear)
-        return kOutside;
-
-    // compute and test the Y coordinate
-    pcy = v.x * mCamUp.x + v.y * mCamUp.y + v.z * mCamUp.z;
-    aux = pcz * mTang;
-    if (pcy > aux || pcy < -aux)
-        return kOutside;;
-
-    // compute and test the X coordinate
-    pcx = v.x * mCamRight.x + v.y * mCamRight.y + v.z * mCamRight.z;
-    aux = aux * mAspect;
-    if (pcx > aux || pcx < -aux)
-        return kOutside;
-
+    for (unsigned int i = 0; i < 6; i++)
+    {
+        float dist =    Planes[i].x * bs.Position.x +
+                        Planes[i].y * bs.Position.y +
+                        Planes[i].z * bs.Position.z + 
+                        Planes[i].w - bs.Radius;
+        if (dist > 0.0f) return kOutside;
+    }
     return kInside;
+}
+
+glm::vec4 Frustrum::SetValues(glm::vec4 p)
+{
+    glm::vec3 n = glm::vec3(p.x, p.y, p.z);
+    float l = glm::length(n);
+    return -p / l;
 }
 
 void LoadMeshFromFile(const char * file, MeshBasicVertexData& md)
 {
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    tinyobj::attrib_t at;
+    std::string err;
+    bool ret = tinyobj::LoadObj(&at, &shapes, &materials, &err, file);
+    if (!err.empty()) 
+    {
+        printf("ERROR:%s\n", err.c_str());
+    }
+    if (!ret) 
+    {
+        exit(1);
+    }
+
+    // Build vertex data
+    for (unsigned int i = 0; i < at.vertices.size(); i += 3)
+    {
+        // Positions
+        float px = at.vertices[i + 0];
+        float py = at.vertices[i + 1];
+        float pz = at.vertices[i + 2];
+        // Uvs
+        float ux, uy;
+        ux = uy = 0.0f;
+        if (at.texcoords.size() > 0)
+        {
+            ux = at.texcoords[i + 0];
+            uy = at.texcoords[i + 1];
+        }
+        // Normals
+        md.vertex.push_back(BasicVertex(px, py, pz, ux, uy));
+    }
+
+    // Build indices
+    for (unsigned int s = 0; s < shapes.size(); s++)
+    {
+        for (unsigned int i = 0; i < shapes[s].mesh.indices.size(); i++)
+        {
+            unsigned int idx = shapes[s].mesh.indices[i].vertex_index;
+            md.ele.push_back(idx);
+        }
+    }
+
+    printf(" LOG: Loaded mesh:%s\n", shapes[0].name.c_str());
 }
 
 void GenerateSphere(float radius, int div, MeshBasicVertexData & md)
@@ -148,3 +190,7 @@ void GenerateSphere(float radius, int div, MeshBasicVertexData & md)
     }
 }
 
+void LoadTextureFromFile(TextureDef& def)
+{
+    def.Data = stbi_load(def.Path, &def.Size.x, &def.Size.y, &def.ElePerPixel, 0);
+}

@@ -20,7 +20,7 @@
 
 Terrain::Terrain():
     ChunkSide(16),
-    ElementSide(4)
+    ElementSide(8)
 {
 }
 
@@ -31,9 +31,8 @@ Terrain::~Terrain()
 void Terrain::Init()
 {
     MeshBasicVertexData md;
-    GenerateSphere(1.0f, 10, md);
+    LoadMeshFromFile("../data/meshes/sphere.obj", md);
     mSphereMesh.Init(md.vertex, md.ele);
-    mSphereMesh.DMode = kTriangles;
     mSphereMat.Init("../data/shaders/default.vs", "../data/shaders/default.fs");
 
     ElementSize = HeightMapSize / (ChunkSide*(ElementSide-1));
@@ -50,8 +49,16 @@ void Terrain::Init()
     mHeightMap.Init(TextureDef("../data/hmaps/hm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mSplatMap.Init(TextureDef("../data/hmaps/splat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
 
-    const glm::vec2 chunkCenter = glm::vec2((ElementSide - 1) * ElementSize) * 0.5f;
-
+    // Load the hmpa so we can sample to find the chunks y pos
+    TextureDef hMap;
+    hMap.Path = "../data/hmaps/hm.png";
+    LoadTextureFromFile(hMap);
+    
+    // Bounding sphere radius
+    // hypotenuse = opposite / sin(angle)
+    float angleToRad = 3.141516f / 180.0f;
+    float diagonal = ((ElementSide - 1) * ElementSize) / sin(45.0f * angleToRad);
+    float radius = diagonal * 0.5;
     mChunks.resize(ChunkSide * ChunkSide);
     for (unsigned int i = 0; i < ChunkSide; i++)
     {
@@ -62,9 +69,14 @@ void Terrain::Init()
             mChunks[idx].ChunkPosition = p;
             InitMeshAsGrid(mChunks[idx].ChunkMesh, ElementSide, ElementSize);
             mChunks[idx].ChunkMesh.DMode = DrawMode::kPatches3;
+
             // Build bounding sphere
-            glm::vec2 tmpCC = chunkCenter * (p + glm::vec2(1.0f));
-            mChunks[idx].BSphere = BoundingSphere(glm::vec3(tmpCC.x,0.0f,tmpCC.y),chunkCenter.x);
+            glm::vec3 bSpherePos = glm::vec3(p.x, 0.0f, p.y);
+            bSpherePos *= (ElementSide - 1) * ElementSize;
+            bSpherePos += radius;
+            unsigned int yData = hMap.Data[(int)bSpherePos.y * 1024 + (int)bSpherePos.x];
+            bSpherePos.y = ((float)yData / 255.0f) * 100.0f;
+            mChunks[idx].BSphere = BoundingSphere(bSpherePos, radius);
         }
     }
 }
@@ -77,7 +89,7 @@ void Terrain::Update(Frustrum viewFrust)
         mChunksVisible.clear();
         for (unsigned int i = 0; i < mChunks.size(); i++)
         {
-            if (viewFrust.SphereInFrustrum(mChunks[i].BSphere) == kInside)
+            if (viewFrust.SphereTest(mChunks[i].BSphere) == kInside)
             {
                 mChunksVisible.push_back(mChunks[i]);
             }
@@ -129,6 +141,25 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
             RenderChunk(mChunks[i]);
         }
     }
+
+    // Debug chunks
+    if (VisualDebug)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glm::mat4 curModel;
+        unsigned int loc = 0;
+        for (unsigned int i = 0; i < mChunks.size(); i++)
+        {
+            mSphereMat.Use();
+            curModel = glm::mat4();
+            curModel = glm::translate(curModel, mChunks[i].BSphere.Position);
+            curModel = glm::scale(curModel, glm::vec3(mChunks[i].BSphere.Radius));
+            loc = glGetUniformLocation(mSphereMat.Id, "uModel");
+            glUniformMatrix4fv(loc, 1, GL_FALSE, &curModel[0][0]);
+            mSphereMesh.Draw();
+        }
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 }
 
 void Terrain::RenderUi()
@@ -141,7 +172,8 @@ void Terrain::RenderUi()
         ImGui::LabelText("ElementSize", "%f", ElementSize);
         ImGui::LabelText("HeightMapSize", "%i", HeightMapSize);
         ImGui::LabelText("Chunks", "%i/%i", mChunksVisible.size(), mChunks.size());
-        ImGui::Checkbox("Frustrum culling enabled:", &FrustrumCulling);
+        ImGui::Checkbox("Frustrum culling", &FrustrumCulling);
+        ImGui::Checkbox("Visual debug", &VisualDebug);
         ImGui::Separator();
     }
     ImGui::End();
@@ -169,9 +201,9 @@ void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
     unsigned int faceCnt = (size-1) * (size-1) * 2;
     ele.resize(faceCnt * 3);
     unsigned int k = 0;
-    for (unsigned int i = 0; i < size-1; i++)  // -1 normal / -2 debug chunk border
+    for (unsigned int i = 0; i < size-2; i++)  // -1 normal / -2 debug chunk border
     {
-        for (unsigned int j = 0; j < size-1; j++)
+        for (unsigned int j = 0; j < size-2; j++)
         {
             ele[k] = i * size + j;
             ele[k + 1] = i * size + j + 1;
@@ -209,11 +241,5 @@ void Terrain::RenderChunk(Chunk & c)
     loc = glGetUniformLocation(mTerrainMaterial.Id, "uChunkPos");
     glUniform2fv(loc, 1, &c.ChunkPosition.x);
     c.ChunkMesh.Draw();
-
-    // Draw debug sphere quad
-    //mSphereMat.Use();
-    //loc = glGetUniformLocation(mSphereMat.Id, "uModel");
-    //glUniformMatrix4fv(loc, 1, GL_FALSE, &curModel[0][0]);
-    //mSphereMesh.Draw();
 }
 
