@@ -13,25 +13,13 @@ uniform sampler2D uGrassTexture;
 uniform sampler2D uCliffTexture;
 uniform sampler2D uSplatTexture;
 uniform sampler2D uHeightMap;
+uniform sampler2D uLutTexture;
 
 in vec2 iTexcoord;
 in vec3 iPosition;
 
 out vec4 oColor;
 
-/*
-	Hash function.
-*/
-float Hash(vec3 p) 
-{
-	p  = fract( p*0.3183099+.1 );
-  	p *= 17.0;
-  	return fract( p.x*p.y*p.z*(p.x+p.y+p.z) );
-}
-
-/*
-	4 component hash
-*/
 vec4 Hash4( vec2 p ) 
 { 
 	return fract(sin(vec4( 1.0+dot(p,vec2(37.0,17.0)), 
@@ -40,113 +28,56 @@ vec4 Hash4( vec2 p )
                                               4.0+dot(p,vec2(23.0,31.0))))*103.0); 
 }
 
-
 /*
-	3D value noise.
+	Value noise using lut texture [0,1]
 */
-float Noise( in vec3 x )
+float VNoise( in vec3 x )
 {
-    vec3 p = floor(x);
-    vec3 f = fract(x);
-    f = f*f*(3.0-2.0*f);
-  
-    return mix(mix(mix( Hash(p+vec3(0,0,0)), 
-                        Hash(p+vec3(1,0,0)),f.x),
-                   mix( Hash(p+vec3(0,1,0)), 
-                        Hash(p+vec3(1,1,0)),f.x),f.y),
-               mix(mix( Hash(p+vec3(0,0,1)), 
-                        Hash(p+vec3(1,0,1)),f.x),
-                   mix( Hash(p+vec3(0,1,1)), 
-                        Hash(p+vec3(1,1,1)),f.x),f.y),f.z);
+    vec3 p = floor(x.xzy);
+    vec3 f = fract(x.xzy);
+	vec3 f2 = f*f; 
+	f = f*f2*(10.0-15.0*f+6.0*f2);
+	vec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;
+	vec2 rg = texture2D( uLutTexture, (uv+0.5)/256.0, -100.0 ).ba;
+    float n = mix( rg.y, rg.x, f.z )-.5;
+	return n + 1.0 * 0.5;
 }
 
 /*
-	Fractional Brownian motion [0,1]
+	Fractional Brownian motion [0,1] 2 octaves
 */
-float Fbm(vec3 pos, int octaves, float persistence) 
+float Fbm2(vec3 pos) 
 {
-
-    float total = 0.0f;
-    float frequency = 1.0f;
-    float amplitude = 1.0f;
-    float maxValue = 0.0f;  
-    for(int i=0;i<octaves;i++) 
-    {
-        total += Noise(pos * frequency) * amplitude;
-        maxValue += amplitude;
-        amplitude *= persistence;
-        frequency *= 2.0f;
-    }
-    return total/maxValue;
-}
-/*
-	Plane definition
-*/
-struct Plane
-{
-    vec3 Point;
-    vec3 Normal;
-};
-
-/*
-	If a ray intersects the provided plane it will return
-	the distance to the plane (if not just 0).
-*/
-float IPlane( vec3 ro, vec3 rd, Plane plane)
-{
-    float hit = 0.0;
-    float dotP = dot(rd,plane.Normal);
-    if(dotP == 0.0)
-    {
-        return hit;
-    }
-    
-    float distToHit = dot(plane.Point - ro, plane.Normal) / dotP;
-    if(distToHit < 0.0)
-    {
-        return hit;
-    }
-    
-    hit = distToHit;
-    return hit;
+	vec3 q = pos;
+	float f;
+    f  = 0.50000*VNoise( q ); q = q*2.02;
+    f += 0.25000*VNoise( q );;
+	return f;
 }
 
-float GetFade(float dist)
+/*
+	Fractional Brownian motion [0,1] 5 octaves
+*/
+float Fbm5(vec3 pos) 
 {
-	float uFadeDist = 1200.0f;
-	float d = clamp(dist,0.0f,uFadeDist);
-	d = d / uFadeDist;
-	d = clamp(d,0.0f,1.0f);
-	return (d - 1.0f) * -1.0f;
+
+	vec3 q = pos;
+	float f;
+    f  = 0.50000*VNoise( q ); q = q*2.02;
+    f += 0.25000*VNoise( q ); q = q*2.03;
+    f += 0.12500*VNoise( q ); q = q*2.01;
+    f += 0.06250*VNoise( q ); q = q*2.02;
+    f += 0.03125*VNoise( q );
+	return f;
 }
 
 float CloudsShadowing()
 {
-	float cFactor = 1.0f;
-
-	// TO-DO:Aspect ratio
-	vec3 rd = -(vec3(0.5f,-1.0f,0.0f));
-	vec3 ro = iPosition;
-
-	// Make it uniforms
-	vec2 uWind = vec2(0.15f);
-
-	// Check cloud intersection
-	Plane clouds;
-	clouds.Point = vec3(0.0f,250.0f,0.0f);
-	clouds.Normal = vec3(0.0f,1.0f,0.0f);
-	float cDist = IPlane(ro,rd,clouds);
-	if(cDist != 0.0f)
-	{
-		// Cloud position and wind
-		vec3 cPos = ro + (rd * cDist);
-		cPos /= 50.0f;
-		cPos.xy += uTime * uWind;
-
-		cFactor -= Fbm(cPos,2,0.65f);
-	}
-	cFactor = max(cFactor,0.2f);
-	return cFactor;
+	vec2 w = vec2(0.25f,0.25f) * uTime;
+	vec3 p = vec3(iPosition.x,250.0f,iPosition.z);
+	p *= 0.015f;
+	p.xz += w;
+	return (Fbm2(p)-1.0f)*-1.0f;
 }
 
 vec4 texture2DNoTile( sampler2D samp, in vec2 uv )

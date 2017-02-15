@@ -47,4 +47,8 @@ private:
     glw::Material mWaterMaterial;
     glw::Texture mWaterDuDvTexture;
     glw::Texture mWaterNormTexture;
+
+    // Noise texture
+    std::vector<Color> mLutColors;
+    glw::Texture mLutTexture;
 };

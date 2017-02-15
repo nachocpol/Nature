@@ -19,16 +19,15 @@
 	+ Fix time for the app (delta time,fps)							[-]
 	+ Use IMGUI to log information about timming					[✓]	29 / 1 / 2017
 	+ Loading textures												[x]
-	+ Improve input class to handle,pressed released				[x]
-	+ Fustrum Class 												[x]
+	+ Improve input class to handle,pressed released				[-]
+	+ Fustrum Class 												[✓]	14 / 2 / 2017
 	+ Obtain planes from the camera view and proj					[x]
-	+ Perform frustum culling with the terrain						[x]
+	+ Perform frustum culling with the terrain						[✓] 14 / 2 / 2017
 	+ Generic texture Class 										[✓] 31 / 1 / 2017
  	+ Setup postprocessing (fullscreen quad,fbo etc)				[✓]	31 / 1 / 2017
 	+ Beta version of the clouds									[✓] 31 / 1 / 2017
 	+ Port new clouds 												[✓]  2 / 2 / 2017
 	+ Error callback												[x]
-	+ Material should handle uniforms								[x]
 	+ Function to setup textures 									[✓]
 	+ Add mouse position to input Class 							[✓] 4 / 2 / 2017
 	+ Fix clouds 													[✓] 5 / 2 / 2017
@@ -44,7 +43,8 @@
 	  	+ Improve it, more than one? UBO?							[x]
   	+ If a shader is not using uPass check it and dont set the uni  [x]
   	+ Water effect													[✓] 9 / 2 / 2017
-  	+ Tessellation for the terrain									[-]
+  	+ Tessellation for the terrain									[✓] 14/ 2 / 2017
   	+ Wireframe mode												[x]
   	+ Made function to load textures, now update the code
   	  of gl texture creation to use it.								[x]
+  	+ Use hash texture for all the noise							[x]

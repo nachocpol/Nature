@@ -38,6 +38,8 @@ public:
     bool FrustrumCulling = false;
     bool VisualDebug = false;
 
+    glw::Texture* LutTexture;
+
 private:
     void InitMeshAsGrid(glw::Mesh& mesh,unsigned int size, float eleSize);
     void RenderChunk(Chunk& c);

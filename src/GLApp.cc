@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 #include "gtc/matrix_transform.hpp"
+#include "gtc/random.hpp"
 
 GLApp::GLApp()
 {
@@ -86,6 +87,33 @@ bool GLApp::Init()
     mWaterMaterial.Init("../data/shaders/water.vs", "../data/shaders/water.fs");
     mWaterDuDvTexture.Init(TextureDef("../data/textures/wdudv.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mWaterNormTexture.Init(TextureDef("../data/textures/wnorm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+
+    // Init lut texture
+    mLutColors.resize(256 * 256 * 4);
+    for (unsigned int y = 0; y < 256; y++)
+    {
+        for (unsigned int x = 0; x < 256; x++)
+        {
+            unsigned int idx = y * 256 + x;
+            mLutColors[idx].R = (unsigned char)glm::clamp(int(glm::linearRand(0.0f, 1.0f) * 255.0f), 0, 255);
+            mLutColors[idx].B = (unsigned char)glm::clamp(int(glm::linearRand(0.0f, 1.0f) * 255.0f), 0, 255);
+        }
+    }
+    for (unsigned int y = 0; y < 256; y++)
+    {
+        for (unsigned int x = 0; x < 256; x++)
+        {
+            int x2 = (x - 37) & 255;
+            int y2 = (y - 17) & 255;
+            unsigned int idx = y2 * 256 + x2;
+            mLutColors[idx].G = mLutColors[idx].R;
+            mLutColors[idx].A = mLutColors[idx].B;
+        }
+    }
+    TextureDef mLutDef = TextureDef("", glm::vec2(256, 256), TextureUsage::kSampling);
+    mLutDef.Data = &mLutColors[0].R;
+    mLutTexture.Init(mLutDef);
+    mTerrain.LutTexture = &mLutTexture;
     return true;
 }
 
@@ -144,6 +172,12 @@ void GLApp::Render()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         mCloudsMat.Use();
+
+        glActiveTexture(GL_TEXTURE0 + 0);
+        glBindTexture(GL_TEXTURE_2D, mLutTexture.Id);
+        int loc = glGetUniformLocation(mCloudsMat.Id, "uLutTexture");
+        glUniform1i(loc, 0);
+
         glm::mat4 ctrans = glm::mat4();
         ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight, 512.0f));
         ctrans = glm::scale(ctrans, glm::vec3(4096.0f));
@@ -210,12 +244,18 @@ void GLApp::Render()
 
         mWaterMesh.Draw();
         glDisable(GL_BLEND);
-
+        
         // Clouds
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         mCloudsMat.Use();
+
+        glActiveTexture(GL_TEXTURE0 + 0);
+        glBindTexture(GL_TEXTURE_2D, mLutTexture.Id);
+        loc = glGetUniformLocation(mCloudsMat.Id, "uLutTexture");
+        glUniform1i(loc, 0);
+
         glm::mat4 ctrans = glm::mat4();
         ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight, 512.0f));
         ctrans = glm::scale(ctrans, glm::vec3(4096.0f));

@@ -138,6 +138,10 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     glBindTexture(GL_TEXTURE_2D, mCliffTexture.Id);
     glUniform1i(glGetUniformLocation(mTerrainMaterial.Id, "uCliffTexture"), 3);
 
+    glActiveTexture(GL_TEXTURE0 + 4);
+    glBindTexture(GL_TEXTURE_2D, LutTexture->Id);
+    glUniform1i(glGetUniformLocation(mTerrainMaterial.Id, "uLutTexture"), 4);
+
     // Render visible chunks
     if (FrustrumCulling)
     {

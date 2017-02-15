@@ -12,7 +12,7 @@ out vec3 iPosition;
 
 vec2 GetUv()
 {
-	float uHeightMapSize = 2048.0f;;
+	float uHeightMapSize = 2048.0f;
 	vec2 p = (uModel * vec4(aPosition,1.0f)).xz;
 	return p/uHeightMapSize;
 }

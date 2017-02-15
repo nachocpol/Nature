@@ -35,7 +35,7 @@ public:
     Frustrum CameraFrustrum;
     float Sensitivity = 0.25f;
     float Speed = 0.3f;
-    bool LockMouse = false;
+    bool LockMouse = true;
 
 private:
     void UpdateMouseLook();

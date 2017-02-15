@@ -38,7 +38,7 @@ void Camera::Update()
 {
     if (Input::GetInstance()->GetKey(INPUT_KEY_L))
     {
-        LockMouse != LockMouse;
+        LockMouse = !LockMouse;
     }
     if (Input::GetInstance()->GetKey(INPUT_KEY_W))
     {

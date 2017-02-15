@@ -1,5 +1,5 @@
 solution "Nature3.0"
-	configurations  {"Debug64","Release64","Debug32"}
+	configurations  {"Debug64","Release64"}
 
 project "Nature3.0App"
 	kind "ConsoleApp"
