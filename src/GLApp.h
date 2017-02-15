@@ -40,7 +40,7 @@ private:
 
     // Water
     float mWaterHeight = 10.0f;
-    float mWaterScale = 1000.0f;
+    float mWaterScale = 1024.0f;
     glw::RenderTarget mWaterReflecRt;
     glw::RenderTarget mWaterRefracRt;
     glw::Mesh mWaterMesh;
@@ -51,4 +51,8 @@ private:
     // Noise texture
     std::vector<Color> mLutColors;
     glw::Texture mLutTexture;
+
+    // Sky
+    glw::Mesh mSkyMesh;
+    glw::Material mSkyMaterial;
 };

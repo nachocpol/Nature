@@ -112,7 +112,7 @@ void main()
 	if(camDist > 4500.0f)discard;
 	
 	float n = 0.0f;
-    vec3 q = 0.01*iWPos + vec3(w.x,0.0f,w.y	);
+    vec3 q = 0.01*iWPos + vec3(w.x,0.0f,w.y);
     n = Fbm5(q);
 
 	vec3 uCloudBrig = vec3(0.95f,0.95f,0.95f);//morning

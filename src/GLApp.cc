@@ -114,6 +114,16 @@ bool GLApp::Init()
     mLutDef.Data = &mLutColors[0].R;
     mLutTexture.Init(mLutDef);
     mTerrain.LutTexture = &mLutTexture;
+
+    // Init sky
+    MeshBasicVertexData md;
+    LoadMeshFromFile("../data/meshes/sphere.obj", md);
+    mSkyMesh.Init(md.vertex, md.ele);
+    mSkyMaterial.Init
+    (
+        "../data/shaders/sky.vs",
+        "../data/shaders/sky.fs"
+    );
     return true;
 }
 
@@ -213,7 +223,7 @@ void GLApp::Render()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         mWaterMaterial.Use();
         glm::mat4 wtrans = glm::mat4();
-        wtrans = glm::translate(wtrans, glm::vec3(512.0f,mWaterHeight, 512.0f));
+        wtrans = glm::translate(wtrans, glm::vec3(mWaterScale,mWaterHeight, mWaterScale));
         wtrans = glm::scale(wtrans, glm::vec3(mWaterScale));
         glw::SetTransform(mWaterMaterial.Id, &wtrans[0][0]);
 
@@ -245,6 +255,15 @@ void GLApp::Render()
         mWaterMesh.Draw();
         glDisable(GL_BLEND);
         
+        // Sky
+        glDisable(GL_CULL_FACE);
+        mSkyMaterial.Use();
+        glm::mat4 strans = glm::mat4();
+        strans = glm::scale(strans, glm::vec3(4096.0f));
+        glw::SetTransform(mSkyMaterial.Id, &strans[0][0]);
+        mSkyMesh.Draw();
+        glEnable(GL_CULL_FACE);
+
         // Clouds
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
@@ -304,4 +323,3 @@ void GLApp::Release()
     ImGui_ImplGlfwGL3_Shutdown();
     mWindow.Release();
 }
-
