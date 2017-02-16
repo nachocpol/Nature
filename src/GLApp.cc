@@ -117,7 +117,7 @@ bool GLApp::Init()
 
     // Init sky
     MeshBasicVertexData md;
-    LoadMeshFromFile("../data/meshes/sphere.obj", md);
+    LoadMeshFromFile("../data/meshes/spherehi.obj", md);
     mSkyMesh.Init(md.vertex, md.ele);
     mSkyMaterial.Init
     (
@@ -189,7 +189,7 @@ void GLApp::Render()
         glUniform1i(loc, 0);
 
         glm::mat4 ctrans = glm::mat4();
-        ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight, 512.0f));
+        ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight , 512.0f));
         ctrans = glm::scale(ctrans, glm::vec3(4096.0f));
         glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
         mCloudsPlane.Draw();
@@ -206,13 +206,25 @@ void GLApp::Render()
     mPassConst.Update();
     mWaterRefracRt.Enable();
     {
-        mTerrain.Render(true, glm::vec4(0.0f, -1.0f, 0.0f, mWaterHeight + 0.01f));
+        mTerrain.Render(true, glm::vec4(0.0f, -1.0f, 0.0f, (mWaterHeight ) + 0.01f));
     }
     mWaterRefracRt.Disable();
 
     // Render scene
     mBaseRt.Enable();
     {
+        // Sky
+        glDisable(GL_CULL_FACE);
+        glDepthMask(GL_FALSE);
+        mSkyMaterial.Use();
+        glm::mat4 strans = glm::mat4();
+        strans = glm::translate(strans, glm::vec3(0.0f, 0.0f, 0.0f));
+        strans = glm::scale(strans, glm::vec3(2.0f));//radius 1
+        glw::SetTransform(mSkyMaterial.Id, &strans[0][0]);
+        mSkyMesh.Draw();
+        glDepthMask(GL_TRUE);
+        glEnable(GL_CULL_FACE);
+
         // Terrain
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         mTerrain.Render(false);
@@ -255,15 +267,6 @@ void GLApp::Render()
         mWaterMesh.Draw();
         glDisable(GL_BLEND);
         
-        // Sky
-        glDisable(GL_CULL_FACE);
-        mSkyMaterial.Use();
-        glm::mat4 strans = glm::mat4();
-        strans = glm::scale(strans, glm::vec3(4096.0f));
-        glw::SetTransform(mSkyMaterial.Id, &strans[0][0]);
-        mSkyMesh.Draw();
-        glEnable(GL_CULL_FACE);
-
         // Clouds
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
@@ -276,7 +279,7 @@ void GLApp::Render()
         glUniform1i(loc, 0);
 
         glm::mat4 ctrans = glm::mat4();
-        ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight, 512.0f));
+        ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight , 512.0f));
         ctrans = glm::scale(ctrans, glm::vec3(4096.0f));
         glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
         mCloudsPlane.Draw();

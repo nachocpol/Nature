@@ -14,9 +14,9 @@ layout(std140)uniform uPass
 uniform mat4 uModel;
 
 out vec3 v3Direction;
-out vec3 iMainColor;
-out vec3 iSecondaryColor;
-
+out vec3 c0;
+out vec3 c1;
+out vec3 iSunDir;
 float scale(float fCos)
 {
 	float fScaleDepth = 0.25f;		// The scale depth (i.e. the altitude at which the atmosphere's average density is found)
@@ -36,25 +36,27 @@ void main()
 	const int nSamples = 4;
 	const float fSamples = 4.0;
 
-	vec3  v3CameraPos = uCampos;		// The camera's current position
-	vec3  v3LightPos = vec3(0.5f,1.0f,0.0f);		// The direction vector to the light source
+	vec3  v3CameraPos = vec3(0.0f,0.956f,0.0f);		// The camera's current position
+	//float sunY = sin(uTime * 0.5f);
+	vec3  v3LightPos = vec3(0.0f,0.0f,1.0f);		// The direction vector to the light source
+	iSunDir = v3LightPos;
 	vec3  v3InvWavelength = 1.0f / pow4WaveLength;	// 1 / pow(wavelength, 4) for the red, green, and blue channels
-	float fCameraHeight = uCampos.y;	// The camera's current height
+	float fCameraHeight = v3CameraPos.y;	// The camera's current height
 	float fCameraHeight2 = pow(fCameraHeight,2.0f);	// fCameraHeight^2
-	float fOuterRadius = 2048.0f;		// The outer (atmosphere) radius
+	float fOuterRadius = 1.0f;		// The outer (atmosphere) radius
 	float fOuterRadius2 = pow(fOuterRadius,2.0f);	// fOuterRadius^2
-	float fInnerRadius = 2000.0f;		// The inner (planetary) radius
+	float fInnerRadius = 0.95f;		// The inner (planetary) radius
 	float fInnerRadius2 = pow(fInnerRadius,2.0f);	// fInnerRadius^2
 	float fKrESun = Kr * ESun;			// Kr * ESun
 	float fKmESun = Km * ESun;			// Km * ESun
 	float fKr4PI = Kr * 4.0f * PI;			// Kr * 4 * PI
 	float fKm4PI = Km * 4.0f * PI;			// Km * 4 * PI
 	float fScale = 1.0f / (fOuterRadius - fInnerRadius);			// 1 / (fOuterRadius - fInnerRadius)
-	float fScaleDepth = 0.25f;		// The scale depth (i.e. the altitude at which the atmosphere's average density is found)
+	float fScaleDepth = 0.1f;		// The scale depth (i.e. the altitude at which the atmosphere's average density is found)
 	float fScaleOverScaleDepth = fScale/fScaleDepth;	// fScale / fScaleDepth
 
 	// Get the ray from the camera to the vertex, and its length (which is the far point of the ray passing through the atmosphere)
-	vec3 v3Pos = (uModel * vec4(aPosition,1.0f)).xyz;
+	vec3 v3Pos = (uModel * vec4(aPosition,0.0f)).xyz;
 	vec3 v3Ray = v3Pos - v3CameraPos;
 	float fFar = length(v3Ray);
 	v3Ray /= fFar;
@@ -88,9 +90,12 @@ void main()
 	}
 
 	// Finally, scale the Mie and Rayleigh colors and set up the varying variables for the pixel shader
-	iSecondaryColor = v3FrontColor * fKmESun;
-	iMainColor = v3FrontColor * (v3InvWavelength * fKrESun);
+	c1 = v3FrontColor * fKmESun;
+	c0 = v3FrontColor * (v3InvWavelength * fKrESun);
 	v3Direction = v3CameraPos - v3Pos;
 
-	gl_Position = uProjection * uView * uModel *  vec4(aPosition,1.0f);
+	mat3 v = mat3(uView);
+	vec3 displacedPos = aPosition;
+	displacedPos.y -= 0.2f;
+	gl_Position = uProjection * mat4(v)  *  vec4(displacedPos,1.0f);
 }	

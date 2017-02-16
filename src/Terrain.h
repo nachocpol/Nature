@@ -59,6 +59,7 @@ private:
 
     // Frustrum culling
     std::vector<float> mChunkHeight;
+
     // Debug
     glw::Mesh mSphereMesh;
     glw::Material mSphereMat;
