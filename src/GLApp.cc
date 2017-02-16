@@ -116,14 +116,7 @@ bool GLApp::Init()
     mTerrain.LutTexture = &mLutTexture;
 
     // Init sky
-    MeshBasicVertexData md;
-    LoadMeshFromFile("../data/meshes/spherehi.obj", md);
-    mSkyMesh.Init(md.vertex, md.ele);
-    mSkyMaterial.Init
-    (
-        "../data/shaders/sky.vs",
-        "../data/shaders/sky.fs"
-    );
+    mSky.Init();
     return true;
 }
 
@@ -214,16 +207,7 @@ void GLApp::Render()
     mBaseRt.Enable();
     {
         // Sky
-        glDisable(GL_CULL_FACE);
-        glDepthMask(GL_FALSE);
-        mSkyMaterial.Use();
-        glm::mat4 strans = glm::mat4();
-        strans = glm::translate(strans, glm::vec3(0.0f, 0.0f, 0.0f));
-        strans = glm::scale(strans, glm::vec3(2.0f));//radius 1
-        glw::SetTransform(mSkyMaterial.Id, &strans[0][0]);
-        mSkyMesh.Draw();
-        glDepthMask(GL_TRUE);
-        glEnable(GL_CULL_FACE);
+        mSky.Render();
 
         // Terrain
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -317,6 +301,7 @@ void GLApp::RenderUi()
     ImGui::End();
 
     mTerrain.RenderUi();
+    mSky.RenderUi();
 
     ImGui::Render();
 }

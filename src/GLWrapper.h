@@ -23,6 +23,12 @@ namespace glw
 
     void SetTransform(GLint program, float* trans);
 
+    void SetUniform1i(const char* name,GLint program, int* value);
+
+    void SetUniform1f(const char* name,GLint program, float* value);
+
+    void SetUniform3f(const char* name,GLint program, float* value);
+
     struct Mesh
     {
         Mesh():DMode(kTriangles) {}

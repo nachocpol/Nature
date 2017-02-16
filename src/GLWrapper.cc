@@ -76,8 +76,42 @@ void glw::SetClipPlane(GLint indx, glm::vec4 plane, GLuint program)
 
 void glw::SetTransform(GLint program, float* trans)
 {
-    GLuint loc = glGetUniformLocation(program, "uModel");
+    GLint loc = glGetUniformLocation(program, "uModel");
+#ifdef _DEBUG
+    if(loc == -1)
+        printf("GL_ERROR: Could not set uniform:%s\n", "uModel");
+#endif
     glUniformMatrix4fv(loc, 1, GL_FALSE, trans);
+}
+
+void glw::SetUniform1i(const char* name,GLint program, int * value)
+{
+    GLint loc = glGetUniformLocation(program, name);
+#ifdef _DEBUG
+    if (loc == -1)
+        printf("GL_ERROR: Could not set uniform:%s\n", name);
+#endif
+    glUniform1iv(loc,1,value);
+}
+
+void glw::SetUniform1f(const char* name, GLint program, float * value)
+{
+    GLint loc = glGetUniformLocation(program, name);
+#ifdef _DEBUG
+    if(loc == -1)
+        printf("GL_ERROR: Could not set uniform:%s\n", name);
+#endif
+    glUniform1fv(loc, 1, value);
+}
+
+void glw::SetUniform3f(const char* name, GLint program, float * value)
+{
+    GLint loc = glGetUniformLocation(program, name);
+#ifdef _DEBUG
+    if (loc == -1)
+        printf("GL_ERROR: Could not set uniform:%s\n", name);
+#endif
+    glUniform3fv(loc, 1, value);
 }
 
 void glw::Mesh::Init(std::vector<BasicVertex> vertex, std::vector<unsigned int> ele)

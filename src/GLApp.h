@@ -8,6 +8,7 @@
 #include "Window.h"
 #include "Terrain.h"
 #include "Camera.h"
+#include "Sky.h"
 
 class GLApp:public App
 {
@@ -53,6 +54,5 @@ private:
     glw::Texture mLutTexture;
 
     // Sky
-    glw::Mesh mSkyMesh;
-    glw::Material mSkyMaterial;
+    Sky mSky;
 };
