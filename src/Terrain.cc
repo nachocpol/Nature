@@ -51,6 +51,7 @@ void Terrain::Init()
     mCliffTexture.Init(TextureDef("../data/textures/cliff.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mHeightMap.Init(TextureDef("../data/hmaps/pirineo/pirineohm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mSplatMap.Init(TextureDef("../data/hmaps/pirineo/pirineosplat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mSnowTexture.Init(TextureDef("../data/textures/snow.png", glm::vec2(0.0f), TextureUsage::kTexturing));
 
     // Load the hmpa so we can sample to find the chunks y pos
     TextureDef hMap;
@@ -85,7 +86,7 @@ void Terrain::Init()
             bSpherePos.y = ((float)yData / 255.0f) * 100.0f;
             // printf("LOG:BSphere x:%f, y:%f ,z:%f \n", bSpherePos.x,bSpherePos.y, bSpherePos.z);
             // We use the diagonal because the sphere mesh radius is 0.5
-            mChunks[idx].BSphere = BoundingSphere(bSpherePos, diagonal); 
+            mChunks[idx].BSphere = BoundingSphere(bSpherePos * MapScale, diagonal * MapScale); 
                                                                                 
         }
     }
@@ -122,26 +123,14 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
         glw::SetClipPlane(0, glm::vec4(0.0f, 1.0f, 0.0f, 99999.0f), mTerrainMaterial.Id);
     }
     
-    glActiveTexture(GL_TEXTURE0 + 0);
-    glBindTexture(GL_TEXTURE_2D, mGrassTexture.Id);
-    glUniform1i(glGetUniformLocation(mTerrainMaterial.Id, "uGrassTexture"), 0);
+    GLuint p = mTerrainMaterial.Id;
 
-    glActiveTexture(GL_TEXTURE0 + 1);
-    glBindTexture(GL_TEXTURE_2D, mHeightMap.Id);
-    glUniform1i(glGetUniformLocation(mTerrainMaterial.Id, "uHeightMap"), 1);
-
-    glActiveTexture(GL_TEXTURE0 + 2);
-    glBindTexture(GL_TEXTURE_2D, mSplatMap.Id);
-    glUniform1i(glGetUniformLocation(mTerrainMaterial.Id, "uSplatTexture"), 2);
-
-    glActiveTexture(GL_TEXTURE0 + 3);
-    glBindTexture(GL_TEXTURE_2D, mCliffTexture.Id);
-    glUniform1i(glGetUniformLocation(mTerrainMaterial.Id, "uCliffTexture"), 3);
-
-    glActiveTexture(GL_TEXTURE0 + 4);
-    glBindTexture(GL_TEXTURE_2D, LutTexture->Id);
-    glUniform1i(glGetUniformLocation(mTerrainMaterial.Id, "uLutTexture"), 4);
-
+    glw::SetUniformTexture("uGrassTexture", p, mGrassTexture.Id, 0);
+    glw::SetUniformTexture("uHeightMap", p, mHeightMap.Id, 1);
+    glw::SetUniformTexture("uSplatTexture", p, mSplatMap.Id, 2);
+    glw::SetUniformTexture("uCliffTexture", p, mCliffTexture.Id, 3);
+    glw::SetUniformTexture("uLutTexture", p, LutTexture->Id, 4);
+    glw::SetUniformTexture("uSnowTexture", p, mSnowTexture.Id, 5);
     // Render visible chunks
     if (FrustrumCulling)
     {
@@ -191,6 +180,7 @@ void Terrain::RenderUi()
         ImGui::LabelText("Chunks", "%i/%i", mChunksVisible.size(), mChunks.size());
         ImGui::Checkbox("Frustrum culling", &FrustrumCulling);
         ImGui::Checkbox("Visual debug", &VisualDebug);
+        ImGui::Checkbox("Draw wireframe", &mDrawWire);
         ImGui::Separator();
     }
     ImGui::End();
@@ -239,6 +229,8 @@ void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
 
 void Terrain::RenderChunk(Chunk & c)
 {
+    if (mDrawWire){glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);}
+
     // Build model for current chunk
     glm::mat4 curModel;
     curModel = glm::mat4();
@@ -259,5 +251,7 @@ void Terrain::RenderChunk(Chunk & c)
     loc = glGetUniformLocation(mTerrainMaterial.Id, "uChunkPos");
     glUniform2fv(loc, 1, &c.ChunkPosition.x);
     c.ChunkMesh.Draw();
+
+    if(mDrawWire){glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);}
 }
 

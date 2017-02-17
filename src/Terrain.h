@@ -65,4 +65,5 @@ private:
     // Debug
     glw::Mesh mSphereMesh;
     glw::Material mSphereMat;
+    bool mDrawWire = false;
 };

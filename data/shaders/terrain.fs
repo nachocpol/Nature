@@ -14,6 +14,7 @@ uniform sampler2D uCliffTexture;
 uniform sampler2D uSplatTexture;
 uniform sampler2D uHeightMap;
 uniform sampler2D uLutTexture;
+uniform sampler2D uSnowTexture;
 
 in vec2 iTexcoord;
 in vec3 iPosition;
@@ -119,10 +120,18 @@ vec3 GetBaseColor()
 {
 	float tiling1 = 200.0f;
 	float tiling2 = 100.0f;
+
 	vec3 splat = texture(uSplatTexture,iTexcoord).xyz;
+
 	vec3 grass = texture2DNoTile(uGrassTexture,iTexcoord * tiling1).xyz;
 	vec3 cliff = texture2DNoTile(uCliffTexture,iTexcoord * tiling2).xyz;
-	return mix(grass,cliff,sqrt(splat.z));
+    vec3 snow = texture2DNoTile(uSnowTexture,iTexcoord * tiling1).xyz;
+	
+    vec3 finalColor = vec3(0.0f);
+    finalColor = mix(finalColor,grass,splat.g);
+    finalColor = mix(finalColor,cliff,splat.b);
+    finalColor = mix(finalColor,snow,splat.r);  
+    return finalColor;
 }
 
 void main()

@@ -114,6 +114,13 @@ void glw::SetUniform3f(const char* name, GLint program, float * value)
     glUniform3fv(loc, 1, value);
 }
 
+void glw::SetUniformTexture(const char * name, GLint program, unsigned int texId,unsigned int bindId)
+{
+    glActiveTexture(GL_TEXTURE0 + bindId);
+    glBindTexture(GL_TEXTURE_2D, texId);
+    glUniform1i(glGetUniformLocation(program, name), bindId);
+}
+
 void glw::Mesh::Init(std::vector<BasicVertex> vertex, std::vector<unsigned int> ele)
 {
     GLsizeiptr eleSize = sizeof(unsigned int) * ele.size();

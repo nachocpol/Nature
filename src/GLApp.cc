@@ -270,7 +270,7 @@ void GLApp::Render()
         glw::SetUniform1f("uScaleFactor", mCloudsMat.Id, &mCloudScaleFactor);
 
         glm::mat4 ctrans = glm::mat4();
-        ctrans = glm::translate(ctrans, glm::vec3(100000.0f, mCloudsHeight , 100000.0f));
+        ctrans = glm::translate(ctrans, glm::vec3(50000.0f, mCloudsHeight , 50000.0f));
         ctrans = glm::scale(ctrans, glm::vec3(100000.0f,0.0f,100000.0f));
         glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
         mCloudsPlane.Draw();
