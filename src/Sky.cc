@@ -6,6 +6,7 @@
 #include "glm.hpp"
 #include "gtc/matrix_transform.hpp"
 #include "imgui.h"
+#include "GLFW/glfw3.h"
 
 const float kPi = 3.141517f;
 
@@ -54,6 +55,10 @@ void Sky::Init()
 
 void Sky::Render()
 {
+	// todo update
+	SunPosition.x = sin(glfwGetTime() * 0.25f);
+	SunPosition.y = sin(glfwGetTime() * 0.25f);
+
     glDisable(GL_CULL_FACE);
     glDepthMask(GL_FALSE);
     mSkyMaterial.Use();
