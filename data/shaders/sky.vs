@@ -45,14 +45,15 @@ float scale(float fCos)
 
 void main()
 {
-	vec3  v3CameraPos = vec3(0.0f,0.456f,0.0f);		// The camera's current position
+	vec3  v3CameraPos = uCampos;
+	v3CameraPos += vec3(0.0f,uInnerRadius,0.0f);
 	float fCameraHeight = v3CameraPos.y;
 	vec3  v3LightPos = uSunPosition;		// The direction vector to the light source
 	iSunDir = v3LightPos;
 
 	// Get the ray from the camera to the vertex, and its length (which is the far point of the ray passing through the atmosphere)
 	vec3 v3Pos = (uModel * vec4(aPosition,1.0f)).xyz;
-	vec3 v3Ray = v3Pos - v3CameraPos;
+	vec3 v3Ray = (v3Pos - v3CameraPos);
 	float fFar = length(v3Ray);
 	v3Ray /= fFar;
 
@@ -89,9 +90,12 @@ void main()
 	iColor = v3FrontColor * (u3InvWavelength * uKrESun);
 	v3Direction = v3CameraPos - v3Pos;
 
+	//gl_Position = uProjection * uView * uModel * vec4(aPosition,1.0f);
+
+	// Draw as skybox, on top of everything
 	mat3 v = mat3(uView);
 	vec3 displacedPos = aPosition;
-	displacedPos.y -= 0.0f;
-	gl_Position = uProjection * mat4(v)  *  vec4(displacedPos,1.0f);
+	displacedPos.y -= 0.47f;
+	gl_Position = uProjection * mat4(v)  *  vec4(displacedPos * 10.0f,1.0f);
 
 }	

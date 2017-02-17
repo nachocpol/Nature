@@ -170,6 +170,9 @@ void GLApp::Render()
     {
         mTerrain.Render(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.01f)));
 
+		// Sky
+		mSky.Render();
+
         // Clouds
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);

@@ -12,7 +12,7 @@ Camera::Camera():
     mPosition(-20.0f,30.0f,-20.0f),
     mFront(0.0f,0.0f,0.0f),
     mNear(0.2f),
-    mFar(3000.0f),
+    mFar(70000000.0f),
     mFovRad(glm::radians(75.0f))
 {
 }

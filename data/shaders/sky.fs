@@ -22,7 +22,9 @@ out vec4 oColor;
 
 void main()
 {
-	float fCos = dot(iSunDir, v3Direction) / length(v3Direction);
+    // we can clamp second and color in the vertex
+
+	float fCos = dot(normalize(iSunDir), v3Direction) / length(v3Direction);
 	float fMiePhase = 1.5 * ((1.0 - uG2) / (2.0 + uG2)) * (1.0 + fCos*fCos) / pow(1.0 + uG2 - 2.0*uG*fCos, 1.5);
 	oColor.xyz = iColor + fMiePhase * iSecondaryColor;
 	oColor.a = oColor.b;

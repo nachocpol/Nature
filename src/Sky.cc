@@ -16,8 +16,8 @@ Sky::Sky():
     mWaveLength(0.65f,0.57f,0.475f),
     mSamples(4),
     mFSamples((float)mSamples),
-    mOuterRadius(1.0f),
-    mInnerRadius(0.95f),
+    mOuterRadius(kAtmosphereR),
+    mInnerRadius(kEarthR),
     mRScaleDepth(0.25f),
     mMScaleDepth(0.1f),
     mG(-0.990f),
@@ -32,7 +32,7 @@ Sky::Sky():
     mKr4PI = mKr * 4.0f * kPi;
     mKm4PI = mKm * 4.0f * kPi;
     mScale = 1.0f / (mOuterRadius - mInnerRadius);
-    mScaleOverScaleDepth = (1.0f / (mOuterRadius - mInnerRadius)) / mRScaleDepth;
+    mScaleOverScaleDepth = mScale / mRScaleDepth;
     mG2 = pow(mG, 2.0f);
 }
 
@@ -80,7 +80,7 @@ void Sky::Render()
 
     glm::mat4 strans = glm::mat4();
     strans = glm::translate(strans, glm::vec3(0.0f, 0.0f, 0.0f));
-    strans = glm::scale(strans, glm::vec3(1.0f));//radius 1
+    strans = glm::scale(strans, glm::vec3(kAtmosphereR * 2.0f)); //radius of sphere is 0.5f
     glw::SetTransform(mSkyMaterial.Id, &strans[0][0]);
     mSkyMesh.Draw();
     glDepthMask(GL_TRUE);
@@ -117,5 +117,5 @@ void Sky::RenderUi()
     mKr4PI = mKr * 4.0f * kPi;
     mKm4PI = mKm * 4.0f * kPi;
     mScale = 1.0f / (mOuterRadius - mInnerRadius);
-    mScaleOverScaleDepth = (1.0f / (mOuterRadius - mInnerRadius)) / mRScaleDepth;
+    mScaleOverScaleDepth = mScale / mRScaleDepth;
 }

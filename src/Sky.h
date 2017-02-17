@@ -22,6 +22,12 @@ private:
 
     // camera position
     // light position
+	// Earth radius: 6300000 (m)
+	// Earth + atmosphere 6400000 (m)
+	
+	// Some constants
+	float kEarthR = 6300000.0f;
+	float kAtmosphereR = 6500000.0f;
 
     // Atmospheric scattering values
     float mKr;                  // Rayleigh scattering constant
