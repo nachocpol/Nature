@@ -22,7 +22,7 @@
 
 Terrain::Terrain():
     ChunkSide(16),
-    ElementSide(4)
+    ElementSide(16)
 {
 }
 

@@ -28,12 +28,13 @@
 	+ Beta version of the clouds									[✓] 31 / 1 / 2017
 	+ Port new clouds 												[✓]  2 / 2 / 2017
 	+ Error callback												[x]
+	+ Functions to set uniforms										[✓] 16 / 2 / 2017
 	+ Function to setup textures 									[✓]
 	+ Add mouse position to input Class 							[✓] 4 / 2 / 2017
 	+ Fix clouds 													[✓] 5 / 2 / 2017
 	+ Add InvProj, InvViewRot										[x]
 	+ Clouds are being rendered above everything					[✓] 6 / 2 / 2017
-		+ Now if im above the clouds they are not rendered...		[x]
+		+ Now if im above the clouds they are not rendered...		[✓]
 	+ Fix grid generation											[✓] 6 / 2 / 2017
 	+ Use stencil instead of depth hack for the Clouds 				[x]
 	+ Add delta time to camera speed								[x]
@@ -44,7 +45,9 @@
   	+ If a shader is not using uPass check it and dont set the uni  [x]
   	+ Water effect													[✓] 9 / 2 / 2017
   	+ Tessellation for the terrain									[✓] 14/ 2 / 2017
-  	+ Wireframe mode												[x]
+  	+ Wireframe mode												[-]
   	+ Made function to load textures, now update the code
-  	  of gl texture creation to use it.								[x]
-  	+ Use hash texture for all the noise							[x]
+  	  of gl texture creation to use it.								[-]
+  	+ Use hash texture for all the noise							[-]
+  	+ O'Neil atmospheric scattering									[✓] 17 / 2 / 2017
+  	+ Improve clouds with scattering more samples etc 				[x]

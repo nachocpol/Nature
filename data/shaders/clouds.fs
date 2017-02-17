@@ -119,7 +119,7 @@ void main()
     n = Fbm5(q);
 
 	vec3 uCloudBrig = vec3(0.95f,0.95f,0.95f);//morning
-	//uCloudBrig = vec3(0.91f,0.65f,0.505f);//sunset
+	uCloudBrig = vec3(0.91f,0.65f,0.505f);//sunset
 	vec3 uCloudDark = vec3(0.57f,0.63f,0.7f);
 	vec3 cloudColor = mix(uCloudBrig,uCloudDark,n);
 	oColor = vec4(cloudColor,(n - 1.0f) * -1.0f);

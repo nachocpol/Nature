@@ -22,7 +22,7 @@ out vec2 tcTexcoord[];
 float GetTess()
 {
 	float dist = distance(iPosition[0],uCampos);
-	float fact = min(dist/10000.0f,1.0f);
+	float fact = min(dist/1000.0f,1.0f);
 	return mix(4.0f,1.0f,fact);
 }
 
