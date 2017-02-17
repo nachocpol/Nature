@@ -49,8 +49,8 @@ void Terrain::Init()
 
     mGrassTexture.Init(TextureDef("../data/textures/grass.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
     mCliffTexture.Init(TextureDef("../data/textures/cliff.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mHeightMap.Init(TextureDef("../data/hmaps/hm2k.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mSplatMap.Init(TextureDef("../data/hmaps/splat2k.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mHeightMap.Init(TextureDef("../data/hmaps/pirineo/pirineohm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mSplatMap.Init(TextureDef("../data/hmaps/pirineo/pirineosplat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
 
     // Load the hmpa so we can sample to find the chunks y pos
     TextureDef hMap;
@@ -242,6 +242,7 @@ void Terrain::RenderChunk(Chunk & c)
     // Build model for current chunk
     glm::mat4 curModel;
     curModel = glm::mat4();
+    curModel = glm::scale(curModel, glm::vec3(MapScale));
     curModel = glm::translate
     (
         curModel,

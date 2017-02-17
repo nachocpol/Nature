@@ -90,12 +90,14 @@ void main()
 	iColor = v3FrontColor * (u3InvWavelength * uKrESun);
 	v3Direction = v3CameraPos - v3Pos;
 
-	//gl_Position = uProjection * uView * uModel * vec4(aPosition,1.0f);
+	float off = 0.472f;
+	// Draw bottom of sky as solid color (anyway it will give incorrect colors/black)
+	if(aPosition.y <= off)iColor = iSecondaryColor = vec3(0.6f);
 
 	// Draw as skybox, on top of everything
 	mat3 v = mat3(uView);
 	vec3 displacedPos = aPosition;
-	displacedPos.y -= 0.47f;
+	displacedPos.y -= off;
 	gl_Position = uProjection * mat4(v)  *  vec4(displacedPos * 10.0f,1.0f);
 
 }	

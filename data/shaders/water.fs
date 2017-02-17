@@ -150,7 +150,7 @@ vec4 GetWaterColor()
 
 	// Water tint
 	vec3 uWaterTint = vec3(0.23f,0.35f,0.57f);
-	float uWaterTintFactor = 0.2f;
+	float uWaterTintFactor = 0.0f;
 	c = mix(c,uWaterTint,uWaterTintFactor);
 
 	// Specular

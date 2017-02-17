@@ -35,6 +35,7 @@ public:
     float ElementSize;
     // Size of the heightmap used
     unsigned int HeightMapSize = 2048;
+    float MapScale = 14.0f;
     bool FrustrumCulling = false;
     bool VisualDebug = false;
 
@@ -56,6 +57,7 @@ private:
     glw::Texture mSplatMap;
     glw::Texture mGrassTexture;
     glw::Texture mCliffTexture;
+    glw::Texture mSnowTexture;
 
     // Frustrum culling
     std::vector<float> mChunkHeight;

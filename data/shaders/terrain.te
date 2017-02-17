@@ -34,6 +34,6 @@ void main()
 {
 	iPosition = Interpolate(tcPosition[0],tcPosition[1],tcPosition[2]);
     iTexcoord = Interpolate(tcTexcoord[0],tcTexcoord[1],tcTexcoord[2]);
-    iPosition.y = texture(uHeightMap,iTexcoord).x * 100.0f;
+    iPosition.y = texture(uHeightMap,iTexcoord).x * 200.0f * 14.0f;
     gl_Position = uProjection * uView * vec4(iPosition, 1.0f);
 }

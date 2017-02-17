@@ -184,6 +184,8 @@ void GLApp::Render()
         int loc = glGetUniformLocation(mCloudsMat.Id, "uLutTexture");
         glUniform1i(loc, 0);
 
+        glw::SetUniform1f("uScaleFactor", mCloudsMat.Id, &mCloudScaleFactor);
+
         glm::mat4 ctrans = glm::mat4();
         ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight , 512.0f));
         ctrans = glm::scale(ctrans, glm::vec3(4096.0f));
@@ -265,9 +267,11 @@ void GLApp::Render()
         loc = glGetUniformLocation(mCloudsMat.Id, "uLutTexture");
         glUniform1i(loc, 0);
 
+        glw::SetUniform1f("uScaleFactor", mCloudsMat.Id, &mCloudScaleFactor);
+
         glm::mat4 ctrans = glm::mat4();
-        ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight , 512.0f));
-        ctrans = glm::scale(ctrans, glm::vec3(4096.0f));
+        ctrans = glm::translate(ctrans, glm::vec3(100000.0f, mCloudsHeight , 100000.0f));
+        ctrans = glm::scale(ctrans, glm::vec3(100000.0f,0.0f,100000.0f));
         glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
         mCloudsPlane.Draw();
         glDisable(GL_BLEND);
@@ -292,13 +296,28 @@ void GLApp::RenderUi()
 
     ImGui::Begin("Nature 3.0");
     {
+        // Debug info
         ImGui::Text("Time:          %f", mTime);
         ImGui::Text("Delta Time:    %f", mDeltaTime);
         ImGui::Text("FPS:           %i", mFps);
         ImGui::Separator();
+
+        // Camera
+        ImGui::Text("Camera");
         ImGui::DragFloat("Camera speed", &mCamera.Speed, 0.1f, 0.01f, 4.0f);
         ImGui::DragFloat("Camera sensitivity", &mCamera.Sensitivity, 0.05f, 0.1f, 1.0f);
         ImGui::Checkbox("Camera Locked", &mCamera.LockMouse);
+        ImGui::Separator();
+
+        // Water
+        ImGui::Text("Water");
+        ImGui::InputFloat("Water height", &mWaterHeight);
+        ImGui::Separator();
+
+        // Clouds
+        ImGui::Text("Clouds");
+        ImGui::InputFloat("Clouds height", &mCloudsHeight);
+        ImGui::InputFloat("Clouds scale factor", &mCloudScaleFactor);
         ImGui::Separator();
     }
     ImGui::End();

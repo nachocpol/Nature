@@ -12,17 +12,17 @@ const float kPi = 3.141517f;
 
 Sky::Sky():
     mKr(0.0025f),
-    mESun(20.0f),
-    mKm(0.0010f),
-    mWaveLength(0.65f,0.57f,0.475f),
-    mSamples(4),
+    mESun(15.0f),
+    mKm(0.0004f),
+    mWaveLength(0.65f,0.57f,0.45f),
+    mSamples(16),
     mFSamples((float)mSamples),
     mOuterRadius(kAtmosphereR),
     mInnerRadius(kEarthR),
-    mRScaleDepth(0.25f),
+    mRScaleDepth(0.22f),
     mMScaleDepth(0.1f),
     mG(-0.990f),
-    SunPosition(0.0f,0.0f,1.0f)
+    SunPosition(0.0f,0.5f,1.0f)
 {
     mPow4WaveLength = glm::pow(mWaveLength, glm::vec3(4.0f));
     m3InvWavelength = 1.0f / mPow4WaveLength;
@@ -56,8 +56,8 @@ void Sky::Init()
 void Sky::Render()
 {
 	// todo update
-	SunPosition.x = sin(glfwGetTime() * 0.25f);
-	SunPosition.y = sin(glfwGetTime() * 0.25f);
+	//SunPosition.x = sin(glfwGetTime() * 0.25f);
+	//SunPosition.y = sin(glfwGetTime() * 0.25f);
 
     glDisable(GL_CULL_FACE);
     glDepthMask(GL_FALSE);

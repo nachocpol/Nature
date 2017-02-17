@@ -35,7 +35,8 @@ private:
     glw::Mesh mBaseQuadRt;
 
     // Clouds
-    float mCloudsHeight = 250.0f;
+    float mCloudsHeight = 3500.0f;
+    float mCloudScaleFactor = 0.001f;
     glw::Material mCloudsMat;
     glw::Mesh mCloudsPlane;
 

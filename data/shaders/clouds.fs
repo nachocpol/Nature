@@ -8,6 +8,7 @@ layout(std140)uniform uPass
 	float uTime;
 };
 uniform sampler2D uLutTexture;
+uniform float uScaleFactor;
 
 in vec2 iTexcoord;
 in vec3 iWPos;
@@ -96,10 +97,11 @@ float Scattering(vec3 ro,vec3 rd)
 
 float GetFade(float dist)
 {
-	float uFadeDist = 2200.0f;
+	float uFadeDist = 100200.0f;
 	float d = clamp(dist,0.0f,uFadeDist);
 	d = d / uFadeDist;
 	d = clamp(d,0.0f,1.0f);
+	//return 1.0f;
 	return (d - 1.0f) * -1.0f;
 }
 
@@ -109,10 +111,11 @@ void main()
 	vec2 w = vec2(0.25f,0.25f) * uTime;
 
 	float camDist = distance(uCampos,iWPos);
-	if(camDist > 4500.0f)discard;
+	//if(camDist > 4500.0f)discard;
 	
 	float n = 0.0f;
-    vec3 q = 0.01*iWPos + vec3(w.x,0.0f,w.y);
+    vec3 q = uScaleFactor*iWPos + vec3(w.x,0.0f,w.y);
+    q.y = 0.0f;
     n = Fbm5(q);
 
 	vec3 uCloudBrig = vec3(0.95f,0.95f,0.95f);//morning

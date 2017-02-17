@@ -75,7 +75,7 @@ float CloudsShadowing()
 {
 	vec2 w = vec2(0.25f,0.25f) * uTime;
 	vec3 p = vec3(iPosition.x,250.0f,iPosition.z);
-	p *= 0.015f;
+	p *= 0.0015f;
 	p.xz += w;
 	return (Fbm2(p)-1.0f)*-1.0f;
 }
