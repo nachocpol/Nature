@@ -108,7 +108,7 @@ float GetFade(float dist)
 void main()
 {
 	vec3 sunDir = vec3(0.4f,0.6f,0.0f);
-	vec2 w = vec2(0.25f,0.25f) * uTime;
+	vec2 w = vec2(0.05f,0.05f) * uTime;
 
 	float camDist = distance(uCampos,iWPos);
 	//if(camDist > 4500.0f)discard;

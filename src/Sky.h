@@ -19,11 +19,6 @@ public:
 private:
     glw::Mesh mSkyMesh;
     glw::Material mSkyMaterial;
-
-    // camera position
-    // light position
-	// Earth radius: 6300000 (m)
-	// Earth + atmosphere 6400000 (m)
 	
 	// Some constants
 	float kEarthR = 6300000.0f;

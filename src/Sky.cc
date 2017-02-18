@@ -55,10 +55,6 @@ void Sky::Init()
 
 void Sky::Render()
 {
-	// todo update
-	//SunPosition.x = sin(glfwGetTime() * 0.25f);
-	//SunPosition.y = sin(glfwGetTime() * 0.25f);
-
     glDisable(GL_CULL_FACE);
     glDepthMask(GL_FALSE);
     mSkyMaterial.Use();
@@ -96,18 +92,17 @@ void Sky::RenderUi()
 {
     ImGui::Begin("Nature 3.0");
     {
-        ImGui::Text("Terrain");
-        ImGui::InputFloat3("Sun Position", &SunPosition.x);
-        ImGui::InputFloat("Rayleigh scattering constant", &mKr);
-        ImGui::InputFloat("Sun brightness constant", &mESun);
-        ImGui::InputFloat("Mie scattering constant", &mKm);
-        ImGui::InputFloat3("Particles wavelength", &mWaveLength.x);
-        ImGui::InputInt("Samples", &mSamples);
-        ImGui::InputFloat("Outer Radius", &mOuterRadius);
-        ImGui::InputFloat("Inner Radius", &mInnerRadius);
-        ImGui::InputFloat("Rayleigh Scale Depth", &mRScaleDepth);
-        ImGui::InputFloat("Mie Scale Depth", &mMScaleDepth);
-        ImGui::InputFloat("Mie phase asymmetry factor", &mG);
+        ImGui::Text("Sky");
+        ImGui::InputFloat("Rayleigh scattering constant(sky)", &mKr);
+        ImGui::InputFloat("Sun brightness constant(sky)", &mESun);
+        ImGui::InputFloat("Mie scattering constant(sky)", &mKm);
+        ImGui::InputFloat3("Particles wavelength(sky)", &mWaveLength.x);
+        ImGui::InputInt("Samples(sky)", &mSamples);
+        ImGui::InputFloat("Outer Radius(sky)", &mOuterRadius);
+        ImGui::InputFloat("Inner Radius(sky)", &mInnerRadius);
+        ImGui::InputFloat("Rayleigh Scale Depth(sky)", &mRScaleDepth);
+        ImGui::InputFloat("Mie Scale Depth(sky)", &mMScaleDepth);
+        ImGui::InputFloat("Mie phase asymmetry factor(sky)", &mG);
         ImGui::Separator();
     }
     ImGui::End();

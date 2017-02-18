@@ -3,10 +3,12 @@
 
 layout(std140)uniform uPass
 {
-	mat4 uView;
-	mat4 uProjection;
-	vec3 uCampos;
-	float uTime;
+    mat4 uView;
+    mat4 uProjection;
+    vec3 uCampos;
+    float uTime;
+    float uCamnear;
+    float uCamfar;
 };
 
 uniform sampler2D uGrassTexture;
@@ -15,9 +17,14 @@ uniform sampler2D uSplatTexture;
 uniform sampler2D uHeightMap;
 uniform sampler2D uLutTexture;
 uniform sampler2D uSnowTexture;
+uniform sampler2D uNormalTexture;
+uniform vec3 uSunPosition;
 
 in vec2 iTexcoord;
 in vec3 iPosition;
+in vec3 iColor;
+in vec3 iSecondaryColor;
+in vec3 iNormal;
 
 out vec4 oColor;
 
@@ -74,7 +81,7 @@ float Fbm5(vec3 pos)
 
 float CloudsShadowing()
 {
-	vec2 w = vec2(0.25f,0.25f) * uTime;
+	vec2 w = vec2(0.05f,0.05f) * uTime;
 	vec3 p = vec3(iPosition.x,250.0f,iPosition.z);
 	p *= 0.0015f;
 	p.xz += w;
@@ -134,10 +141,31 @@ vec3 GetBaseColor()
     return finalColor;
 }
 
+vec3 GetAtmosphereColor(vec3 base)
+{
+    return iColor + base * iSecondaryColor;
+}
+
+vec3 ColorCorrect(vec3 color,float exposure)
+{
+    // Reinhard tone map + gamma correction
+    const float gamma = 2.2f;
+    vec3 mapped = vec3(1.0f) - exp(-color * exposure);
+    return pow(mapped, vec3(1.0f / gamma));
+}
+
 void main()
 {
-	//oColor = texture(uHeightMap,iTexcoord);
-	//oColor = vec4(iTexcoord.xy,0.0f,1.0f);
-	oColor = vec4(GetBaseColor(),1.0f) * CloudsShadowing();
+    // Load normal and hack to work with world machine normals
+    vec3 normal = texture(uNormalTexture,iTexcoord).xzy;
+    normal.z = (normal.z - 1.0f) * -1.0f;
+
+    vec3 base = GetBaseColor();
+    vec3 baseAtm = GetAtmosphereColor(base);
+
+    // Lambert
+    float l = max(dot(normalize(normal),uSunPosition),0.1f);
+    oColor = vec4(ColorCorrect(baseAtm,0.2f) * l,1.0f);
 }
+
 

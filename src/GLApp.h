@@ -34,6 +34,8 @@ private:
     glw::Material mBaseMatRt;
     glw::Mesh mBaseQuadRt;
 
+    glm::vec3 mSunDirection;
+
     // Clouds
     float mCloudsHeight = 3500.0f;
     float mCloudScaleFactor = 0.001f;

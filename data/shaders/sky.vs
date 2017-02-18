@@ -14,23 +14,21 @@ layout(std140)uniform uPass
 uniform mat4 uModel;
 
 // Atmospheric scattering parameters
-const float PI = 3.141517f;
 uniform vec3 uSunPosition;
 uniform int uSamples;           
 uniform float uFSamples;
 uniform float uInnerRadius;
-
 uniform vec3  uPow4WaveLength;
-uniform vec3  u3InvWavelength;	// 1 / pow(wavelength, 4) for the red, green, and blue channels
-uniform float uOuterRadius2;	// fOuterRadius^2
-uniform float uInnerRadius2;	// fInnerRadius^2
-uniform float uKrESun;			// Kr * ESun
-uniform float uKmESun;			// Km * ESun
-uniform float uKr4PI;			// Kr * 4 * PI
-uniform float uKm4PI;			// Km * 4 * PI
-uniform float uScale;			// 1 / (fOuterRadius - fInnerRadius)
+uniform vec3  u3InvWavelength;	
+uniform float uOuterRadius2;	
+uniform float uInnerRadius2;	
+uniform float uKrESun;			
+uniform float uKmESun;			
+uniform float uKr4PI;			
+uniform float uKm4PI;			
+uniform float uScale;			
 uniform float uScaleDepth;	
-uniform float uScaleOverScaleDepth;	// fScale / fScaleDepth
+uniform float uScaleOverScaleDepth;	
 
 out vec3 v3Direction;
 out vec3 iSunDir;

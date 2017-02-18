@@ -134,6 +134,9 @@ void GLApp::Update()
     mPassConst.PCamNear = mCamera.GetNear();
     mPassConst.PCamFar = mCamera.GetFar();
     mPassConst.Update();
+
+    mSky.SunPosition = mSunDirection;
+    mTerrain.SunPosition = mSunDirection;
 }
 
 void GLApp::Render()
@@ -215,9 +218,7 @@ void GLApp::Render()
         mSky.Render();
 
         // Terrain
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         mTerrain.Render(false);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         // Water
         glEnable(GL_BLEND);
@@ -300,6 +301,10 @@ void GLApp::RenderUi()
         ImGui::Text("Time:          %f", mTime);
         ImGui::Text("Delta Time:    %f", mDeltaTime);
         ImGui::Text("FPS:           %i", mFps);
+        ImGui::Separator();
+
+        // Parameters
+        ImGui::InputFloat3("Sun direction", &mSunDirection.x);
         ImGui::Separator();
 
         // Camera

@@ -11,28 +11,37 @@ layout(std140)uniform uPass
 	mat4 uProjection;
 	vec3 uCampos;
 	float uTime;
+	float uCamnear;
+	float uCamfar;
 };
 
 in vec3 iPosition[];
 in vec2 iTexcoord[];
+in vec3 iColor[];
+in vec3 iSecondaryColor[];
+in vec3 iNormal[];
 
 out vec3 tcPosition[];
 out vec2 tcTexcoord[];
+out vec3 tcColor[];
+out vec3 tcSecondaryColor[];
 
 float GetTess()
 {
 	float dist = distance(iPosition[0],uCampos);
-	float fact = min(dist/1000.0f,1.0f);
-	return mix(4.0f,1.0f,fact);
+	float fact = min(dist/4000.0f,1.0f);
+	return mix(6.0f,1.0f,fact);
 }
 
 void main()
 {
 	tcPosition[gl_InvocationID] = iPosition[gl_InvocationID];
 	tcTexcoord[gl_InvocationID] = iTexcoord[gl_InvocationID];
+	tcColor[gl_InvocationID] = iColor[gl_InvocationID];
+	tcSecondaryColor[gl_InvocationID] = iSecondaryColor[gl_InvocationID];
 
 	float t = GetTess();
-	float to = 2.0f;
+	const float to = 1.0f;
 	gl_TessLevelInner[0] = t;
 	gl_TessLevelOuter[0] = to;
 	gl_TessLevelOuter[1] = to;
