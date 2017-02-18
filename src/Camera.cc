@@ -12,9 +12,9 @@ Camera::Camera():
     mPosition(-20.0f,30.0f,-20.0f),
     mFront(0.0f,0.0f,0.0f),
     mNear(0.2f),
-    mFar(70000000.0f),
-    mFovRad(glm::radians(75.0f))
+    mFar(70000000.0f)
 {
+    SetFov(60.0f);
 }
 
 Camera::~Camera()
@@ -26,12 +26,14 @@ void Camera::Init(float aspect)
     Projection = glm::perspective(mFovRad, aspect, mNear, mFar);
     View = glm::lookAt(mPosition, mFront, mUp);
     CameraFrustrum.SetPlanes(Projection * View);
+    mAspect = aspect;
 }
 
 void Camera::Resize(float aspect)
 {
     Projection = glm::perspective(mFovRad, aspect, mNear, mFar);
     CameraFrustrum.SetPlanes(Projection * View);
+    mAspect = aspect;
 }
 
 void Camera::Update()
@@ -79,6 +81,13 @@ void Camera::UpdateView()
 void Camera::SetYInverse(bool newInv)
 {
     mYInversed = newInv;
+}
+
+void Camera::SetFov(float angle)
+{
+    mFovDegree = angle;
+    mFovRad = glm::radians(angle);
+    Projection = glm::perspective(mFovRad, mAspect, mNear, mFar);
 }
 
 void Camera::UpdateMouseLook()

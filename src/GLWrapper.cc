@@ -104,6 +104,16 @@ void glw::SetUniform1f(const char* name, GLint program, float * value)
     glUniform1fv(loc, 1, value);
 }
 
+void glw::SetUniform2f(const char * name, GLint program, float * value)
+{
+    GLint loc = glGetUniformLocation(program, name);
+#ifdef _DEBUG
+    if (loc == -1)
+        printf("GL_ERROR: Could not set uniform:%s\n", name);
+#endif
+    glUniform2fv(loc, 1, value);
+}
+
 void glw::SetUniform3f(const char* name, GLint program, float * value)
 {
     GLint loc = glGetUniformLocation(program, name);

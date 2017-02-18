@@ -155,7 +155,7 @@ void GLApp::Render()
         mWaterRefracRt.Resize(ws);
     }
 
-    glClearColor(0.45f, 0.75f, 0.95f, 1.0f);
+    glClearColor(0.3f,0.3f,0.3f, 1.0f);
     glViewport( mViewport.x, mViewport.y,
                 mViewport.z, mViewport.w);
     glEnable(GL_DEPTH_TEST);
@@ -171,28 +171,26 @@ void GLApp::Render()
     mPassConst.Update();
     mWaterReflecRt.Enable();
     {
-        mTerrain.Render(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.01f)));
+        // Sky
+        mSky.Render();
 
-		// Sky
-		mSky.Render();
+        // Terrain
+        mTerrain.Render(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.01f)));
 
         // Clouds
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         mCloudsMat.Use();
-
-        glActiveTexture(GL_TEXTURE0 + 0);
-        glBindTexture(GL_TEXTURE_2D, mLutTexture.Id);
-        int loc = glGetUniformLocation(mCloudsMat.Id, "uLutTexture");
-        glUniform1i(loc, 0);
-
-        glw::SetUniform1f("uScaleFactor", mCloudsMat.Id, &mCloudScaleFactor);
-
+        
         glm::mat4 ctrans = glm::mat4();
-        ctrans = glm::translate(ctrans, glm::vec3(512.0f, mCloudsHeight , 512.0f));
-        ctrans = glm::scale(ctrans, glm::vec3(4096.0f));
+        ctrans = glm::translate(ctrans, glm::vec3(50000.0f, mCloudsHeight, 50000.0f));
+        ctrans = glm::scale(ctrans, glm::vec3(100000.0f, 0.0f, 100000.0f));
+
+        glw::SetUniformTexture("uLutTexture", mCloudsMat.Id, mLutTexture.Id, 0);
+        glw::SetUniform1f("uScaleFactor", mCloudsMat.Id, &mCloudScaleFactor);
         glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
+
         mCloudsPlane.Draw();
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
@@ -225,34 +223,17 @@ void GLApp::Render()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         mWaterMaterial.Use();
         glm::mat4 wtrans = glm::mat4();
-        wtrans = glm::translate(wtrans, glm::vec3(mWaterScale,mWaterHeight, mWaterScale));
-        wtrans = glm::scale(wtrans, glm::vec3(mWaterScale));
+        wtrans = glm::scale(wtrans, glm::vec3(mWaterScale,1.0f,mWaterScale));
+        wtrans = glm::translate(wtrans, glm::vec3(0.0f,mWaterHeight, 0.0f));
+        
+        unsigned int wp = mWaterMaterial.Id;
+
+        glw::SetUniformTexture("uReflectionTexture", wp, mWaterReflecRt.RenderTexture.Id, 0);
+        glw::SetUniformTexture("uRefractionTexture", wp, mWaterRefracRt.RenderTexture.Id, 1);
+        glw::SetUniformTexture("uDudvTexture", wp, mWaterDuDvTexture.Id, 2);
+        glw::SetUniformTexture("uRefractDepth", wp, mWaterRefracRt.DepthTexture.Id, 3);
+        glw::SetUniformTexture("uNormTexture", wp, mWaterNormTexture.Id, 4);
         glw::SetTransform(mWaterMaterial.Id, &wtrans[0][0]);
-
-        glActiveTexture(GL_TEXTURE0 + 0);
-        glBindTexture(GL_TEXTURE_2D, mWaterReflecRt.RenderTexture.Id);
-        int loc = glGetUniformLocation(mWaterMaterial.Id, "uReflectionTexture");
-        glUniform1i(loc, 0);
-
-        glActiveTexture(GL_TEXTURE0 + 1);
-        glBindTexture(GL_TEXTURE_2D, mWaterRefracRt.RenderTexture.Id);
-        loc = glGetUniformLocation(mWaterMaterial.Id, "uRefractionTexture");
-        glUniform1i(loc, 1);
-
-        glActiveTexture(GL_TEXTURE0 + 2);
-        glBindTexture(GL_TEXTURE_2D, mWaterDuDvTexture.Id);
-        loc = glGetUniformLocation(mWaterMaterial.Id, "uDudvTexture");
-        glUniform1i(loc, 2);
-
-        glActiveTexture(GL_TEXTURE0 + 3);
-        glBindTexture(GL_TEXTURE_2D, mWaterRefracRt.DepthTexture.Id);
-        loc = glGetUniformLocation(mWaterMaterial.Id, "uRefractDepth");
-        glUniform1i(loc, 3);
-
-        glActiveTexture(GL_TEXTURE0 + 4);
-        glBindTexture(GL_TEXTURE_2D, mWaterNormTexture.Id);
-        loc = glGetUniformLocation(mWaterMaterial.Id, "uNormTexture");
-        glUniform1i(loc, 4);
 
         mWaterMesh.Draw();
         glDisable(GL_BLEND);
@@ -263,17 +244,14 @@ void GLApp::Render()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         mCloudsMat.Use();
 
-        glActiveTexture(GL_TEXTURE0 + 0);
-        glBindTexture(GL_TEXTURE_2D, mLutTexture.Id);
-        loc = glGetUniformLocation(mCloudsMat.Id, "uLutTexture");
-        glUniform1i(loc, 0);
-
-        glw::SetUniform1f("uScaleFactor", mCloudsMat.Id, &mCloudScaleFactor);
-
         glm::mat4 ctrans = glm::mat4();
-        ctrans = glm::translate(ctrans, glm::vec3(50000.0f, mCloudsHeight , 50000.0f));
-        ctrans = glm::scale(ctrans, glm::vec3(100000.0f,0.0f,100000.0f));
+        ctrans = glm::translate(ctrans, glm::vec3(50000.0f, mCloudsHeight, 50000.0f));
+        ctrans = glm::scale(ctrans, glm::vec3(100000.0f, 0.0f, 100000.0f));
+
+        glw::SetUniformTexture("uLutTexture", mCloudsMat.Id, mLutTexture.Id, 0);
+        glw::SetUniform1f("uScaleFactor", mCloudsMat.Id, &mCloudScaleFactor);
         glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
+
         mCloudsPlane.Draw();
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
@@ -282,9 +260,7 @@ void GLApp::Render()
 
     // Draw
     mBaseMatRt.Use();
-    glActiveTexture(GL_TEXTURE0 + 0);
-    glBindTexture(GL_TEXTURE_2D, mBaseRt.RenderTexture.Id);
-    glUniform1i(glGetUniformLocation(mBaseMatRt.Id, "uColorTexture"), 0);
+    glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mBaseRt.RenderTexture.Id, 0);
     mBaseQuadRt.Draw();
 
     RenderUi();
@@ -312,6 +288,9 @@ void GLApp::RenderUi()
         ImGui::DragFloat("Camera speed", &mCamera.Speed, 0.1f, 0.01f, 4.0f);
         ImGui::DragFloat("Camera sensitivity", &mCamera.Sensitivity, 0.05f, 0.1f, 1.0f);
         ImGui::Checkbox("Camera Locked", &mCamera.LockMouse);
+        float tmpFov = *mCamera.GetFov();
+        ImGui::InputFloat("Camera FOV", &tmpFov);
+        mCamera.SetFov(tmpFov);
         ImGui::Separator();
 
         // Water

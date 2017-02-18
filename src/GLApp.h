@@ -43,8 +43,8 @@ private:
     glw::Mesh mCloudsPlane;
 
     // Water
-    float mWaterHeight = 10.0f;
-    float mWaterScale = 1024.0f;
+    float mWaterHeight = 1200.0f;
+    float mWaterScale = 2900.0f;
     glw::RenderTarget mWaterReflecRt;
     glw::RenderTarget mWaterRefracRt;
     glw::Mesh mWaterMesh;

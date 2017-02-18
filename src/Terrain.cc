@@ -110,8 +110,6 @@ void Terrain::Init()
             unsigned int yDataIdx = (int)bSpherePos.z * HeightMapSize + (int)bSpherePos.x;
             unsigned char yData = hMap.Data[yDataIdx];
             bSpherePos.y = ((float)yData / 255.0f) * 100.0f;
-            // printf("LOG:BSphere x:%f, y:%f ,z:%f \n", bSpherePos.x,bSpherePos.y, bSpherePos.z);
-            // We use the diagonal because the sphere mesh radius is 0.5
             mChunks[idx].BSphere = BoundingSphere(bSpherePos * MapScale, diagonal * MapScale); 
                                                                                 
         }
@@ -123,7 +121,6 @@ void Terrain::Update(Frustrum viewFrust)
     // Perform frustum culling
     if (FrustrumCulling)
     {
-        float initTime = glfwGetTime();
         mChunksVisible.clear();
         for (unsigned int i = 0; i < mChunks.size(); i++)
         {
@@ -132,8 +129,6 @@ void Terrain::Update(Frustrum viewFrust)
                 mChunksVisible.push_back(mChunks[i]);
             }
         }
-        float elapsed = glfwGetTime() - initTime;
-        //printf(" LOG:Time to cull terrain:%f\n", elapsed * 1000.0f);
     }
 }
 
@@ -151,6 +146,7 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     
     GLuint p = mTerrainMaterial.Id;
 
+    // Textures
     glw::SetUniformTexture("uGrassTexture", p, mGrassTexture.Id, 0);
     glw::SetUniformTexture("uHeightMap", p, mHeightMap.Id, 1);
     glw::SetUniformTexture("uSplatTexture", p, mSplatMap.Id, 2);
@@ -158,6 +154,20 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     glw::SetUniformTexture("uLutTexture", p, LutTexture->Id, 4);
     glw::SetUniformTexture("uSnowTexture", p, mSnowTexture.Id, 5);
     glw::SetUniformTexture("uNormalTexture", p, mNormal.Id, 6);
+
+    // Scattering parameters
+    glw::SetUniform3f("uSunPosition", p, &SunPosition.x);
+    glw::SetUniform1i("uSamples", p, &mSamples);
+    glw::SetUniform1f("uInnerRadius", p, &mInnerRadius);
+    glw::SetUniform3f("u3InvWavelength", p, &m3InvWavelength.x);
+    glw::SetUniform1f("uKrESun", p, &mKrESun);
+    glw::SetUniform1f("uKmESun", p, &mKmESun);
+    glw::SetUniform1f("uKr4PI", p, &mKr4PI);
+    glw::SetUniform1f("uKm4PI", p, &mKm4PI);
+    glw::SetUniform1f("uScale", p, &mScale);
+    glw::SetUniform1f("uScaleDepth", p, &mRScaleDepth);
+    glw::SetUniform1f("uScaleOverScaleDepth", p, &mScaleOverScaleDepth);
+
     // Render visible chunks
     if (FrustrumCulling)
     {
@@ -187,8 +197,7 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
             curModel = glm::mat4();
             curModel = glm::translate(curModel, mChunks[i].BSphere.Position);
             curModel = glm::scale(curModel, glm::vec3(mChunks[i].BSphere.Radius));
-            loc = glGetUniformLocation(mSphereMat.Id, "uModel");
-            glUniformMatrix4fv(loc, 1, GL_FALSE, &curModel[0][0]);
+            glw::SetTransform(mSphereMat.Id, &curModel[0][0]);
             mSphereMesh.Draw();
         }
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -284,29 +293,12 @@ void Terrain::RenderChunk(Chunk & c)
     );
 
     GLuint p = mTerrainMaterial.Id;
-    glw::SetUniform3f("uSunPosition", p, &SunPosition.x);
-    glw::SetUniform1i("uSamples", p, &mSamples);
-    glw::SetUniform1f("uFSamples", p, &mFSamples);
-    glw::SetUniform1f("uInnerRadius", p, &mInnerRadius);
-    glw::SetUniform1f("uG", p, &mG);
-    glw::SetUniform1f("uG2", p, &mG2);
 
-    glw::SetUniform3f("u3InvWavelength", p, &m3InvWavelength.x);
-    glw::SetUniform1f("uKrESun", p, &mKrESun);
-    glw::SetUniform1f("uKmESun", p, &mKmESun);
-    glw::SetUniform1f("uKr4PI", p, &mKr4PI);
-    glw::SetUniform1f("uKm4PI", p, &mKm4PI);
-    glw::SetUniform1f("uScale", p, &mScale);
-    glw::SetUniform1f("uScaleDepth", p, &mRScaleDepth);
-    glw::SetUniform1f("uScaleOverScaleDepth", p, &mScaleOverScaleDepth);
+    // Model matrix
+    glw::SetTransform(p, &curModel[0][0]);
 
-    //glw::SetTransform(p,&)
-    unsigned int loc = glGetUniformLocation(mTerrainMaterial.Id, "uModel");
-    glUniformMatrix4fv(loc, 1, GL_FALSE, &curModel[0][0]);
-    loc = glGetUniformLocation(mTerrainMaterial.Id, "uChunkPos");
-    glUniform2fv(loc, 1, &c.ChunkPosition.x);
     c.ChunkMesh.Draw();
-
+    
     if(mDrawWire){glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);}
 }
 

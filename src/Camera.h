@@ -29,6 +29,8 @@ public:
     void SetPitch(float p) { mPitch = p; }
     float GetNear() { return mNear; }
     float GetFar() { return mFar; }
+    float* GetFov() { return &mFovDegree; }
+    void SetFov(float angle);
 
     glm::mat4 View;
     glm::mat4 Projection;
@@ -49,6 +51,8 @@ private:
     float mNear;
     float mFar;
     float mFovRad;
+    float mFovDegree;
+    float mAspect;  // cached to use when changing fov
 
     // Mouse look
     float mLastX = 0.0f;

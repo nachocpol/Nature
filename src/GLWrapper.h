@@ -27,6 +27,8 @@ namespace glw
 
     void SetUniform1f(const char* name,GLint program, float* value);
 
+    void SetUniform2f(const char* name, GLint program, float* value);
+
     void SetUniform3f(const char* name,GLint program, float* value);
 
     void SetUniformTexture(const char* name, GLint program, unsigned int texId, unsigned int bindId);

@@ -20,12 +20,8 @@ uniform vec4 uClipPlane;
 // Atmospheric scattering parameters
 uniform vec3 uSunPosition;
 uniform int uSamples;           
-uniform float uFSamples;
 uniform float uInnerRadius;
-uniform vec3  uPow4WaveLength;
 uniform vec3  u3InvWavelength;	
-uniform float uOuterRadius2;	
-uniform float uInnerRadius2;	
 uniform float uKrESun;			
 uniform float uKmESun;			
 uniform float uKr4PI;			
