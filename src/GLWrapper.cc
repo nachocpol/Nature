@@ -416,7 +416,7 @@ void glw::Texture::Init(TextureDef def)
         switch (elePerPixel)
         {
         case 1:
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, Def.Size.x, Def.Size.y, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, Def.Size.x, Def.Size.y, 0, GL_RED, GL_FLOAT, data);
             SetTextureParameter(Def);
             break;
         case 3:

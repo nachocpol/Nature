@@ -15,6 +15,7 @@ layout(std140)uniform uPass
 	float uCamfar;
 };
 uniform sampler2D uHeightMap;
+uniform vec4 uClipPlane;
 
 in vec3 tcPosition[];
 in vec2 tcTexcoord[];
@@ -53,4 +54,9 @@ void main()
     iSecondaryColor = Interpolate(tcSecondaryColor[0],tcSecondaryColor[1],tcSecondaryColor[2]);
 
     gl_Position = uProjection * uView * vec4(iPosition, 1.0f);
+
+    float clip = dot(vec4(iPosition,1.0f),uClipPlane);
+    gl_ClipDistance[0] = clip;
+    gl_ClipDistance[1] = clip;
+    gl_ClipDistance[2] = clip;
 }

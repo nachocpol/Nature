@@ -29,7 +29,7 @@ out vec3 tcSecondaryColor[];
 float GetTess()
 {
 	float dist = distance(iPosition[0],uCampos);
-	float fact = min(dist/4000.0f,1.0f);
+	float fact = min(dist/4000.0f,1.0f);	
 	return mix(6.0f,1.0f,fact);
 }
 
@@ -46,5 +46,4 @@ void main()
 	gl_TessLevelOuter[0] = to;
 	gl_TessLevelOuter[1] = to;
 	gl_TessLevelOuter[2] = to;
-	
 }
