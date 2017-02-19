@@ -190,6 +190,9 @@ void GLApp::Render()
         glw::SetUniformTexture("uLutTexture", mCloudsMat.Id, mLutTexture.Id, 0);
         glw::SetUniform1f("uScaleFactor", mCloudsMat.Id, &mCloudScaleFactor);
         glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
+        glw::SetUniform3f("uSundir",mCloudsMat.Id, &mSunDirection.x);
+        glw::SetUniform1i("uScatSamples", mCloudsMat.Id, &mScatSamplesLow);
+        glw::SetUniform1f("uSampleDist", mCloudsMat.Id, &mScatSampleDist);
 
         mCloudsPlane.Draw();
         glDisable(GL_BLEND);
@@ -251,6 +254,9 @@ void GLApp::Render()
         glw::SetUniformTexture("uLutTexture", mCloudsMat.Id, mLutTexture.Id, 0);
         glw::SetUniform1f("uScaleFactor", mCloudsMat.Id, &mCloudScaleFactor);
         glw::SetTransform(mCloudsMat.Id, &ctrans[0][0]);
+        glw::SetUniform3f("uSundir", mCloudsMat.Id, &mSunDirection.x);
+        glw::SetUniform1i("uScatSamples", mCloudsMat.Id, &mScatSamples);
+        glw::SetUniform1f("uSampleDist", mCloudsMat.Id, &mScatSampleDist);
 
         mCloudsPlane.Draw();
         glDisable(GL_BLEND);
@@ -302,6 +308,8 @@ void GLApp::RenderUi()
         ImGui::Text("Clouds");
         ImGui::InputFloat("Clouds height", &mCloudsHeight);
         ImGui::InputFloat("Clouds scale factor", &mCloudScaleFactor);
+        ImGui::InputInt("Clouds scatter samples", &mScatSamples);
+        ImGui::InputFloat("Clouds scat sample dist", &mScatSampleDist);
         ImGui::Separator();
     }
     ImGui::End();

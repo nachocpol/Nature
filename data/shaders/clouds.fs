@@ -9,6 +9,9 @@ layout(std140)uniform uPass
 };
 uniform sampler2D uLutTexture;
 uniform float uScaleFactor;
+uniform vec3 uSundir;
+uniform int uScatSamples;
+uniform float uSampleDist;
 
 in vec2 iTexcoord;
 in vec3 iWPos;
@@ -82,17 +85,22 @@ float Fbm8(vec3 pos)
 	Check the thikness of the clouds by performing 
 	more samples "into the cloud".
 */
-float Scattering(vec3 ro,vec3 rd)
+float Scattering()
 {
-    const int samples = 8;
-    float sampleDist = 0.5f;
-    float acum = 0.0f;
-    for(int i = 0; i < samples; i++)
-    {
-        float idx = float(i) / float(samples);
-        acum += Fbm5(ro + (rd * (idx * sampleDist)));
-    }
-    return acum / float(samples);
+	vec2 uWind = vec2(0.05f,0.05f) * uTime;
+
+
+	float step = uSampleDist / float(uScatSamples);
+	float n = 0.0f;
+	vec3 pos = uScaleFactor*iWPos + vec3(uWind.x,0.0f,uWind.y);
+	pos.y = 0.0f;
+	for(int i=0;i<uScatSamples;i++)
+	{
+		n += pow(Fbm5(pos),2.0f);
+		pos.y += step;
+	}
+	n /= float(uScatSamples);
+	return n;
 }
 
 float GetFade(float dist)
@@ -101,30 +109,27 @@ float GetFade(float dist)
 	float d = clamp(dist,0.0f,uFadeDist);
 	d = d / uFadeDist;
 	d = clamp(d,0.0f,1.0f);
-	//return 1.0f;
 	return (d - 1.0f) * -1.0f;
 }
 
 void main()
 {
 	vec3 sunDir = vec3(0.4f,0.6f,0.0f);
-	vec2 w = vec2(0.05f,0.05f) * uTime;
-
+	vec2 uWind = vec2(0.05f,0.05f) * uTime;
 	float camDist = distance(uCampos,iWPos);
-	//if(camDist > 4500.0f)discard;
-	
-	float n = 0.0f;
-    vec3 q = uScaleFactor*iWPos + vec3(w.x,0.0f,w.y);
-    q.y = 0.0f;
-    n = Fbm5(q);
+	float fade = GetFade(camDist);
+	if(fade <= 0.0f)discard;
+    float n = Scattering();
 
-	vec3 uCloudBrig = vec3(0.95f,0.95f,0.95f);//morning
-	//uCloudBrig = vec3(0.91f,0.65f,0.505f);//sunset
+    // Cloud colors
 	vec3 uCloudDark = vec3(0.57f,0.63f,0.7f);
-	vec3 cloudColor = mix(uCloudBrig,uCloudDark,n);
+    vec3 uCloudMorning = vec3(0.95f,0.95f,0.95f);
+    vec3 uCloudSunset = vec3(0.91f,0.65f,0.505f);
+    float setFactor = dot(vec3(0.0f,0.0f,1.0f),normalize(uSundir));
+	vec3 uCloudBright = mix(uCloudMorning,uCloudSunset,pow(setFactor,4.0f));
+	vec3 cloudColor = mix(uCloudBright,uCloudDark,n);
 	oColor = vec4(cloudColor,(n - 1.0f) * -1.0f);
-	oColor.a *= GetFade(camDist);
-	//oColor = vec4(n);
+	oColor.a *= fade;
 }
 
 

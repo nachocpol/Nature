@@ -37,8 +37,11 @@ private:
     glm::vec3 mSunDirection;
 
     // Clouds
-    float mCloudsHeight = 3500.0f;
-    float mCloudScaleFactor = 0.001f;
+    float mCloudsHeight = 6000.0f;
+    float mCloudScaleFactor = 0.0005f;
+    int mScatSamples = 4;
+    int mScatSamplesLow = 1;
+    float mScatSampleDist = 1.2f;
     glw::Material mCloudsMat;
     glw::Mesh mCloudsPlane;
 

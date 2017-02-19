@@ -24,7 +24,7 @@ const float kPi = 3.141517f;
 
 Terrain::Terrain():
     ChunkSide(16), 
-    ElementSide(16),
+    ElementSide(32),
     mKr(0.0025f),
     mESun(15.0f),
     mKm(0.0004f),

@@ -165,7 +165,7 @@ void main()
 
     // Lambert
     float l = max(dot(normalize(normal),uSunPosition),0.1f);
-    oColor = vec4(ColorCorrect(baseAtm,0.2f) * l,1.0f);
+    oColor = vec4(ColorCorrect(baseAtm,0.2f) * l,1.0f) * CloudsShadowing();
 }
 
 

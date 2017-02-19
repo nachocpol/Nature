@@ -389,11 +389,11 @@ void glw::Texture::Init(TextureDef def)
     
     unsigned char* data = nullptr;
     GLint elePerPixel = 0;
-
+    GLint x;
+    GLint y;
+    
     if (Def.Path &&  !Def.Data)
     {
-        GLint x;
-        GLint y;
         data = stbi_load(def.Path, &x, &y, &elePerPixel, 0);
         if (!data)
         {
@@ -416,7 +416,7 @@ void glw::Texture::Init(TextureDef def)
         switch (elePerPixel)
         {
         case 1:
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, Def.Size.x, Def.Size.y, 0, GL_RED, GL_FLOAT, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, Def.Size.x, Def.Size.y, 0, GL_RED, GL_FLOAT, stbi_loadf(def.Path, &x, &y, &elePerPixel, 0));
             SetTextureParameter(Def);
             break;
         case 3:
@@ -461,7 +461,6 @@ void glw::Texture::Init(TextureDef def)
             SetTextureParameter(Def);
             break;
         }
-        break;
         break;
     }
     
