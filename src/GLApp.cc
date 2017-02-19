@@ -14,10 +14,12 @@
 
 GLApp::GLApp()
 {
+    mSunDirection = glm::vec3(0.0f, 0.2f, 1.0f);
 }
 
 GLApp::~GLApp()
 {
+    
 }
 
 bool GLApp::Init()
@@ -237,6 +239,16 @@ void GLApp::Render()
         glw::SetUniformTexture("uRefractDepth", wp, mWaterRefracRt.DepthTexture.Id, 3);
         glw::SetUniformTexture("uNormTexture", wp, mWaterNormTexture.Id, 4);
         glw::SetTransform(mWaterMaterial.Id, &wtrans[0][0]);
+        glw::SetUniform1f("uWaveSize", wp, &mWaveSize);
+        glw::SetUniform1f("uWaveStrength", wp, &mWaveStrenght);
+        glw::SetUniform1f("uNormStrenght", wp, &mNormStrenght);
+        glw::SetUniform3f("uWaveSpeed", wp, &mWaveSpeed.x);
+        glw::SetUniform3f("uWaveSpeed2", wp, &mWaveSpeed2.x);
+        glw::SetUniform3f("uSundir", wp, &mSunDirection.x);
+        glw::SetUniform1f("uWaterShinyFactor", wp, &mWaterShinyFactor);
+        glw::SetUniform3f("uSpecColor", wp, &mSpecColor.x);
+        glw::SetUniform3f("uWaterTint", wp, &mWaterTint.x);
+        glw::SetUniform1f("uWaterTintFactor", wp, &mWaterTintFactor);
 
         mWaterMesh.Draw();
         glDisable(GL_BLEND);
@@ -302,6 +314,15 @@ void GLApp::RenderUi()
         // Water
         ImGui::Text("Water");
         ImGui::InputFloat("Water height", &mWaterHeight);
+        ImGui::InputFloat("Wave size", &mWaveSize);
+        ImGui::InputFloat("Wave strength", &mWaveStrenght);
+        ImGui::InputFloat("Normal strength", &mNormStrenght);
+        ImGui::InputFloat3("Wave speed", &mWaveSpeed.x);
+        ImGui::InputFloat3("Wave speed 2", &mWaveSpeed2.x);
+        ImGui::InputFloat("Water specular factor", &mWaterShinyFactor);
+        ImGui::InputFloat3("Water specular color", &mSpecColor.x);
+        ImGui::InputFloat3("Water tint", &mWaterTint.x);
+        ImGui::InputFloat("Water tint factor", &mWaterTintFactor);
         ImGui::Separator();
 
         // Clouds

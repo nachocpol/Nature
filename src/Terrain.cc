@@ -74,10 +74,10 @@ void Terrain::Init()
 
     mGrassTexture.Init(TextureDef("../data/textures/grass.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
     mCliffTexture.Init(TextureDef("../data/textures/cliff.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mHeightMap.Init(TextureDef("../data/hmaps/pirineo/pirineohm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mSplatMap.Init(TextureDef("../data/hmaps/pirineo/pirineosplat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mHeightMap.Init(TextureDef("../data/hmaps/lagodix/lagodixhm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mSplatMap.Init(TextureDef("../data/hmaps/lagodix/lagodixsplat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mSnowTexture.Init(TextureDef("../data/textures/snow.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mNormal.Init(TextureDef("../data/hmaps/pirineo/pirineosnorm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mNormal.Init(TextureDef("../data/hmaps/lagodix/lagodixnorm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
 
     // Load the hmpa so we can sample to find the chunks y pos
     TextureDef hMap;
@@ -155,6 +155,10 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     glw::SetUniformTexture("uSnowTexture", p, mSnowTexture.Id, 5);
     glw::SetUniformTexture("uNormalTexture", p, mNormal.Id, 6);
 
+    // Random stuff
+    glw::SetUniform1f("uTiling1", p, &mTiling1);
+    glw::SetUniform1f("uTiling2", p, &mTiling2);
+
     // Scattering parameters
     glw::SetUniform3f("uSunPosition", p, &SunPosition.x);
     glw::SetUniform1i("uSamples", p, &mSamples);
@@ -209,6 +213,8 @@ void Terrain::RenderUi()
     ImGui::Begin("Nature 3.0");
     {
         ImGui::Text("Terrain");
+        ImGui::InputFloat("Texture tiling 1", &mTiling1);
+        ImGui::InputFloat("Texture tiling 2", &mTiling2);
         ImGui::LabelText("ChunkSide", "%i", ChunkSide);
         ImGui::LabelText("ElementSide", "%i", ElementSide);
         ImGui::LabelText("ElementSize", "%f", ElementSize);

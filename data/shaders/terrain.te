@@ -42,7 +42,7 @@ float GetHeight(vec2 uv)
 { 
     // 200 = height scale
     // 14 = terrain scale UNIFORMS!
-    return texture(uHeightMap,uv).x * 200.0f * 14.0f;
+    return texture(uHeightMap,uv).x * 200.0f * 9.0f;
 }
 
 void main()

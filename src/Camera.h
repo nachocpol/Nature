@@ -36,7 +36,7 @@ public:
     glm::mat4 Projection;
     Frustrum CameraFrustrum;
     float Sensitivity = 0.25f;
-    float Speed = 0.3f;
+    float Speed = 1.0f;
     bool LockMouse = true;
 
 private:

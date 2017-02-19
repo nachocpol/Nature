@@ -35,7 +35,7 @@ public:
     float ElementSize;
     // Size of the heightmap used
     unsigned int HeightMapSize = 2048;
-    float MapScale = 14.0f;
+    float MapScale = 9.0f;
     bool FrustrumCulling = false;
     bool VisualDebug = false;
 
@@ -69,6 +69,10 @@ private:
     glw::Mesh mSphereMesh;
     glw::Material mSphereMat;
     bool mDrawWire = false;
+
+    // Texturing
+    float mTiling1 = 200.0f;
+    float mTiling2 = 100.0f;
 
     // Some constants
     float kEarthR = 6300000.0f;

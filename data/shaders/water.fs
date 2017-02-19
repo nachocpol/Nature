@@ -16,6 +16,16 @@ uniform sampler2D uRefractionTexture;
 uniform sampler2D uDudvTexture;
 uniform sampler2D uRefractDepth;
 uniform sampler2D uNormTexture;
+uniform	float uWaveSize;
+uniform	float uWaveStrength;
+uniform	float uNormStrenght;//bigger smother
+uniform	vec2 uWaveSpeed;
+uniform	vec2 uWaveSpeed2;
+uniform vec3 uSundir;
+uniform float uWaterShinyFactor;
+uniform vec3 uSpecColor;
+uniform vec3 uWaterTint;
+uniform float uWaterTintFactor;
 
 in vec2 iTexcoord;
 in vec4 iCPos;
@@ -78,12 +88,8 @@ float CalcFresnel(vec3 normal)
 
 vec2 GetUv(float shore)
 {
-	float uWaveSize = 60.0f;
-	float uWaveStrength = 0.02f;
-	vec2 uWaveSpeed = vec2(0.001f,0.0005f) * uTime;
-
 	vec2 samp = vec2(iTexcoord.x,iTexcoord.y);
-	vec2 disp = texture(uDudvTexture,(samp + uWaveSpeed) * uWaveSize).xy;
+	vec2 disp = texture(uDudvTexture,(samp + (uWaveSpeed * uTime)) * uWaveSize).xy;
 	disp = disp * 2.0f - 1.0f;
 	disp *= uWaveStrength * shore;
 	return disp;
@@ -108,13 +114,8 @@ float GetWaterFade(float dist)
 
 vec3 GetNormal()
 {
-	float uWaveSize = 60.0f;
-	float uNormStrenght = 1.0f;//bigger smother
-	vec2 uWaveSpeed = vec2(0.001f,0.0005f) * uTime;
-	vec2 uWaveSpeed2 = vec2(-0.001f,0.0005f) * uTime;
-
-	vec2 uv = (iTexcoord + uWaveSpeed) * uWaveSize;
-	vec2 uv2 = (iTexcoord + uWaveSpeed2) * uWaveSize;
+	vec2 uv = (iTexcoord + (uWaveSpeed * uTime)) * uWaveSize;
+	vec2 uv2 = (iTexcoord + (uWaveSpeed2 * uTime)) * uWaveSize;
 
 	vec3 fNorm;
 	vec4 nMap = texture2DNoTile(uNormTexture,uv);
@@ -149,20 +150,16 @@ vec4 GetWaterColor()
 	vec3 c =  mix(reflectCol,refractCol,CalcFresnel(vec3(0.0f,1.0f,0.0f)));
 
 	// Water tint
-	vec3 uWaterTint = vec3(0.23f,0.35f,0.57f);
-	float uWaterTintFactor = 0.0f;
 	c = mix(c,uWaterTint,uWaterTintFactor);
 
 	// Specular
-	vec3 uSunDir = -vec3(0.5f,-0.5f,0.0f);
-	float uWaterShinyFactor = 30.0f;
 	vec3 viewDir = normalize(uCampos - iWPos);
-	vec3 halfVec = normalize(uSunDir + viewDir);
+	vec3 halfVec = normalize(uSundir + viewDir);
 	float spec = pow(max(dot(wNorm,halfVec),0.0f),uWaterShinyFactor);
-	vec3 specColor = vec3(0.1f,0.1f,0.1f) * spec;
+	vec3 specColor = uSpecColor * spec;
 
 	// Fade the water at the shore
-	return vec4(c + spec,GetWaterFade(distToFloor));
+	return vec4(c + specColor,GetWaterFade(distToFloor));
 }
 
 void main()
