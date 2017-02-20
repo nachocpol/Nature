@@ -50,7 +50,7 @@ namespace glw
     {
         InstancedMesh(){}
         void InitInstances(unsigned int maxInstances,BufferUsage usage);
-        void Render(std::vector<glm::mat4> transforms);
+        void Render(std::vector<glm::mat4>& transforms);
         Mesh IMesh;
         GLuint TransformsId;
     private:

@@ -11,7 +11,7 @@ struct Chunk
 {
     Chunk(){}
     glm::vec2 ChunkPosition;
-    glw::Mesh ChunkMesh;
+    //glw::Mesh ChunkMesh;
     BoundingSphere BSphere;
 };
 
@@ -50,7 +50,9 @@ private:
     // Chunks
     std::vector<Chunk> mChunks;
     std::vector<Chunk> mChunksVisible;
-    
+    glw::InstancedMesh mChunkMeshInstance;
+    std::vector<glm::mat4> curTransforms;
+
     // Material
     glw::MaterialTess mTerrainMaterial;
 

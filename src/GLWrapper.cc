@@ -225,7 +225,7 @@ void glw::InstancedMesh::InitInstances(unsigned int maxInstances, BufferUsage us
     glBindVertexArray(0);
 }
 
-void glw::InstancedMesh::Render(std::vector<glm::mat4> transforms)
+void glw::InstancedMesh::Render(std::vector<glm::mat4>& transforms)
 {
     // The transforms buffer is initialized once so we
     // check to prevent memory overlaping
@@ -239,7 +239,6 @@ void glw::InstancedMesh::Render(std::vector<glm::mat4> transforms)
     // Update the transforms buffer
     glBindBuffer(GL_ARRAY_BUFFER, TransformsId);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * transforms.size(), transforms.data());
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     switch (IMesh.DMode)
     {
     case kTriangles:
@@ -253,6 +252,7 @@ void glw::InstancedMesh::Render(std::vector<glm::mat4> transforms)
         glDrawElementsInstanced(GL_QUADS, IMesh.NumElements / 1, GL_UNSIGNED_INT, 0, transforms.size());
         break;
     }
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 

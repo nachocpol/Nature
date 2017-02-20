@@ -2,6 +2,7 @@
 
 layout (location = 0) in vec3 aPosition;
 layout (location = 1) in vec2 aTexcoord;
+layout (location = 6) in mat4 aInstancedModel;
 layout(std140)uniform uPass
 {
 	mat4 uView;
@@ -13,7 +14,7 @@ layout(std140)uniform uPass
 };
 
 uniform sampler2D uHeightMap;
-uniform mat4 uModel;
+//uniform mat4 uModel;
 uniform vec2 uChunkPos;
 uniform vec4 uClipPlane;
 
@@ -49,7 +50,7 @@ void AtmosphericScattering()
 	float fCameraHeight = v3CameraPos.y;
 
 	// Get the ray from the camera to the vertex, and its length (which is the far point of the ray passing through the atmosphere)
-	vec3 v3Pos = (uModel * vec4(aPosition,1.0f)).xyz;
+	vec3 v3Pos = (aInstancedModel * vec4(aPosition,1.0f)).xyz;
 	v3Pos.y += uInnerRadius;
 	vec3 v3Ray = v3Pos - v3CameraPos;
 	float fFar = length(v3Ray);
@@ -91,7 +92,7 @@ void AtmosphericScattering()
 vec2 GetUv()
 {
 	float uHeightMapSize = 2048.0f * 9.0f;
-	vec2 p = (uModel * vec4(aPosition,1.0f)).xz;
+	vec2 p = (aInstancedModel * vec4(aPosition,1.0f)).xz;
 	return p/uHeightMapSize;
 }
 
@@ -100,6 +101,6 @@ void main()
 	AtmosphericScattering();
 	vec2 uv = GetUv();
 	iTexcoord = uv;
-	iPosition = (uModel * vec4(aPosition,1.0f)).xyz;
+	iPosition = (aInstancedModel * vec4(aPosition,1.0f)).xyz;
 	gl_ClipDistance[0] = dot(vec4(iPosition,1.0f),uClipPlane);
 }

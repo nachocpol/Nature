@@ -97,8 +97,9 @@ void Terrain::Init()
             unsigned int idx = i * ChunkSide + j;
             glm::vec2 p = glm::vec2(i, j);
             mChunks[idx].ChunkPosition = p;
-            InitMeshAsGrid(mChunks[idx].ChunkMesh, ElementSide, ElementSize);
-            mChunks[idx].ChunkMesh.DMode = DrawMode::kPatches3;
+
+            // InitMeshAsGrid(mChunks[idx].ChunkMesh, ElementSide, ElementSize);
+            // mChunks[idx].ChunkMesh.DMode = DrawMode::kPatches3;
 
             // Build bounding sphere
             // Set the chuks position as the initial position
@@ -114,6 +115,12 @@ void Terrain::Init()
                                                                                 
         }
     }
+
+    // Init instanced mesh
+    InitMeshAsGrid(mChunkMeshInstance.IMesh, ElementSide, ElementSize);
+    mChunkMeshInstance.IMesh.DMode = DrawMode::kPatches3;
+    mChunkMeshInstance.InitInstances(ChunkSide * ChunkSide, BufferUsage::kDynamic);
+    curTransforms.resize(mChunks.size());
 }
 
 void Terrain::Update(Frustrum viewFrust)
@@ -185,8 +192,24 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     {
         for (unsigned int i = 0; i < mChunks.size(); i++)
         {
-            RenderChunk(mChunks[i]);
+            //RenderChunk(mChunks[i]);
+            // Build model for current chunk
+            glm::mat4 curModel;
+            curModel = glm::mat4();
+            curModel = glm::scale(curModel, glm::vec3(MapScale));
+            curModel = glm::translate
+            (
+                curModel,
+                glm::vec3
+                (
+                    mChunks[i].ChunkPosition.x * (ElementSide - 1) * ElementSize,
+                    0.0f,
+                    mChunks[i].ChunkPosition.y * (ElementSide - 1) * ElementSize
+                )
+            );
+            curTransforms[i] = curModel;
         }
+        mChunkMeshInstance.Render(curTransforms);
     }
 
     // Debug chunks
@@ -281,6 +304,7 @@ void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
 
 void Terrain::RenderChunk(Chunk & c)
 {
+    /*
     if (mDrawWire){glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);}
 
     // Build model for current chunk
@@ -306,5 +330,6 @@ void Terrain::RenderChunk(Chunk & c)
     c.ChunkMesh.Render();
     
     if(mDrawWire){glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);}
+    */
 }
 
