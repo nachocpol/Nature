@@ -164,35 +164,96 @@ void glw::Mesh::Init(std::vector<BasicVertex> vertex, std::vector<unsigned int> 
     glBindVertexArray(0);
 }
 
-void glw::Mesh::Draw()
+void glw::Mesh::Render()
 {
+    glBindVertexArray(Id);
     switch (DMode)
     {
     case kTriangles:
-        glBindVertexArray(Id);
-        {
-            glDrawElements(GL_TRIANGLES, NumElements, GL_UNSIGNED_INT, 0);
-        }
-        glBindVertexArray(0);
+        glDrawElements(GL_TRIANGLES, NumElements, GL_UNSIGNED_INT, 0);
         break;
     case kPatches3:
-        glBindVertexArray(Id);
-        {
-            glPatchParameteri(GL_PATCH_VERTICES, 3);
-            glDrawElements(GL_PATCHES, NumElements, GL_UNSIGNED_INT, 0);
-        }
-        glBindVertexArray(0);
+        glPatchParameteri(GL_PATCH_VERTICES, 3);
+        glDrawElements(GL_PATCHES, NumElements, GL_UNSIGNED_INT, 0);
         break;
     case kQuad:
-        glBindVertexArray(Id);
-        {
-            glDrawElements(GL_QUADS, NumElements/1, GL_UNSIGNED_INT, 0);
-        }
-        glBindVertexArray(0);
+        glDrawElements(GL_QUADS, NumElements/1, GL_UNSIGNED_INT, 0);
+        break;
+    }
+    glBindVertexArray(0);
+}
+
+void glw::InstancedMesh::InitInstances(unsigned int maxInstances, BufferUsage usage)
+{
+    mMaxInstances = maxInstances;
+    mUsage = usage;
+    GLenum use;
+    switch (mUsage)
+    {
+    case kStatic:
+        use = GL_STATIC_DRAW;
+        break;
+    case kDynamic:
+        use = GL_DYNAMIC_DRAW;
         break;
     default:
         break;
     }
+    glGenBuffers(1, &TransformsId);
+    glBindBuffer(GL_ARRAY_BUFFER, TransformsId);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4)*mMaxInstances, nullptr, use);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // Setup the atribute
+    glBindVertexArray(IMesh.Id);
+    {
+        GLuint location = 6;    // Maybe hit performance dunno   
+        GLint components = 4;
+        GLenum type = GL_FLOAT;
+        GLboolean normalized = GL_FALSE;
+        GLsizei datasize = sizeof(glm::mat4);
+        char* pointer = 0;
+        GLuint divisor = 1;
+
+        for (unsigned int i = 0; i < 4; i++)
+        {
+            glEnableVertexAttribArray(location + i); 
+            glVertexAttribPointer(location + i, components, type, normalized, datasize, pointer + i * sizeof(glm::vec4));
+            glVertexAttribDivisor(location + i, divisor);
+        }
+    }
+    glBindVertexArray(0);
+}
+
+void glw::InstancedMesh::Render(std::vector<glm::mat4> transforms)
+{
+    // The transforms buffer is initialized once so we
+    // check to prevent memory overlaping
+    if (transforms.size() > mMaxInstances)
+    {
+        printf("GL_ERROR: transforms.size() should be equal or less than the requested initial size.\n");
+        return;
+    }
+
+    glBindVertexArray(IMesh.Id);
+    // Update the transforms buffer
+    glBindBuffer(GL_ARRAY_BUFFER, TransformsId);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * transforms.size(), transforms.data());
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    switch (IMesh.DMode)
+    {
+    case kTriangles:
+        glDrawElementsInstanced(GL_TRIANGLES, IMesh.NumElements, GL_UNSIGNED_INT, 0, transforms.size());
+        break;
+    case kPatches3:
+        glPatchParameteri(GL_PATCH_VERTICES, 3);
+        glDrawElementsInstanced(GL_PATCHES, IMesh.NumElements, GL_UNSIGNED_INT, 0, transforms.size());
+        break;
+    case kQuad:
+        glDrawElementsInstanced(GL_QUADS, IMesh.NumElements / 1, GL_UNSIGNED_INT, 0, transforms.size());
+        break;
+    }
+    glBindVertexArray(0);
 }
 
 glw::Shader::Shader():
@@ -438,7 +499,7 @@ void glw::Texture::Init(TextureDef def)
         SetTextureParameter(Def);
         break;
     case kRenderTargetDepth:
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, Def.Size.x, Def.Size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, Def.Size.x, Def.Size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, data);
         SetTextureParameter(Def);
         break;
     case kSampling:
@@ -481,7 +542,7 @@ void glw::Texture::Resize(glm::vec2 size)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Def.Size.x, Def.Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
         break;
     case kRenderTargetDepth:
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, Def.Size.x, Def.Size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, Def.Size.x, Def.Size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
         break;
     }
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -565,3 +626,5 @@ void glw::RenderTarget::Disable()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
+

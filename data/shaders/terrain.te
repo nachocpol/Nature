@@ -27,6 +27,7 @@ out vec3 iPosition;
 out vec2 iTexcoord;
 out vec3 iColor;
 out vec3 iSecondaryColor;
+out vec3 iClipPos;
 
 vec2 Interpolate(vec2 v0, vec2 v1, vec2 v2)
 {
@@ -54,6 +55,7 @@ void main()
     iSecondaryColor = Interpolate(tcSecondaryColor[0],tcSecondaryColor[1],tcSecondaryColor[2]);
 
     gl_Position = uProjection * uView * vec4(iPosition, 1.0f);
+    iClipPos = gl_Position.xyz;
 
     float clip = dot(vec4(iPosition,1.0f),uClipPlane);
     gl_ClipDistance[0] = clip;

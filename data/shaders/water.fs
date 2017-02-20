@@ -159,10 +159,16 @@ vec4 GetWaterColor()
 	vec3 specColor = uSpecColor * spec;
 
 	// Fade the water at the shore
-	return vec4(c + specColor,GetWaterFade(distToFloor));
+	return vec4(c + specColor,1.0f);
+	//return vec4(c + specColor,GetWaterFade(distToFloor));
 }
 
 void main()
 {
 	oColor = GetWaterColor();
+
+    // Logarithmic z-buffer
+    const float C = 1.0;
+    const float offset = 1.0;
+    gl_FragDepth = (log(C * iCPos.z + offset) / log(C * uCamfar + offset));
 }

@@ -52,6 +52,12 @@ enum FrustrumResult
     kIntersect
 };
 
+enum BufferUsage
+{
+    kStatic,    // Won't change 
+    kDynamic    // Updated multiple times
+};
+
 struct TextureDef
 {
     TextureDef() :Path(nullptr) {}

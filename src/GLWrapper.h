@@ -37,13 +37,25 @@ namespace glw
     {
         Mesh():DMode(kTriangles) {}
         void Init(std::vector<BasicVertex> vertex,std::vector<unsigned int> ele);
-        void Draw();
+        void Render();
 
         GLuint Id;
         GLuint Ebo;
         GLuint Vbo;
         GLuint NumElements;
         DrawMode DMode;
+    };
+
+    struct InstancedMesh
+    {
+        InstancedMesh(){}
+        void InitInstances(unsigned int maxInstances,BufferUsage usage);
+        void Render(std::vector<glm::mat4> transforms);
+        Mesh IMesh;
+        GLuint TransformsId;
+    private:
+        unsigned int mMaxInstances;
+        BufferUsage mUsage;
     };
 
     struct Shader

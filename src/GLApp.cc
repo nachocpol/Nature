@@ -196,7 +196,7 @@ void GLApp::Render()
         glw::SetUniform1i("uScatSamples", mCloudsMat.Id, &mScatSamplesLow);
         glw::SetUniform1f("uSampleDist", mCloudsMat.Id, &mScatSampleDist);
 
-        mCloudsPlane.Draw();
+        mCloudsPlane.Render();
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
     }
@@ -250,7 +250,7 @@ void GLApp::Render()
         glw::SetUniform3f("uWaterTint", wp, &mWaterTint.x);
         glw::SetUniform1f("uWaterTintFactor", wp, &mWaterTintFactor);
 
-        mWaterMesh.Draw();
+        mWaterMesh.Render();
         glDisable(GL_BLEND);
         
         // Clouds
@@ -270,7 +270,7 @@ void GLApp::Render()
         glw::SetUniform1i("uScatSamples", mCloudsMat.Id, &mScatSamples);
         glw::SetUniform1f("uSampleDist", mCloudsMat.Id, &mScatSampleDist);
 
-        mCloudsPlane.Draw();
+        mCloudsPlane.Render();
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
     }
@@ -279,7 +279,7 @@ void GLApp::Render()
     // Draw
     mBaseMatRt.Use();
     glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mBaseRt.RenderTexture.Id, 0);
-    mBaseQuadRt.Draw();
+    mBaseQuadRt.Render();
 
     RenderUi();
     mWindow.Swap();

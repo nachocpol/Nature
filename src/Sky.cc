@@ -83,7 +83,7 @@ void Sky::Render()
     strans = glm::translate(strans, glm::vec3(0.0f, 0.0f, 0.0f));
     strans = glm::scale(strans, glm::vec3(kAtmosphereR * 2.0f)); //radius of sphere is 0.5f
     glw::SetTransform(mSkyMaterial.Id, &strans[0][0]);
-    mSkyMesh.Draw();
+    mSkyMesh.Render();
     glDepthMask(GL_TRUE);
     glEnable(GL_CULL_FACE);
 }

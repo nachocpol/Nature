@@ -6,7 +6,10 @@ layout(std140)uniform uPass
 	mat4 uProjection;
 	vec3 uCampos;
 	float uTime;
+	float uCamnear;
+	float uCamfar;
 };
+
 uniform sampler2D uLutTexture;
 uniform float uScaleFactor;
 uniform vec3 uSundir;
@@ -15,6 +18,7 @@ uniform float uSampleDist;
 
 in vec2 iTexcoord;
 in vec3 iWPos;
+in vec3 iClipPos;
 
 out vec4 oColor;
 
@@ -130,6 +134,11 @@ void main()
 	vec3 cloudColor = mix(uCloudBright,uCloudDark,n);
 	oColor = vec4(cloudColor,(n - 1.0f) * -1.0f);
 	oColor.a *= fade;
+
+	// Logarithmic z-buffer
+    const float C = 1.0;
+    const float offset = 1.0;
+    gl_FragDepth = (log(C * iClipPos.z + offset) / log(C * uCamfar + offset));
 }
 
 

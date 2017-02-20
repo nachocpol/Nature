@@ -24,7 +24,7 @@ const float kPi = 3.141517f;
 
 Terrain::Terrain():
     ChunkSide(16), 
-    ElementSide(32),
+    ElementSide(16),
     mKr(0.0025f),
     mESun(15.0f),
     mKm(0.0004f),
@@ -202,7 +202,7 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
             curModel = glm::translate(curModel, mChunks[i].BSphere.Position);
             curModel = glm::scale(curModel, glm::vec3(mChunks[i].BSphere.Radius));
             glw::SetTransform(mSphereMat.Id, &curModel[0][0]);
-            mSphereMesh.Draw();
+            mSphereMesh.Render();
         }
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
@@ -303,7 +303,7 @@ void Terrain::RenderChunk(Chunk & c)
     // Model matrix
     glw::SetTransform(p, &curModel[0][0]);
 
-    c.ChunkMesh.Draw();
+    c.ChunkMesh.Render();
     
     if(mDrawWire){glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);}
 }

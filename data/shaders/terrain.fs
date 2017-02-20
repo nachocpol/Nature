@@ -27,6 +27,7 @@ in vec3 iPosition;
 in vec3 iColor;
 in vec3 iSecondaryColor;
 in vec3 iNormal;
+in vec3 iClipPos;
 
 out vec4 oColor;
 
@@ -165,6 +166,11 @@ void main()
     // Lambert
     float l = max(dot(normalize(normal),uSunPosition),0.1f);
     oColor = vec4(ColorCorrect(baseAtm,0.2f) * l,1.0f) * CloudsShadowing();
-}
+
+    // Logarithmic z-buffer
+    const float C = 1.0;
+    const float offset = 1.0;
+    gl_FragDepth = (log(C * iClipPos.z + offset) / log(C * uCamfar + offset));
+}   
 
 
