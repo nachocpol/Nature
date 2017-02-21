@@ -97,5 +97,4 @@ void main()
 	vec3 displacedPos = aPosition;
 	displacedPos.y -= off;
 	gl_Position = uProjection * mat4(v)  *  vec4(displacedPos * 10.0f,1.0f);
-
 }	

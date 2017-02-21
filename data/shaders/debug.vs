@@ -15,9 +15,11 @@ layout(std140)uniform uPass
 uniform mat4 uModel;
 
 out vec2 iTexcoord;
+out vec3 iCPos;
 
 void main()
 {
 	iTexcoord = aTexcoord;
 	gl_Position = uProjection * uView * uModel *  vec4(aPosition,1.0f);
+	iCPos = gl_Position.xyz;
 }	

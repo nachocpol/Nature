@@ -15,7 +15,7 @@ Sky::Sky():
     mESun(15.0f),
     mKm(0.0004f),
     mWaveLength(0.65f,0.57f,0.45f),
-    mSamples(16),
+    mSamples(12),
     mFSamples((float)mSamples),
     mOuterRadius(kAtmosphereR),
     mInnerRadius(kEarthR),
@@ -59,9 +59,6 @@ void Sky::Render()
     glDepthMask(GL_FALSE);
     mSkyMaterial.Use();
 
-    // Set uniforms, ok here is where I should've made
-    // a function to set uniforms... hold on if I'm wasting time
-    // typing this... Lets make it!!!
     GLuint p = mSkyMaterial.Id;
     glw::SetUniform3f("uSunPosition",p, &SunPosition.x);
     glw::SetUniform1i("uSamples", p, &mSamples);

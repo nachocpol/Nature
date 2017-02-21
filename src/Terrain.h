@@ -11,7 +11,7 @@ struct Chunk
 {
     Chunk(){}
     glm::vec2 ChunkPosition;
-    //glw::Mesh ChunkMesh;
+    glw::Mesh ChunkMesh;
     BoundingSphere BSphere;
 };
 
@@ -36,7 +36,7 @@ public:
     // Size of the heightmap used
     unsigned int HeightMapSize = 2048;
     float MapScale = 9.0f;
-    bool FrustrumCulling = false;
+    bool FrustrumCulling = true;
     bool VisualDebug = false;
 
     glw::Texture* LutTexture;
@@ -46,6 +46,7 @@ public:
 private:
     void InitMeshAsGrid(glw::Mesh& mesh,unsigned int size, float eleSize);
     void RenderChunk(Chunk& c);
+    void RenderInstanced(std::vector<Chunk>& chunks);
 
     // Chunks
     std::vector<Chunk> mChunks;
@@ -54,6 +55,7 @@ private:
     std::vector<glm::mat4> curTransforms;
 
     // Material
+    glw::MaterialTess mTerrainMaterialInst;
     glw::MaterialTess mTerrainMaterial;
 
     // Textures
@@ -71,6 +73,7 @@ private:
     glw::Mesh mSphereMesh;
     glw::Material mSphereMat;
     bool mDrawWire = false;
+    bool mUseInstancing = true;
 
     // Texturing
     float mTiling1 = 200.0f;

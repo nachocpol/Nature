@@ -29,7 +29,7 @@ Terrain::Terrain():
     mESun(15.0f),
     mKm(0.0004f),
     mWaveLength(0.65f, 0.57f, 0.45f),
-    mSamples(16),
+    mSamples(1),
     mFSamples((float)mSamples),
     mOuterRadius(kAtmosphereR),
     mInnerRadius(kEarthR),
@@ -64,9 +64,17 @@ void Terrain::Init()
 
     // Ignoring decimal part
     ElementSize = HeightMapSize / (ChunkSide*(ElementSide-1));
+
     mTerrainMaterial.Init
     (
         "../data/shaders/terrain.vs",
+        "../data/shaders/terrain.fs",
+        "../data/shaders/terrain.tc",
+        "../data/shaders/terrain.te"
+    );
+    mTerrainMaterialInst.Init
+    (
+        "../data/shaders/terraininst.vs",
         "../data/shaders/terrain.fs",
         "../data/shaders/terrain.tc",
         "../data/shaders/terrain.te"
@@ -81,7 +89,7 @@ void Terrain::Init()
 
     // Load the hmpa so we can sample to find the chunks y pos
     TextureDef hMap;
-    hMap.Path = "../data/hmaps/hm2k.png";
+    hMap.Path = mHeightMap.Def.Path;
     LoadTextureFromFile(hMap);
     
     // Bounding sphere radius (sin(45) because chunks are squares
@@ -98,8 +106,8 @@ void Terrain::Init()
             glm::vec2 p = glm::vec2(i, j);
             mChunks[idx].ChunkPosition = p;
 
-            // InitMeshAsGrid(mChunks[idx].ChunkMesh, ElementSide, ElementSize);
-            // mChunks[idx].ChunkMesh.DMode = DrawMode::kPatches3;
+            InitMeshAsGrid(mChunks[idx].ChunkMesh, ElementSide, ElementSize);
+            mChunks[idx].ChunkMesh.DMode = DrawMode::kPatches3;
 
             // Build bounding sphere
             // Set the chuks position as the initial position
@@ -110,9 +118,8 @@ void Terrain::Init()
             // Find terrain height
             unsigned int yDataIdx = (int)bSpherePos.z * HeightMapSize + (int)bSpherePos.x;
             unsigned char yData = hMap.Data[yDataIdx];
-            bSpherePos.y = ((float)yData / 255.0f) * 100.0f;
-            mChunks[idx].BSphere = BoundingSphere(bSpherePos * MapScale, diagonal * MapScale); 
-                                                                                
+            bSpherePos.y = ((float)yData / 255.0f) * 200.0f;
+            mChunks[idx].BSphere = BoundingSphere(bSpherePos * MapScale, diagonal * MapScale);                                                                 
         }
     }
 
@@ -141,18 +148,28 @@ void Terrain::Update(Frustrum viewFrust)
 
 void Terrain::Render(bool useClip, glm::vec4 plane)
 {
-    mTerrainMaterial.Use();
-    if (useClip)
+    // Set the current material
+    GLuint p = 0;
+    if (mUseInstancing)
     {
-        glw::SetClipPlane(0, plane, mTerrainMaterial.Id);
+        mTerrainMaterialInst.Use();
+        p = mTerrainMaterialInst.Id;
     }
     else
     {
-        glw::SetClipPlane(0, glm::vec4(0.0f, 1.0f, 0.0f, 99999.0f), mTerrainMaterial.Id);
+        mTerrainMaterial.Use();
+        p = mTerrainMaterial.Id;
     }
     
-    GLuint p = mTerrainMaterial.Id;
-
+    if (useClip)
+    {
+        glw::SetClipPlane(0, plane, p);
+    }
+    else
+    {
+        glw::SetClipPlane(0, glm::vec4(0.0f, 1.0f, 0.0f, 99999.0f), p);
+    }
+    
     // Textures
     glw::SetUniformTexture("uGrassTexture", p, mGrassTexture.Id, 0);
     glw::SetUniformTexture("uHeightMap", p, mHeightMap.Id, 1);
@@ -179,37 +196,37 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     glw::SetUniform1f("uScaleDepth", p, &mRScaleDepth);
     glw::SetUniform1f("uScaleOverScaleDepth", p, &mScaleOverScaleDepth);
 
-    // Render visible chunks
-    if (FrustrumCulling)
+    if (mUseInstancing)
     {
-        for (unsigned int i = 0; i < mChunksVisible.size(); i++)
+        // Render visible chunks
+        if (FrustrumCulling)
         {
-            RenderChunk(mChunksVisible[i]);
+            RenderInstanced(mChunksVisible);
+        }
+        // Render all chunks
+        else
+        {
+            RenderInstanced(mChunks);
         }
     }
-    // Render all chunks
     else
     {
-        for (unsigned int i = 0; i < mChunks.size(); i++)
+        // Render visible chunks
+        if (FrustrumCulling)
         {
-            //RenderChunk(mChunks[i]);
-            // Build model for current chunk
-            glm::mat4 curModel;
-            curModel = glm::mat4();
-            curModel = glm::scale(curModel, glm::vec3(MapScale));
-            curModel = glm::translate
-            (
-                curModel,
-                glm::vec3
-                (
-                    mChunks[i].ChunkPosition.x * (ElementSide - 1) * ElementSize,
-                    0.0f,
-                    mChunks[i].ChunkPosition.y * (ElementSide - 1) * ElementSize
-                )
-            );
-            curTransforms[i] = curModel;
+            for (unsigned int i = 0; i < mChunksVisible.size(); i++)
+            {
+                RenderChunk(mChunksVisible[i]);
+            }
         }
-        mChunkMeshInstance.Render(curTransforms);
+        // Render all chunks
+        else
+        {
+            for (unsigned int i = 0; i < mChunks.size(); i++)
+            {
+                RenderChunk(mChunks[i]);
+            }
+        }
     }
 
     // Debug chunks
@@ -246,6 +263,7 @@ void Terrain::RenderUi()
         ImGui::Checkbox("Frustrum culling", &FrustrumCulling);
         ImGui::Checkbox("Visual debug", &VisualDebug);
         ImGui::Checkbox("Draw wireframe", &mDrawWire);
+        ImGui::Checkbox("Use instancing", &mUseInstancing);
         ImGui::InputFloat("Rayleigh scattering constant(terrain)", &mKr);
         ImGui::InputFloat("Sun brightness constant(terrain)", &mESun);
         ImGui::InputFloat("Mie scattering constant(terrain)", &mKm);
@@ -304,7 +322,6 @@ void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
 
 void Terrain::RenderChunk(Chunk & c)
 {
-    /*
     if (mDrawWire){glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);}
 
     // Build model for current chunk
@@ -330,6 +347,33 @@ void Terrain::RenderChunk(Chunk & c)
     c.ChunkMesh.Render();
     
     if(mDrawWire){glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);}
-    */
+}
+
+void Terrain::RenderInstanced(std::vector<Chunk>& chunks)
+{
+    if (mDrawWire) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
+
+    curTransforms.resize(chunks.size());
+    for (unsigned int i = 0; i < chunks.size(); i++)
+    {
+        // Build model for current chunk
+        glm::mat4 curModel;
+        curModel = glm::mat4();
+        curModel = glm::scale(curModel, glm::vec3(MapScale));
+        curModel = glm::translate
+        (
+            curModel,
+            glm::vec3
+            (
+                chunks[i].ChunkPosition.x * (ElementSide - 1) * ElementSize,
+                0.0f,
+                chunks[i].ChunkPosition.y * (ElementSide - 1) * ElementSize
+            )
+        );
+        curTransforms[i] = curModel;
+    }
+    mChunkMeshInstance.Render(curTransforms);
+
+    if (mDrawWire) { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 }
 

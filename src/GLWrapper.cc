@@ -199,14 +199,15 @@ void glw::InstancedMesh::InitInstances(unsigned int maxInstances, BufferUsage us
     default:
         break;
     }
-    glGenBuffers(1, &TransformsId);
-    glBindBuffer(GL_ARRAY_BUFFER, TransformsId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4)*mMaxInstances, nullptr, use);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    // Setup the atribute
     glBindVertexArray(IMesh.Id);
     {
+        // Transforms matrix buffer
+        glGenBuffers(1, &TransformsId);
+        glBindBuffer(GL_ARRAY_BUFFER, TransformsId);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4)*mMaxInstances, nullptr, use);
+        
+        // Setup the atribute
         GLuint location = 6;    // Maybe hit performance dunno   
         GLint components = 4;
         GLenum type = GL_FLOAT;
@@ -221,6 +222,8 @@ void glw::InstancedMesh::InitInstances(unsigned int maxInstances, BufferUsage us
             glVertexAttribPointer(location + i, components, type, normalized, datasize, pointer + i * sizeof(glm::vec4));
             glVertexAttribDivisor(location + i, divisor);
         }
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
     glBindVertexArray(0);
 }
@@ -239,6 +242,7 @@ void glw::InstancedMesh::Render(std::vector<glm::mat4>& transforms)
     // Update the transforms buffer
     glBindBuffer(GL_ARRAY_BUFFER, TransformsId);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * transforms.size(), transforms.data());
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * transforms.size(), &transforms[0][0],GL_DYNAMIC_DRAW);
     switch (IMesh.DMode)
     {
     case kTriangles:

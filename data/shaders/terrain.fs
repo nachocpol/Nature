@@ -130,9 +130,9 @@ vec3 GetBaseColor()
 {
 	vec3 splat = texture(uSplatTexture,iTexcoord).xyz;
 
-	vec3 grass = texture2DNoTile(uGrassTexture,iTexcoord * uTiling1).xyz;
-	vec3 cliff = texture2DNoTile(uCliffTexture,iTexcoord * uTiling2).xyz;
-    vec3 snow = texture2DNoTile(uSnowTexture,iTexcoord * uTiling1).xyz;
+	vec3 grass = texture(uGrassTexture,iTexcoord * uTiling1).xyz;
+	vec3 cliff = texture(uCliffTexture,iTexcoord * uTiling2).xyz;
+    vec3 snow = texture(uSnowTexture,iTexcoord * uTiling1).xyz;
 	
     vec3 finalColor = vec3(0.0f);
     finalColor = mix(finalColor,grass,splat.g);

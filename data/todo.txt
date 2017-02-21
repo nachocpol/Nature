@@ -50,4 +50,7 @@
   	  of gl texture creation to use it.								[-]
   	+ Use hash texture for all the noise							[-]
   	+ O'Neil atmospheric scattering									[✓] 17 / 2 / 2017
-  	+ Improve clouds with scattering more samples etc 				[x]
+  	+ Improve clouds with scattering more samples etc 				[✓] 20 / 2 / 2017
+  		+ Now it takes a lot of gpu time!							[x]
+	+ Implement instancing for the terrain							[✓] 21 / 2 / 2017
+	+ Fix water (depth is now changed tho)							[x]
