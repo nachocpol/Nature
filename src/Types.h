@@ -70,6 +70,18 @@ struct TextureDef
     unsigned char* Data = nullptr;
 };
 
+struct TextureDefF
+{
+    TextureDefF() :Path(nullptr) {}
+    TextureDefF(const char* p, glm::vec2 s, TextureUsage u) :
+        Path(p), Size(s), Usage(u) {}
+    const char* Path;
+    glm::ivec2 Size;
+    TextureUsage Usage;
+    int ElePerPixel;
+    float* Data = nullptr;
+};
+
 struct ColorF
 {
     ColorF() {}
@@ -124,6 +136,8 @@ void LoadMeshFromFile(const char* file,MeshBasicVertexData& md);
 void GenerateSphere(float radius, int div, MeshBasicVertexData& md);
 
 void LoadTextureFromFile(TextureDef& def);
+
+void LoadTextureFromFileF(TextureDefF& def);
 
 /* Printable keys */
 #define INPUT_KEY_SPACE              32

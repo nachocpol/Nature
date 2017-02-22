@@ -28,6 +28,7 @@ in vec3 iColor;
 in vec3 iSecondaryColor;
 in vec3 iNormal;
 in vec3 iClipPos;
+in float iLogz;
 
 out vec4 oColor;
 
@@ -168,9 +169,11 @@ void main()
     oColor = vec4(ColorCorrect(baseAtm,0.2f) * l,1.0f) * CloudsShadowing();
 
     // Logarithmic z-buffer
-    const float C = 1.0;
-    const float offset = 1.0;
-    gl_FragDepth = (log(C * iClipPos.z + offset) / log(C * uCamfar + offset));
+    float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));
+    gl_FragDepth = log2(iLogz) * Fcoef_half;
+    //const float C = 1.0;
+    //const float offset = 1.0;
+    //gl_FragDepth = (log(C * iCPos.z + offset) / log(C * uCamfar + offset));
 }   
 
 

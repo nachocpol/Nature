@@ -502,7 +502,8 @@ void glw::Texture::Init(TextureDef def)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Def.Size.x, Def.Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         SetTextureParameter(Def);
         break;
-    case kRenderTargetDepth:
+    case kRenderTargetDepth:    
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, Def.Size.x, Def.Size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, data);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, Def.Size.x, Def.Size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, data);
         SetTextureParameter(Def);
         break;

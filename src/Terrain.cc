@@ -91,6 +91,10 @@ void Terrain::Init()
     TextureDef hMap;
     hMap.Path = mHeightMap.Def.Path;
     LoadTextureFromFile(hMap);
+    // Load hmap float....
+    TextureDefF hMapF;
+    hMapF.Path = mHeightMap.Def.Path;
+    LoadTextureFromFileF(hMapF);
     
     // Bounding sphere radius (sin(45) because chunks are squares
     // hypotenuse = opposite / sin(angle)
@@ -119,15 +123,43 @@ void Terrain::Init()
             unsigned int yDataIdx = (int)bSpherePos.z * HeightMapSize + (int)bSpherePos.x;
             unsigned char yData = hMap.Data[yDataIdx];
             bSpherePos.y = ((float)yData / 255.0f) * 200.0f;
-            mChunks[idx].BSphere = BoundingSphere(bSpherePos * MapScale, diagonal * MapScale);                                                                 
+            mChunks[idx].BSphere = BoundingSphere(bSpherePos * MapScale, diagonal * MapScale); 
+
+            // Add vegetation
+            glm::vec2 cStart = glm::ivec2(p.x, p.y);
+            cStart *= (ElementSide - 1) * ElementSize;
+            glm::vec2 cEnd = cStart + glm::vec2((ElementSide - 1) * ElementSize);
+            glm::mat4 vTrans;
+            for (int ci = cStart.x; ci < cEnd.x; ci+= ElementSize)
+            {
+                for (float cj = cStart.y; cj < cEnd.y; cj+= ElementSize)
+                {
+                    vTrans = glm::mat4();
+                    unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
+                    float vY = hMapF.Data[vIdx] * 200.0f * MapScale;
+                    glm::vec3 vp = glm::vec3(ci, 0.0f, cj) * MapScale;
+                    vp.y = vY;
+                    vTrans = glm::translate(vTrans, vp);
+                    mChunks[idx].Deco.GrassTransforms.push_back(vTrans);
+                }
+            }
         }
     }
 
-    // Init instanced mesh
+    // Init instanced mesh (chunks)
     InitMeshAsGrid(mChunkMeshInstance.IMesh, ElementSide, ElementSize);
     mChunkMeshInstance.IMesh.DMode = DrawMode::kPatches3;
     mChunkMeshInstance.InitInstances(ChunkSide * ChunkSide, BufferUsage::kDynamic);
     curTransforms.resize(mChunks.size());
+
+    // Init vegetation materials
+    mGrassMaterial.Init("../data/shaders/vegetation.vs", "../data/shaders/vegetation.fs");
+
+    // Init vegetation meshes
+    MeshBasicVertexData gMd;
+    LoadMeshFromFile("../data/meshes/grass.obj",gMd);
+    mGrassInstanceMesh.IMesh.Init(gMd.vertex,gMd.ele);
+    mGrassInstanceMesh.InitInstances(ElementSide * ElementSide, BufferUsage::kDynamic);
 }
 
 void Terrain::Update(Frustrum viewFrust)
@@ -160,7 +192,7 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
         mTerrainMaterial.Use();
         p = mTerrainMaterial.Id;
     }
-    
+
     if (useClip)
     {
         glw::SetClipPlane(0, plane, p);
@@ -169,7 +201,7 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     {
         glw::SetClipPlane(0, glm::vec4(0.0f, 1.0f, 0.0f, 99999.0f), p);
     }
-    
+
     // Textures
     glw::SetUniformTexture("uGrassTexture", p, mGrassTexture.Id, 0);
     glw::SetUniformTexture("uHeightMap", p, mHeightMap.Id, 1);
@@ -196,6 +228,7 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     glw::SetUniform1f("uScaleDepth", p, &mRScaleDepth);
     glw::SetUniform1f("uScaleOverScaleDepth", p, &mScaleOverScaleDepth);
 
+    // Draw terrain
     if (mUseInstancing)
     {
         // Render visible chunks
@@ -228,6 +261,21 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
             }
         }
     }
+
+    // Draw vegetation
+    glDisable(GL_CULL_FACE);
+    mGrassMaterial.Use();
+    if (mUseInstancing)
+    {
+        for (unsigned int c = 0; c < mChunksVisible.size(); c++)
+        {
+            mGrassInstanceMesh.Render(mChunksVisible[c].Deco.GrassTransforms);
+        }
+    }
+    else
+    { 
+    }
+    glEnable(GL_CULL_FACE);
 
     // Debug chunks
     if (VisualDebug)

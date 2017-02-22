@@ -28,6 +28,7 @@ out vec2 iTexcoord;
 out vec3 iColor;
 out vec3 iSecondaryColor;
 out vec3 iClipPos;
+out float iLogz;
 
 vec2 Interpolate(vec2 v0, vec2 v1, vec2 v2)
 {
@@ -61,4 +62,8 @@ void main()
     gl_ClipDistance[0] = clip;
     gl_ClipDistance[1] = clip;
     gl_ClipDistance[2] = clip;
+
+    float Fcoef = 2.0 / log2(uCamfar + 1.0);
+    iLogz = 1.0f + gl_Position.w;
+    gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
 }

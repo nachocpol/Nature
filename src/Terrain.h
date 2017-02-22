@@ -7,12 +7,18 @@
 #include "glm.hpp"
 #include "GLWrapper.h"
 
+struct ChunkDeco
+{
+    std::vector<glm::mat4> GrassTransforms;
+};
+
 struct Chunk
 {
     Chunk(){}
     glm::vec2 ChunkPosition;
     glw::Mesh ChunkMesh;
     BoundingSphere BSphere;
+    ChunkDeco Deco;
 };
 
 class Terrain
@@ -107,4 +113,8 @@ private:
     float mKm4PI;			    // Km * 4 * PI
     float mScale;			    // (1.0f / (m_fOuterRadius - m_fInnerRadius)) / m_fRayleighScaleDepth)
     float mScaleOverScaleDepth;	// fScale / fScaleDepth
+
+    // Vegetation
+    glw::Material mGrassMaterial;
+    glw::InstancedMesh mGrassInstanceMesh;
 };

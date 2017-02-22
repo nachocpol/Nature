@@ -48,7 +48,7 @@ private:
     // Water
     float mWaterHeight = 20.0f;
     float mWaterScale = 20480.0f;
-    float mWaveSize = 60.0f;
+    float mWaveSize = 860.0f;
     float mWaveStrenght = 0.02f;
     float mNormStrenght = 1.0f;
     glm::vec2 mWaveSpeed = glm::vec2(0.001f, 0.0005f);

@@ -54,3 +54,5 @@
   		+ Now it takes a lot of gpu time!							[x]
 	+ Implement instancing for the terrain							[✓] 21 / 2 / 2017
 	+ Fix water (depth is now changed tho)							[x]
+	+ When rendering terrain refract/reflect or the other objects
+		use a basic shader.

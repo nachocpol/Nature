@@ -30,6 +30,7 @@ uniform float uWaterTintFactor;
 in vec2 iTexcoord;
 in vec4 iCPos;
 in vec3 iWPos;
+in float iLogz;
 
 out vec4 oColor;
 
@@ -97,13 +98,19 @@ vec2 GetUv(float shore)
 
 float GetDistanceToFloor(vec2 uv)
 {
-	float sceneDepth = texture(uRefractDepth,uv).x;
-	float curDepth = gl_FragCoord.z;
-
+	float rawSDepth = texture(uRefractDepth,uv).x;
+	rawSDepth = pow(uCamfar + 1.0f,rawSDepth) - 1.0f;
+	float a = uCamfar / (uCamfar - uCamnear);
+	float b = uCamfar * uCamnear / (uCamnear - uCamfar);
+	float sceneDepth = (a + b / rawSDepth);
+	float curDepth = iCPos.z;
+	
 	//Calculate distances (water-floor-camera)
 	float dCamFloor = 2.0 * uCamnear * uCamfar /  ( uCamfar + uCamnear - (2.0 * sceneDepth - 1.0)*(uCamfar - uCamnear));
 	float dCamWat = 2.0 * uCamnear * uCamfar /  ( uCamfar + uCamnear - (2.0 * curDepth - 1.0)*(uCamfar - uCamnear));
-	return dCamFloor - dCamWat;
+	//return dCamWat;
+	//return dCamFloor - dCamWat;
+	return 100.0f;
 }
 
 float GetWaterFade(float dist)
@@ -161,14 +168,17 @@ vec4 GetWaterColor()
 	// Fade the water at the shore
 	return vec4(c + specColor,1.0f);
 	//return vec4(c + specColor,GetWaterFade(distToFloor));
+	//return vec4(vec3(distToFloor),1.0f);
 }
 
 void main()
 {
 	oColor = GetWaterColor();
-
+    
     // Logarithmic z-buffer
-    const float C = 1.0;
-    const float offset = 1.0;
-    gl_FragDepth = (log(C * iCPos.z + offset) / log(C * uCamfar + offset));
+    float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));
+    gl_FragDepth = log2(iLogz) * Fcoef_half;
+    //const float C = 1.0;
+    //const float offset = 1.0;
+    //gl_FragDepth = (log(C * iCPos.z + offset) / log(C * uCamfar + offset));
 }
