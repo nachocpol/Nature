@@ -16,6 +16,7 @@ struct Chunk
 {
     Chunk(){}
     glm::vec2 ChunkPosition;
+    glm::vec3 RealChunkPos;
     glw::Mesh ChunkMesh;
     BoundingSphere BSphere;
     ChunkDeco Deco;
@@ -46,7 +47,7 @@ public:
     bool VisualDebug = false;
 
     glw::Texture* LutTexture;
-
+    glm::vec3* CamPos;
     glm::vec3 SunPosition;
 
 private:
@@ -115,6 +116,11 @@ private:
     float mScaleOverScaleDepth;	// fScale / fScaleDepth
 
     // Vegetation
+    unsigned int mGrassCnt = 0;
+    unsigned int mMaxGrassChunk = 0;
     glw::Material mGrassMaterial;
     glw::InstancedMesh mGrassInstanceMesh;
+    // Grass 1
+    glw::Texture mGrass1AlbedoTex;
+    glw::Texture mGrass1OpacityTex;
 };

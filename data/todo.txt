@@ -56,3 +56,6 @@
 	+ Fix water (depth is now changed tho)							[x]
 	+ When rendering terrain refract/reflect or the other objects
 		use a basic shader.
+	+ Instance grass per chunks 									[✓] 23 / 2 / 2017
+	+ Draw all grass in one draw call 								[x]
+	+ Grass underwater¿¿ dont Draw 									[x]

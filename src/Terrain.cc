@@ -117,8 +117,11 @@ void Terrain::Init()
             // Set the chuks position as the initial position
             glm::vec3 bSpherePos = glm::vec3(p.x, 0.0f, p.y);
             bSpherePos *= (ElementSide - 1) * ElementSize;
+            
             // Translate it by the radius so it is centered
             bSpherePos = glm::vec3(bSpherePos.x + radius, 0.0f, bSpherePos.z + radius);
+            mChunks[idx].RealChunkPos = bSpherePos * MapScale; // Set position!
+
             // Find terrain height
             unsigned int yDataIdx = (int)bSpherePos.z * HeightMapSize + (int)bSpherePos.x;
             unsigned char yData = hMap.Data[yDataIdx];
@@ -126,25 +129,35 @@ void Terrain::Init()
             mChunks[idx].BSphere = BoundingSphere(bSpherePos * MapScale, diagonal * MapScale); 
 
             // Add vegetation
+            unsigned int curGrass = 0;
             glm::vec2 cStart = glm::ivec2(p.x, p.y);
             cStart *= (ElementSide - 1) * ElementSize;
             glm::vec2 cEnd = cStart + glm::vec2((ElementSide - 1) * ElementSize);
             glm::mat4 vTrans;
-            for (int ci = cStart.x; ci < cEnd.x; ci+= ElementSize)
+            for (int ci = cStart.x; ci < cEnd.x; ci+= ElementSize/8.0f)
             {
-                for (float cj = cStart.y; cj < cEnd.y; cj+= ElementSize)
+                for (float cj = cStart.y; cj < cEnd.y; cj+= ElementSize/8.0f)
                 {
                     vTrans = glm::mat4();
                     unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
                     float vY = hMapF.Data[vIdx] * 200.0f * MapScale;
+                    if (vY > 200.0f || vY < 24.0f)continue;
                     glm::vec3 vp = glm::vec3(ci, 0.0f, cj) * MapScale;
+                    glm::vec2 randPos = glm::diskRand(10.0f);
+                    vp.x += randPos.x;
+                    vp.z += randPos.y;
                     vp.y = vY;
                     vTrans = glm::translate(vTrans, vp);
                     mChunks[idx].Deco.GrassTransforms.push_back(vTrans);
+                    curGrass++;
                 }
             }
+            mGrassCnt += curGrass;
+            mMaxGrassChunk = glm::max(mMaxGrassChunk, curGrass);
         }
     }
+    printf(" LOG: Total grass:%i\n", mGrassCnt);
+    printf(" LOG: Max grass in a chunk:%i\n", mMaxGrassChunk);
 
     // Init instanced mesh (chunks)
     InitMeshAsGrid(mChunkMeshInstance.IMesh, ElementSide, ElementSize);
@@ -157,9 +170,31 @@ void Terrain::Init()
 
     // Init vegetation meshes
     MeshBasicVertexData gMd;
-    LoadMeshFromFile("../data/meshes/grass.obj",gMd);
+    gMd.vertex =
+    {
+        BasicVertex(-0.5f,0.0f,0.0f,0.0f,1.0f),
+        BasicVertex( 0.5f,0.0f,0.0f,1.0f,1.0f),
+        BasicVertex( 0.5f,1.0f,0.0f,1.0f,0.0f),
+        BasicVertex(-0.5f,1.0f,0.0f,0.0f,0.0f),
+
+        BasicVertex( 0.0f,0.0f,0.5f,0.0f,1.0f),
+        BasicVertex( 0.0f,0.0f,-0.5f,1.0f,1.0f),
+        BasicVertex( 0.0f,1.0f,-0.5f,1.0f,0.0f),
+        BasicVertex( 0.0f,1.0f, 0.5f,0.0f,0.0f)
+    };
+    gMd.ele =
+    {
+        0,1,2,
+        0,2,3,
+        4,5,6,
+        4,6,7
+    };
     mGrassInstanceMesh.IMesh.Init(gMd.vertex,gMd.ele);
-    mGrassInstanceMesh.InitInstances(ElementSide * ElementSide, BufferUsage::kDynamic);
+    mGrassInstanceMesh.InitInstances(mMaxGrassChunk, BufferUsage::kDynamic);
+
+    // Grass 1
+    mGrass1AlbedoTex.Init(TextureDef("../data/textures/grass_01/diffus.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mGrass1OpacityTex.Init(TextureDef("../data/textures/grass_01/opacity.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
 }
 
 void Terrain::Update(Frustrum viewFrust)
@@ -264,17 +299,30 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
 
     // Draw vegetation
     glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
     mGrassMaterial.Use();
+
+    unsigned int vp = mGrassMaterial.Id;
+    glw::SetUniformTexture("uAlbedoTexture", vp, mGrass1AlbedoTex.Id, 0);
+    glw::SetUniformTexture("uOpacityTexture", vp, mGrass1OpacityTex.Id, 1);
+
+    //double start = glfwGetTime();
     if (mUseInstancing)
     {
         for (unsigned int c = 0; c < mChunksVisible.size(); c++)
         {
+            float dToCam = glm::distance(mChunksVisible[c].RealChunkPos,*CamPos);
+            if (dToCam > 1000.0f)continue;
             mGrassInstanceMesh.Render(mChunksVisible[c].Deco.GrassTransforms);
         }
     }
     else
-    { 
+    {
+        // Draw grass of ALL chunks...
     }
+    //double elapsed = glfwGetTime() - start;
+    //printf("LOG:Elapsed draw grass:%f\n",elapsed / 1000.0f);
+    glDisable(GL_BLEND);
     glEnable(GL_CULL_FACE);
 
     // Debug chunks

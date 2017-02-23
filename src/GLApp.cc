@@ -45,7 +45,12 @@ bool GLApp::Init()
     ImGui_ImplGlfwGL3_Init(mWindow.GetHandle(), true);
 
     mCamera.Init((float)mViewport.z / (float)mViewport.w);
+
+    // Init terrain
     mTerrain.Init();
+    mTerrain.CamPos = mCamera.GetPositionPtr();
+
+    // Init pass constants (UBO)
     mPassConst.Init();
 
     // Init scene render target

@@ -140,6 +140,9 @@ vec4 GetWaterColor()
 	vec2 uv = iCPos.xy / iCPos.w;
 	uv = uv * 0.5f + 0.5f;
 
+	// Early test
+	if(texture(uRefractDepth,uv).r >= 1.0f)discard;
+
 	// Reduce displacement at the shore
 	float distToFloor = GetDistanceToFloor(uv);
 	float shoreFact = clamp(distToFloor/50.0f,0.0f,1.0f);

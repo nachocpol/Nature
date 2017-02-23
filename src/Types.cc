@@ -104,10 +104,11 @@ void LoadMeshFromFile(const char * file, MeshBasicVertexData& md)
     bool ret = tinyobj::LoadObj(&at, &shapes, &materials, &err, file);
     if (!err.empty()) 
     {
-        printf("ERROR:%s\n", err.c_str());
+        //printf("ERROR:%s\n", err.c_str());
     }
     if (!ret) 
     {
+        printf("ERROR:%s\n", err.c_str());
         exit(1);
     }
 
@@ -123,8 +124,11 @@ void LoadMeshFromFile(const char * file, MeshBasicVertexData& md)
         ux = uy = 0.0f;
         if (at.texcoords.size() > 0)
         {
-            //ux = at.texcoords[i + 0];
-            //uy = at.texcoords[i + 1];
+            if (i + 1 < at.texcoords.size() - 1)
+            {
+                ux = at.texcoords[i + 0];
+                uy = at.texcoords[i + 1];
+            }
         }
         // Normals
         md.vertex.push_back(BasicVertex(px, py, pz, ux, uy));

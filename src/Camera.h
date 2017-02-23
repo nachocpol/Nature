@@ -16,6 +16,7 @@ public:
     void Resize(float aspect);
     void Update();
     void UpdateView();
+    glm::vec3* GetPositionPtr() { return &mPosition; }
     glm::vec3 GetPosition() { return mPosition; }
     glm::vec3 GetFront() { return mFront; }
     glm::vec3 GetUp() { return mUp; }
