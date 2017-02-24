@@ -19,7 +19,10 @@ out float iLogz;
 void main()
 {
 	iTexcoord = aTexcoord;
-	gl_Position = uProjection * uView * aInstancedModel *  vec4(aPosition,1.0f);
+	vec3 newPos = aPosition;
+	newPos.z += (sin(uTime * 0.8f) * 0.25f) * aPosition.y;
+
+	gl_Position = uProjection * uView * aInstancedModel *  vec4(newPos,1.0f);
 	
 	float Fcoef = 2.0 / log2(uCamfar + 1.0);
 	iLogz = 1.0f + gl_Position.w;

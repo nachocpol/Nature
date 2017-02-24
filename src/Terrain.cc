@@ -134,9 +134,9 @@ void Terrain::Init()
             cStart *= (ElementSide - 1) * ElementSize;
             glm::vec2 cEnd = cStart + glm::vec2((ElementSide - 1) * ElementSize);
             glm::mat4 vTrans;
-            for (int ci = cStart.x; ci < cEnd.x; ci+= ElementSize/8.0f)
+            for (int ci = cStart.x; ci < cEnd.x; ci+= ElementSize/6.0f)
             {
-                for (float cj = cStart.y; cj < cEnd.y; cj+= ElementSize/8.0f)
+                for (float cj = cStart.y; cj < cEnd.y; cj+= ElementSize/6.0f)
                 {
                     vTrans = glm::mat4();
                     unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
@@ -148,6 +148,7 @@ void Terrain::Init()
                     vp.z += randPos.y;
                     vp.y = vY;
                     vTrans = glm::translate(vTrans, vp);
+                    vTrans = glm::scale(vTrans, glm::vec3(2.0f));
                     mChunks[idx].Deco.GrassTransforms.push_back(vTrans);
                     curGrass++;
                 }

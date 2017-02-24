@@ -59,3 +59,5 @@
 	+ Instance grass per chunks 									[✓] 23 / 2 / 2017
 	+ Draw all grass in one draw call 								[x]
 	+ Grass underwater¿¿ dont Draw 									[x]
+	+ Draw all grass inside huge mesh (well it wont be that
+		huge indeed) / geometry shader?
