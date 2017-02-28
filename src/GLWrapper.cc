@@ -124,6 +124,16 @@ void glw::SetUniform3f(const char* name, GLint program, float * value)
     glUniform3fv(loc, 1, value);
 }
 
+void glw::SetUniform4f(const char * name, GLint program, float * value)
+{
+    GLint loc = glGetUniformLocation(program, name);
+#ifdef _DEBUG
+    if (loc == -1)
+        printf("GL_ERROR: Could not set uniform:%s\n", name);
+#endif
+    glUniform4fv(loc, 1, value);
+}
+
 void glw::SetUniformTexture(const char * name, GLint program, unsigned int texId,unsigned int bindId)
 {
     glActiveTexture(GL_TEXTURE0 + bindId);
@@ -499,7 +509,7 @@ void glw::Texture::Init(TextureDef def)
         }
         break;
     case KRenderTarget: 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Def.Size.x, Def.Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Def.Size.x, Def.Size.y, 0, GL_RGB, GL_FLOAT, data);
         SetTextureParameter(Def);
         break;
     case kRenderTargetDepth:    
@@ -544,7 +554,7 @@ void glw::Texture::Resize(glm::vec2 size)
     case kTexturing:
         break;
     case KRenderTarget:
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Def.Size.x, Def.Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Def.Size.x, Def.Size.y, 0, GL_RGB, GL_FLOAT, nullptr);
         break;
     case kRenderTargetDepth:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, Def.Size.x, Def.Size.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);

@@ -124,6 +124,38 @@ bool GLApp::Init()
 
     // Init sky
     mSky.Init();
+
+    // Bloom
+    mBloomRt.Init(glm::vec2(720.0f));
+    mBloomRtV.Init(glm::vec2(720.0f));
+    mBloomFinal.Init(glm::vec2(0.0f));
+    mBloomRtMat.Init
+    (
+        "../data/shaders/bloom/bloomblur.vs",
+        "../data/shaders/bloom/bloomblur.fs"
+    );
+    mBloomMergeMat.Init
+    (
+        "../data/shaders/bloom/bloommerge.vs",
+        "../data/shaders/bloom/bloommerge.fs"
+    );
+
+    // Lens flares
+    // Downsample and threshold
+    mThresholdRt.Init(glm::vec2(720.0f));
+    mThresholdRtMat.Init
+    (
+        "../data/shaders/lensflares/lfthreshold.vs",
+        "../data/shaders/lensflares/lfthreshold.fs"
+    );
+    // Feature generation
+    mLensFeaturesRt.Init(glm::vec2(720.0f));
+    mLensFeaturesRtMat.Init
+    (
+        "../data/shaders/lensflares/lffeatures.vs",
+        "../data/shaders/lensflares/lffeatures.fs"
+    );
+    
     return true;
 }
 
@@ -148,6 +180,7 @@ void GLApp::Update()
 
 void GLApp::Render()
 {
+    // Handle resizing
     glm::ivec2 ws;
     glfwGetWindowSize(mWindow.GetHandle(), &ws.x, &ws.y);
     if (ws.x != mViewport.z || ws.y != mViewport.w)
@@ -156,10 +189,16 @@ void GLApp::Render()
         mViewport.z = ws.x;
         mViewport.w = ws.y;
         mCamera.Resize((float)ws.x / (float)ws.y);
+
         // Resize render targets
         mBaseRt.Resize(ws);
         mWaterReflecRt.Resize(ws);
         mWaterRefracRt.Resize(ws);
+        mThresholdRt.Resize(ws);
+        mLensFeaturesRt.Resize(ws);
+        mBloomRt.Resize(ws);
+        mBloomRtV.Resize(ws);
+        mBloomFinal.Resize(ws);
     }
 
     glClearColor(0.3f,0.3f,0.3f, 1.0f);
@@ -281,9 +320,65 @@ void GLApp::Render()
     }
     mBaseRt.Disable();
 
-    // Draw
+    // Bloom
+    // Horizontal blur
+    mBloomRt.Enable();
+    {
+        mBloomRtMat.Use();
+        glw::SetUniformTexture("uColorTexture", mBloomRtMat.Id, mBaseRt.RenderTexture.Id, 0);
+        glw::SetUniform1i("uHorizontal", mBloomRtMat.Id, &kBloomHorizontal);
+        glw::SetUniform1f("uIntensity", mBloomRtMat.Id, &mBloomSampleIntensity);
+        mBaseQuadRt.Render();
+    }
+    mBloomRt.Disable();
+
+    // Vertical blur
+    mBloomRtV.Enable();
+    {
+        mBloomRtMat.Use();
+        glw::SetUniformTexture("uColorTexture", mBloomRtMat.Id, mBloomRt.RenderTexture.Id, 0);
+        glw::SetUniform1i("uHorizontal", mBloomRtMat.Id, &kBloomVertical);
+        glw::SetUniform1f("uIntensity", mBloomRtMat.Id, &mBloomSampleIntensity);
+        mBaseQuadRt.Render();
+    }
+    mBloomRtV.Disable();
+
+    // Bloom merge
+    mBloomFinal.Enable();
+    {
+        mBloomMergeMat.Use();
+        glw::SetUniformTexture("uColorTexture", mBloomMergeMat.Id, mBaseRt.RenderTexture.Id, 0);
+        glw::SetUniformTexture("uBloomTexture", mBloomMergeMat.Id, mBloomRtV.RenderTexture.Id, 1);
+        mBaseQuadRt.Render();
+    }
+    mBloomFinal.Disable();
+
+    // Lens flares
+    // Threshold
+    mThresholdRt.Enable();
+    {
+        mThresholdRtMat.Use();
+        glw::SetUniform4f("uScale", mThresholdRtMat.Id, &mThresholdScale.x);
+        glw::SetUniform4f("uBias", mThresholdRtMat.Id, &mThresholdBias.x);
+        glw::SetUniformTexture("uColorTexture", mThresholdRtMat.Id, mBloomFinal.RenderTexture.Id, 0);
+        mBaseQuadRt.Render();
+    }
+    mThresholdRt.Disable();
+
+    // Features
+    mLensFeaturesRt.Enable();
+    {
+        mLensFeaturesRtMat.Use();
+        glw::SetUniform1i("uGhostSamples", mLensFeaturesRtMat.Id, &mGhostSamples);
+        glw::SetUniform1f("uGhostDispers", mLensFeaturesRtMat.Id, &mGhostDispers);
+        glw::SetUniformTexture("uColorTexture", mLensFeaturesRtMat.Id, mThresholdRt.RenderTexture.Id, 0);
+        mBaseQuadRt.Render();
+    }
+    mLensFeaturesRt.Disable();
+
+    // Final draw
     mBaseMatRt.Use();
-    glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mBaseRt.RenderTexture.Id, 0);
+    glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mLensFeaturesRt.RenderTexture.Id, 0);
     mBaseQuadRt.Render();
 
     RenderUi();
@@ -293,6 +388,22 @@ void GLApp::Render()
 void GLApp::RenderUi()
 {
     ImGui_ImplGlfwGL3_NewFrame();
+
+    ImGui::Begin("Postprocessing");
+    {
+        // Blooms
+        ImGui::Text("Bloom");
+        ImGui::InputFloat("Bloom sample intensity", &mBloomSampleIntensity);
+        ImGui::Separator();
+        // Lens flares
+        ImGui::Text("Lens flares");
+        ImGui::InputFloat4("Threshold scale", &mThresholdScale.x);
+        ImGui::InputFloat4("Threshold bias", &mThresholdBias.x);
+        ImGui::InputInt("Ghost samples", &mGhostSamples);
+        ImGui::InputFloat("Ghost dispers", &mGhostDispers);
+        ImGui::Separator();
+    }
+    ImGui::End();
 
     ImGui::Begin("Nature 3.0");
     {
@@ -322,8 +433,8 @@ void GLApp::RenderUi()
         ImGui::InputFloat("Wave size", &mWaveSize);
         ImGui::InputFloat("Wave strength", &mWaveStrenght);
         ImGui::InputFloat("Normal strength", &mNormStrenght);
-        ImGui::InputFloat3("Wave speed", &mWaveSpeed.x);
-        ImGui::InputFloat3("Wave speed 2", &mWaveSpeed2.x);
+        ImGui::InputFloat2("Wave speed", &mWaveSpeed.x);
+        ImGui::InputFloat2("Wave speed 2", &mWaveSpeed2.x);
         ImGui::InputFloat("Water specular factor", &mWaterShinyFactor);
         ImGui::InputFloat3("Water specular color", &mSpecColor.x);
         ImGui::InputFloat3("Water tint", &mWaterTint.x);

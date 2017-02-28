@@ -53,8 +53,8 @@ private:
     float mNormStrenght = 1.0f;
     glm::vec2 mWaveSpeed = glm::vec2(0.001f, 0.0005f);
     glm::vec2 mWaveSpeed2 = glm::vec2(-0.001f, 0.0005f);
-    float mWaterShinyFactor = 30.0f;
-    glm::vec3 mSpecColor = glm::vec3(0.1f,0.1f,0.1f);
+    float mWaterShinyFactor = 40.0f;
+    glm::vec3 mSpecColor = glm::vec3(1.0f,1.0f,1.0f);
     glm::vec3 mWaterTint = glm::vec3(0.23f, 0.35f, 0.57f);
     float mWaterTintFactor = 0.1f;
 
@@ -71,4 +71,25 @@ private:
 
     // Sky
     Sky mSky;
+
+    // Bloom
+    glw::RenderTarget mBloomRt;
+    glw::RenderTarget mBloomRtV;
+    glw::RenderTarget mBloomFinal;
+    glw::Material mBloomRtMat;
+    glw::Material mBloomMergeMat;
+    int kBloomHorizontal = 1;
+    int kBloomVertical = 0;
+    float mBloomSampleIntensity = 0.5f;
+
+    // Lens flares
+    glw::RenderTarget mThresholdRt; 
+    glw::Material mThresholdRtMat;
+    glm::vec4 mThresholdScale = glm::vec4(0.9f);
+    glm::vec4 mThresholdBias = glm::vec4(0.9f);
+
+    glw::RenderTarget mLensFeaturesRt; 
+    glw::Material mLensFeaturesRtMat;
+    int mGhostSamples = 3;
+    float mGhostDispers = 4.5f;
 };

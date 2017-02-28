@@ -20,19 +20,10 @@ in vec3 iSecondaryColor;
 
 out vec4 oColor;
 
-vec3 ColorCorrect(vec3 color,float exposure)
-{
-	// Reinhard tone map + gamma correction
-	const float gamma = 2.2f;
-    vec3 mapped = vec3(1.0f) - exp(-color * exposure);
-    return pow(mapped, vec3(1.0f / gamma));
-}
-
 void main()
 {
-    // we can clamp second and color in the vertex
 	float fCos = dot(normalize(iSunDir), v3Direction) / length(v3Direction);
 	float fMiePhase = 1.5 * ((1.0 - uG2) / (2.0 + uG2)) * (1.0 + fCos*fCos) / pow(1.0 + uG2 - 2.0*uG*fCos, 1.5);
-	oColor.xyz = ColorCorrect(iColor + fMiePhase * iSecondaryColor,1.0f);
+	oColor.xyz = (iColor + fMiePhase * iSecondaryColor);
 	oColor.a = oColor.b;
 }

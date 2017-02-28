@@ -147,14 +147,6 @@ vec3 GetAtmosphereColor(vec3 base)
     return iColor + base * iSecondaryColor;
 }
 
-vec3 ColorCorrect(vec3 color,float exposure)
-{
-    // Reinhard tone map + gamma correction
-    const float gamma = 2.2f;
-    vec3 mapped = vec3(1.0f) - exp(-color * exposure);
-    return pow(mapped, vec3(1.0f / gamma));
-}
-
 void main()
 {
     // Load normal and hack to work with world machine normals
@@ -166,7 +158,7 @@ void main()
 
     // Lambert
     float l = max(dot(normalize(normal),uSunPosition),0.1f);
-    oColor = vec4(ColorCorrect(baseAtm,0.2f) * l,1.0f) * CloudsShadowing();
+    oColor = vec4(baseAtm * l,1.0f) * CloudsShadowing();
 
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));
