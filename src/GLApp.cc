@@ -155,7 +155,32 @@ bool GLApp::Init()
         "../data/shaders/lensflares/lffeatures.vs",
         "../data/shaders/lensflares/lffeatures.fs"
     );
-    
+    mLensBlurHRt.Init(glm::vec2(720.0f));
+    mLensBlurVRt.Init(glm::vec2(720.0f));
+    mLensDustTex.Init(TextureDef("../data/textures/lensdust.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mLensStarTex.Init(TextureDef("../data/textures/lensstar.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mLensMergeRt.Init(glm::vec2(720.0f));
+    mLensMergeRtMat.Init
+    (
+        "../data/shaders/lensflares/lmerge.vs",
+        "../data/shaders/lensflares/lmerge.fs"
+    );
+
+    // Tone map
+    mToneMapRt.Init(glm::vec2(720.0f));
+    mToneMapRtMat.Init
+    (
+        "../data/shaders/tonemap/tonemap.vs",
+        "../data/shaders/tonemap/tonemap.fs"
+    );
+
+    // FXAA
+    mFxaaRt.Init(glm::vec2(720.0f));
+    mFxaaRtMat.Init
+    (
+        "../data/shaders/aa/fxaa.vs",
+        "../data/shaders/aa/fxaa.fs"
+    );
     return true;
 }
 
@@ -199,6 +224,11 @@ void GLApp::Render()
         mBloomRt.Resize(ws);
         mBloomRtV.Resize(ws);
         mBloomFinal.Resize(ws);
+        mLensBlurHRt.Resize(ws);
+        mLensBlurVRt.Resize(ws);
+        mLensMergeRt.Resize(ws);
+        mToneMapRt.Resize(ws);
+        mFxaaRt.Resize(ws);
     }
 
     glClearColor(0.3f,0.3f,0.3f, 1.0f);
@@ -371,14 +401,69 @@ void GLApp::Render()
         mLensFeaturesRtMat.Use();
         glw::SetUniform1i("uGhostSamples", mLensFeaturesRtMat.Id, &mGhostSamples);
         glw::SetUniform1f("uGhostDispers", mLensFeaturesRtMat.Id, &mGhostDispers);
+        glw::SetUniform1f("uHaloWidth", mLensFeaturesRtMat.Id, &mHaloWidth);
+        glw::SetUniform1f("uDistortion", mLensFeaturesRtMat.Id, &mChromDistort);
         glw::SetUniformTexture("uColorTexture", mLensFeaturesRtMat.Id, mThresholdRt.RenderTexture.Id, 0);
         mBaseQuadRt.Render();
     }
     mLensFeaturesRt.Disable();
 
+    // Lens blur horizontal
+    static float kIntensityHack = 1.0f;
+    mLensBlurHRt.Enable();
+    {
+        mBloomRtMat.Use();
+        glw::SetUniformTexture("uColorTexture", mBloomRtMat.Id, mLensFeaturesRt.RenderTexture.Id, 0);
+        glw::SetUniform1i("uHorizontal", mBloomRtMat.Id, &kBloomHorizontal);
+        glw::SetUniform1f("uIntensity", mBloomRtMat.Id, &kIntensityHack);
+        mBaseQuadRt.Render();
+    }
+    mLensBlurHRt.Disable();
+
+    // Lens blur vertical
+    mLensBlurVRt.Enable();
+    {
+        mBloomRtMat.Use();
+        glw::SetUniformTexture("uColorTexture", mBloomRtMat.Id, mLensBlurHRt.RenderTexture.Id, 0);
+        glw::SetUniform1i("uHorizontal", mBloomRtMat.Id, &kBloomVertical);
+        glw::SetUniform1f("uIntensity", mBloomRtMat.Id, &kIntensityHack);
+        mBaseQuadRt.Render();
+    }
+    mLensBlurVRt.Disable();
+
+    // Lens merge
+    mLensMergeRt.Enable();
+    {
+        mLensMergeRtMat.Use();
+        glw::SetUniformTexture("uColorTexture", mLensMergeRtMat.Id, mBloomFinal.RenderTexture.Id, 0);
+        glw::SetUniformTexture("uLens", mLensMergeRtMat.Id, mLensBlurVRt.RenderTexture.Id, 1);
+        glw::SetUniformTexture("uLensDust", mLensMergeRtMat.Id, mLensDustTex.Id, 2);
+        glw::SetUniformTexture("uLensStar", mLensMergeRtMat.Id, mLensStarTex.Id, 3);
+        mBaseQuadRt.Render();
+    }
+    mLensMergeRt.Disable();
+
+    // Tone map
+    mToneMapRt.Enable();
+    {
+        mToneMapRtMat.Use();
+        glw::SetUniformTexture("uColorTexture", mToneMapRtMat.Id, mLensMergeRt.RenderTexture.Id, 0);
+        mBaseQuadRt.Render();
+    }
+    mToneMapRt.Disable();
+
+    // Fxaa
+    mFxaaRt.Enable();
+    {
+        mFxaaRtMat.Use();
+        glw::SetUniformTexture("uColorTexture", mFxaaRtMat.Id, mToneMapRt.RenderTexture.Id, 0);
+        mBaseQuadRt.Render();
+    }
+    mFxaaRt.Disable();
+
     // Final draw
     mBaseMatRt.Use();
-    glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mLensFeaturesRt.RenderTexture.Id, 0);
+    glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mFxaaRt.RenderTexture.Id, 0);
     mBaseQuadRt.Render();
 
     RenderUi();
@@ -401,6 +486,8 @@ void GLApp::RenderUi()
         ImGui::InputFloat4("Threshold bias", &mThresholdBias.x);
         ImGui::InputInt("Ghost samples", &mGhostSamples);
         ImGui::InputFloat("Ghost dispers", &mGhostDispers);
+        ImGui::InputFloat("Halo width", &mHaloWidth);
+        ImGui::InputFloat("Chromatic distortion", &mChromDistort);
         ImGui::Separator();
     }
     ImGui::End();

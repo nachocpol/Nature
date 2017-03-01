@@ -157,7 +157,7 @@ void main()
     vec3 baseAtm = GetAtmosphereColor(base);
 
     // Lambert
-    float l = max(dot(normalize(normal),uSunPosition),0.1f);
+    float l = max(dot(normalize(normal),uSunPosition),0.0f);
     oColor = vec4(baseAtm * l,1.0f) * CloudsShadowing();
 
     // Logarithmic z-buffer

@@ -56,7 +56,7 @@ private:
     float mWaterShinyFactor = 40.0f;
     glm::vec3 mSpecColor = glm::vec3(1.0f,1.0f,1.0f);
     glm::vec3 mWaterTint = glm::vec3(0.23f, 0.35f, 0.57f);
-    float mWaterTintFactor = 0.1f;
+    float mWaterTintFactor = 0.0f;
 
     glw::RenderTarget mWaterReflecRt;
     glw::RenderTarget mWaterRefracRt;
@@ -85,11 +85,30 @@ private:
     // Lens flares
     glw::RenderTarget mThresholdRt; 
     glw::Material mThresholdRtMat;
-    glm::vec4 mThresholdScale = glm::vec4(0.9f);
-    glm::vec4 mThresholdBias = glm::vec4(0.9f);
-
+    glm::vec4 mThresholdScale = glm::vec4(0.01f);
+    glm::vec4 mThresholdBias = glm::vec4(0.1f);
     glw::RenderTarget mLensFeaturesRt; 
     glw::Material mLensFeaturesRtMat;
-    int mGhostSamples = 3;
-    float mGhostDispers = 4.5f;
+    int mGhostSamples = 6;
+    float mGhostDispers = 0.3f;
+    float mHaloWidth = 0.4f;
+    float mChromDistort = 5.0f;
+    glw::RenderTarget mLensBlurHRt;
+    glw::RenderTarget mLensBlurVRt;
+    glw::Texture mLensDustTex;
+    glw::Texture mLensStarTex;
+    glw::RenderTarget mLensMergeRt;
+    glw::Material mLensMergeRtMat;
+    glm::mat3 mScaleBias1;
+    glm::mat3 mScaleBias2;
+    glm::mat3 mRotation;
+    glm::mat3 mLensStartTrans;
+
+    // Tone map
+    glw::RenderTarget mToneMapRt;
+    glw::Material mToneMapRtMat;
+
+    // FXAA
+    glw::RenderTarget mFxaaRt;
+    glw::Material mFxaaRtMat;
 };
