@@ -428,7 +428,7 @@ void glw::PassConstants::Init()
     const int mat4Size = sizeof(glm::mat4);
     const int vec3Size = sizeof(glm::vec3);
     const int floatSize = sizeof(float);
-    int size = (2 * mat4Size) + (1 * vec3Size) + (3 * floatSize);
+    int size = (2 * mat4Size) + (1 * vec3Size) + (4 * floatSize);
 
     glCreateBuffers(1, &Id);
     glBindBuffer(GL_UNIFORM_BUFFER, Id);
@@ -451,7 +451,8 @@ void glw::PassConstants::Update()
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * mat4Size + vec3Size, floatSize,&PTime);
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * mat4Size + vec3Size + (1 * floatSize), floatSize, &PCamNear);
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * mat4Size + vec3Size + (2 * floatSize), floatSize, &PCamFar);
- 
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * mat4Size + vec3Size + (3 * floatSize), floatSize, &PAspect);
+
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 

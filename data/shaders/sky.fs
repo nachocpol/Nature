@@ -22,6 +22,7 @@ out vec4 oColor;
 
 void main()
 {
+	//oColor = vec4(iColor,1.0f)	;
 	float fCos = dot(normalize(iSunDir), v3Direction) / length(v3Direction);
 	float fMiePhase = 1.5 * ((1.0 - uG2) / (2.0 + uG2)) * (1.0 + fCos*fCos) / pow(1.0 + uG2 - 2.0*uG*fCos, 1.5);
 	oColor.xyz = (iColor + fMiePhase * iSecondaryColor);

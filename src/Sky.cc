@@ -12,14 +12,14 @@ const float kPi = 3.141517f;
 
 Sky::Sky():
     mKr(0.0025f),
-    mESun(15.0f),
-    mKm(0.0004f),
+    mESun(14.0f),
+    mKm(0.0035f),
     mWaveLength(0.65f,0.57f,0.45f),
     mSamples(12),
     mFSamples((float)mSamples),
     mOuterRadius(kAtmosphereR),
     mInnerRadius(kEarthR),
-    mRScaleDepth(0.22f),
+    mRScaleDepth(0.35f),
     mMScaleDepth(0.1f),
     mG(-0.990f),
     SunPosition(0.0f,0.5f,1.0f)

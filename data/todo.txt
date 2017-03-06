@@ -66,7 +66,8 @@
 	+ Implement lens flares											[✓] 1 / 3 / 2017
 	+ Implement HDR													[✓] 28 / 2 / 2017
 	+ Implement Bloom												[✓] 28 / 2 / 2017
-	+ Implement tone mapping										[x]
+	+ Implement tone mapping										[✓] 1 / 3 / 2017
 	+ Water rt's are resized to full size !!!						[X]
 	+ Add starbust to the lens flares!								[x]
-	
+	+ Add fxaa														[✓] 1 / 3 / 2017
+	+ Fix scattering, the sun changes size

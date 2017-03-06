@@ -125,6 +125,7 @@ void main()
 	float fade = GetFade(camDist);
 	if(fade <= 0.0f)discard;
     float n = Scattering();
+    n -= 1.0f;
 
     // Clouds shape
     vec3 csPos = (uScaleFactor*0.5f)*iWPos;
@@ -139,7 +140,7 @@ void main()
 	vec3 uCloudBright = mix(uCloudSunset,uCloudMorning,sqrt(uSundir.y));
 	vec3 cloudColor = mix(uCloudBright,uCloudDark,n);
 	oColor = vec4(cloudColor,(n - 1.0f) * -1.0f);
-	oColor.a *= fade * cs;
+	oColor.a *= fade;
 
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));

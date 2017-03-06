@@ -71,6 +71,8 @@ private:
 
     // Sky
     Sky mSky;
+    glw::RenderTarget mTestSkyRt;
+    glw::Material mTestSkyRtMat;
 
     // Bloom
     glw::RenderTarget mBloomRt;

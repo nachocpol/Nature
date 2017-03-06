@@ -72,6 +72,7 @@ private:
     glw::Texture mCliffTexture;
     glw::Texture mSnowTexture;
     glw::Texture mNormal;
+    glw::Texture mGrassBlades;
 
     // Frustrum culling
     std::vector<float> mChunkHeight;

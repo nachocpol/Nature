@@ -25,6 +25,7 @@ GLApp::~GLApp()
 bool GLApp::Init()
 {
     mViewport = glm::uvec4(0, 0, 1280, 1024);
+    glm::vec2 initWindowSize = glm::vec2(mViewport.z, mViewport.w);
 
     // Initialize window
     if (!mWindow.Init("Nature 3.0", glm::uvec2(mViewport.z, mViewport.w)))
@@ -66,7 +67,7 @@ bool GLApp::Init()
         0,1,2,
         0,2,3
     };
-    mBaseRt.Init(glm::vec2(mViewport.z, mViewport.w), true);
+    mBaseRt.Init(glm::vec2(initWindowSize), true);
     mBaseMatRt.Init("../data/shaders/rt.vs", "../data/shaders/rt.fs");
     mBaseQuadRt.Init(vert, ele);
 
@@ -126,9 +127,9 @@ bool GLApp::Init()
     mSky.Init();
 
     // Bloom
-    mBloomRt.Init(glm::vec2(720.0f));
-    mBloomRtV.Init(glm::vec2(720.0f));
-    mBloomFinal.Init(glm::vec2(0.0f));
+    mBloomRt.Init(initWindowSize);
+    mBloomRtV.Init(initWindowSize);
+    mBloomFinal.Init(initWindowSize);
     mBloomRtMat.Init
     (
         "../data/shaders/bloom/bloomblur.vs",
@@ -142,24 +143,24 @@ bool GLApp::Init()
 
     // Lens flares
     // Downsample and threshold
-    mThresholdRt.Init(glm::vec2(720.0f));
+    mThresholdRt.Init(initWindowSize);
     mThresholdRtMat.Init
     (
         "../data/shaders/lensflares/lfthreshold.vs",
         "../data/shaders/lensflares/lfthreshold.fs"
     );
     // Feature generation
-    mLensFeaturesRt.Init(glm::vec2(720.0f));
+    mLensFeaturesRt.Init(initWindowSize);
     mLensFeaturesRtMat.Init
     (
         "../data/shaders/lensflares/lffeatures.vs",
         "../data/shaders/lensflares/lffeatures.fs"
     );
-    mLensBlurHRt.Init(glm::vec2(720.0f));
-    mLensBlurVRt.Init(glm::vec2(720.0f));
+    mLensBlurHRt.Init(initWindowSize);
+    mLensBlurVRt.Init(initWindowSize);
     mLensDustTex.Init(TextureDef("../data/textures/lensdust.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
     mLensStarTex.Init(TextureDef("../data/textures/lensstar.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mLensMergeRt.Init(glm::vec2(720.0f));
+    mLensMergeRt.Init(initWindowSize);
     mLensMergeRtMat.Init
     (
         "../data/shaders/lensflares/lmerge.vs",
@@ -167,7 +168,7 @@ bool GLApp::Init()
     );
 
     // Tone map
-    mToneMapRt.Init(glm::vec2(720.0f));
+    mToneMapRt.Init(initWindowSize);
     mToneMapRtMat.Init
     (
         "../data/shaders/tonemap/tonemap.vs",
@@ -175,12 +176,21 @@ bool GLApp::Init()
     );
 
     // FXAA
-    mFxaaRt.Init(glm::vec2(720.0f));
+    mFxaaRt.Init(initWindowSize);
     mFxaaRtMat.Init
     (
         "../data/shaders/aa/fxaa.vs",
         "../data/shaders/aa/fxaa.fs"
     );
+
+    // Test sky
+    mTestSkyRt.Init(initWindowSize);
+    mTestSkyRtMat.Init
+    (
+        "../data/shaders/sky/skypp.vs",
+        "../data/shaders/sky/skypp.fs"
+    );
+
     return true;
 }
 
@@ -197,6 +207,7 @@ void GLApp::Update()
     mPassConst.PTime = mTime;
     mPassConst.PCamNear = mCamera.GetNear();
     mPassConst.PCamFar = mCamera.GetFar();
+    mPassConst.PAspect = mViewport.z / mViewport.w;
     mPassConst.Update();
 
     mSky.SunPosition = mSunDirection;
@@ -248,7 +259,11 @@ void GLApp::Render()
     mWaterReflecRt.Enable();
     {
         // Sky
-        mSky.Render();
+        //mSky.Render();
+        glDepthMask(GL_FALSE);
+        mTestSkyRtMat.Use();
+        mBaseQuadRt.Render();
+        glDepthMask(GL_TRUE);
 
         // Terrain
         mTerrain.Render(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.01f)));
@@ -292,7 +307,11 @@ void GLApp::Render()
     mBaseRt.Enable();
     {
         // Sky
-        mSky.Render();
+        //mSky.Render();
+        glDepthMask(GL_FALSE);
+        mTestSkyRtMat.Use();
+        mBaseQuadRt.Render();
+        glDepthMask(GL_TRUE);
 
         // Terrain
         mTerrain.Render(false);

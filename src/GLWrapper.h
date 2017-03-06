@@ -108,6 +108,7 @@ namespace glw
         float PTime;
         float PCamNear;
         float PCamFar;
+        float PAspect;
     };
 
     struct Texture

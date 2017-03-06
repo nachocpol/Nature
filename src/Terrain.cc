@@ -25,15 +25,15 @@ const float kPi = 3.141517f;
 Terrain::Terrain():
     ChunkSide(16), 
     ElementSide(16),
-    mKr(0.0025f),
-    mESun(15.0f),
-    mKm(0.0004f),
+    mKr(0.0035f),
+    mESun(14.0f),
+    mKm(0.002f),
     mWaveLength(0.65f, 0.57f, 0.45f),
     mSamples(1),
     mFSamples((float)mSamples),
     mOuterRadius(kAtmosphereR),
     mInnerRadius(kEarthR),
-    mRScaleDepth(0.22f),
+    mRScaleDepth(0.35f),
     mMScaleDepth(0.1f),
     mG(-0.990f),
     SunPosition(0.0f, 0.5f, 1.0f)
@@ -67,17 +67,17 @@ void Terrain::Init()
 
     mTerrainMaterial.Init
     (
-        "../data/shaders/terrain.vs",
-        "../data/shaders/terrain.fs",
-        "../data/shaders/terrain.tc",
-        "../data/shaders/terrain.te"
+        "../data/shaders/terrain/terrain.vs",
+        "../data/shaders/terrain/terrain.fs",
+        "../data/shaders/terrain/terrain.tc",
+        "../data/shaders/terrain/terrain.te"
     );
     mTerrainMaterialInst.Init
     (
-        "../data/shaders/terraininst.vs",
-        "../data/shaders/terrain.fs",
-        "../data/shaders/terrain.tc",
-        "../data/shaders/terrain.te"
+        "../data/shaders/terrain/terraininst.vs",
+        "../data/shaders/terrain/terrain.fs",
+        "../data/shaders/terrain/terrain.tc",
+        "../data/shaders/terrain/terrain.te"
     );
 
     mGrassTexture.Init(TextureDef("../data/textures/grass.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
@@ -86,6 +86,7 @@ void Terrain::Init()
     mSplatMap.Init(TextureDef("../data/hmaps/lagodix/lagodixsplat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mSnowTexture.Init(TextureDef("../data/textures/snow.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mNormal.Init(TextureDef("../data/hmaps/lagodix/lagodixnorm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mGrassBlades.Init(TextureDef("../data/textures/s_grassblades.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
 
     // Load the hmpa so we can sample to find the chunks y pos
     TextureDef hMap;
@@ -246,6 +247,7 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     glw::SetUniformTexture("uLutTexture", p, LutTexture->Id, 4);
     glw::SetUniformTexture("uSnowTexture", p, mSnowTexture.Id, 5);
     glw::SetUniformTexture("uNormalTexture", p, mNormal.Id, 6);
+    glw::SetUniformTexture("uGrassBlades", p, mGrassBlades.Id, 7);
 
     // Random stuff
     glw::SetUniform1f("uTiling1", p, &mTiling1);
