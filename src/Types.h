@@ -16,6 +16,13 @@ struct BasicVertex
     glm::vec2 Uv;
 };
 
+struct BasicVertexPoint
+{
+    BasicVertexPoint() {};
+    BasicVertexPoint(float px, float py, float pz);
+    glm::vec3 Position;
+};
+
 struct MeshBasicVertexData
 {
     std::vector<BasicVertex> vertex;
@@ -27,7 +34,8 @@ enum ShaderType
     kVertex,
     kFragment,
     kTessControl,
-    kTessEval
+    kTessEval,
+    kGeometry
 };
 
 enum TextureUsage
@@ -42,7 +50,8 @@ enum DrawMode
 {
     kTriangles,
     kPatches3,
-    kQuad
+    kQuad,
+    kPoints
 };
 
 enum FrustrumResult

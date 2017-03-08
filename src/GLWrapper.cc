@@ -174,6 +174,34 @@ void glw::Mesh::Init(std::vector<BasicVertex> vertex, std::vector<unsigned int> 
     glBindVertexArray(0);
 }
 
+void glw::Mesh::Init(std::vector<BasicVertexPoint> vertex, std::vector<unsigned int> ele)
+{
+    GLsizeiptr eleSize = sizeof(unsigned int) * ele.size();
+    GLsizeiptr vertexSize = sizeof(BasicVertexPoint) * vertex.size();
+    NumElements = ele.size();
+
+    GLsizeiptr posSize = sizeof(glm::vec3);
+
+    glGenVertexArrays(1, &Id);
+    glBindVertexArray(Id);
+    {
+        // Generate and upload element buffer
+        glGenBuffers(1, &Ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, eleSize, ele.data(), GL_STATIC_DRAW);
+
+        // Generate and upload vertex buffer
+        glGenBuffers(1, &Vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, Vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertexSize, vertex.data(), GL_STATIC_DRAW);
+
+        // Setup vertex attributes
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, posSize, (GLvoid*)0);
+        glEnableVertexAttribArray(0);
+    }
+    glBindVertexArray(0);
+}
+
 void glw::Mesh::Render()
 {
     glBindVertexArray(Id);
@@ -187,7 +215,10 @@ void glw::Mesh::Render()
         glDrawElements(GL_PATCHES, NumElements, GL_UNSIGNED_INT, 0);
         break;
     case kQuad:
-        glDrawElements(GL_QUADS, NumElements/1, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_QUADS, NumElements / 1, GL_UNSIGNED_INT, 0);
+        break;
+    case kPoints:
+        glDrawElements(GL_POINTS, NumElements, GL_UNSIGNED_INT, 0);
         break;
     }
     glBindVertexArray(0);
@@ -265,6 +296,9 @@ void glw::InstancedMesh::Render(std::vector<glm::mat4>& transforms)
     case kQuad:
         glDrawElementsInstanced(GL_QUADS, IMesh.NumElements / 1, GL_UNSIGNED_INT, 0, transforms.size());
         break;
+    case kPoints:
+        glDrawElementsInstanced(GL_POINTS, IMesh.NumElements, GL_UNSIGNED_INT, 0,transforms.size());
+        break;
     }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -291,6 +325,9 @@ void glw::Shader::Init(const char * path, ShaderType type)
         break;
     case kTessEval:
         t = GL_TESS_EVALUATION_SHADER;
+        break;
+    case kGeometry:
+        t = GL_GEOMETRY_SHADER;
         break;
     default:
         break;
@@ -324,10 +361,7 @@ glw::Material::Material():
 
 bool glw::Material::Init(const char * vs, const char * fs)
 {
-    // Vertex shader
     Vs.Init(vs, ShaderType::kVertex);
-
-    // Fragment shader
     Fs.Init(fs, ShaderType::kFragment);
 
     // Program and link
@@ -373,16 +407,9 @@ glw::MaterialTess::MaterialTess():
 
 bool glw::MaterialTess::Init(const char * vs, const char * fs, const char * tc, const char * te)
 {
-    // Vertex shader
     Vs.Init(vs, ShaderType::kVertex);
-
-    // Fragment shader
     Fs.Init(fs, ShaderType::kFragment);
-
-    // TessControl
     Tc.Init(tc, ShaderType::kTessControl);
-
-    // TessEval
     Te.Init(te, ShaderType::kTessEval);
 
     // Program and link
@@ -422,6 +449,53 @@ void glw::MaterialTess::Release()
     Te.Release();
     glDeleteProgram(Id);
 }
+
+glw::MaterialGeo::MaterialGeo():
+    Id(0)
+{
+}
+
+bool glw::MaterialGeo::Init(const char * vs, const char * fs, const char * gs)
+{
+    Vs.Init(vs, ShaderType::kVertex);
+    Fs.Init(fs, ShaderType::kFragment);
+    Gs.Init(gs, ShaderType::kGeometry);
+
+    // Program and link
+    GLint s = -1;
+    GLchar log[512];
+    Id = glCreateProgram();
+    glAttachShader(Id, Vs.Id);
+    glAttachShader(Id, Fs.Id);
+    glAttachShader(Id, Gs.Id);
+    glLinkProgram(Id);
+    glGetProgramiv(Id, GL_LINK_STATUS, &s);
+    if (!s)
+    {
+        glGetProgramInfoLog(Id, 512, nullptr, log);
+        printf(" ERROR: Failed to create material:\n %s \n", log);
+        Release();
+        return false;
+    }
+
+    // Setup pass ubo
+    glUniformBlockBinding(Id, glGetUniformBlockIndex(Id, "uPass"), kPassBinding);
+
+    return true;
+}
+
+void glw::MaterialGeo::Use()
+{
+    glUseProgram(Id);
+}
+
+void glw::MaterialGeo::Release()
+{
+    Vs.Release();
+    Fs.Release();
+    Gs.Release();
+}
+
 
 void glw::PassConstants::Init()
 {

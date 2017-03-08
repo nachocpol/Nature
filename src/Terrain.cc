@@ -86,16 +86,15 @@ void Terrain::Init()
     mSplatMap.Init(TextureDef("../data/hmaps/lagodix/lagodixsplat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mSnowTexture.Init(TextureDef("../data/textures/snow.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mNormal.Init(TextureDef("../data/hmaps/lagodix/lagodixnorm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mGrassBlades.Init(TextureDef("../data/textures/s_grassblades.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
 
     // Load the hmpa so we can sample to find the chunks y pos
     TextureDef hMap;
     hMap.Path = mHeightMap.Def.Path;
     LoadTextureFromFile(hMap);
+
     // Load hmap float....
-    TextureDefF hMapF;
-    hMapF.Path = mHeightMap.Def.Path;
-    LoadTextureFromFileF(hMapF);
+    mHmapF.Path = mHeightMap.Def.Path;
+    LoadTextureFromFileF(mHmapF);
     
     // Bounding sphere radius (sin(45) because chunks are squares
     // hypotenuse = opposite / sin(angle)
@@ -129,37 +128,10 @@ void Terrain::Init()
             bSpherePos.y = ((float)yData / 255.0f) * 200.0f;
             mChunks[idx].BSphere = BoundingSphere(bSpherePos * MapScale, diagonal * MapScale); 
 
-            // Add vegetation
-            unsigned int curGrass = 0;
-            glm::vec2 cStart = glm::ivec2(p.x, p.y);
-            cStart *= (ElementSide - 1) * ElementSize;
-            glm::vec2 cEnd = cStart + glm::vec2((ElementSide - 1) * ElementSize);
-            glm::mat4 vTrans;
-            for (int ci = cStart.x; ci < cEnd.x; ci+= ElementSize/6.0f)
-            {
-                for (float cj = cStart.y; cj < cEnd.y; cj+= ElementSize/6.0f)
-                {
-                    vTrans = glm::mat4();
-                    unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
-                    float vY = hMapF.Data[vIdx] * 200.0f * MapScale;
-                    if (vY > 200.0f || vY < 24.0f)continue;
-                    glm::vec3 vp = glm::vec3(ci, 0.0f, cj) * MapScale;
-                    glm::vec2 randPos = glm::diskRand(10.0f);
-                    vp.x += randPos.x;
-                    vp.z += randPos.y;
-                    vp.y = vY;
-                    vTrans = glm::translate(vTrans, vp);
-                    vTrans = glm::scale(vTrans, glm::vec3(2.0f));
-                    mChunks[idx].Deco.GrassTransforms.push_back(vTrans);
-                    curGrass++;
-                }
-            }
-            mGrassCnt += curGrass;
-            mMaxGrassChunk = glm::max(mMaxGrassChunk, curGrass);
+            // Add grass
+            AddGrass(mChunks[idx],p);
         }
     }
-    printf(" LOG: Total grass:%i\n", mGrassCnt);
-    printf(" LOG: Max grass in a chunk:%i\n", mMaxGrassChunk);
 
     // Init instanced mesh (chunks)
     InitMeshAsGrid(mChunkMeshInstance.IMesh, ElementSide, ElementSize);
@@ -168,7 +140,12 @@ void Terrain::Init()
     curTransforms.resize(mChunks.size());
 
     // Init vegetation materials
-    mGrassMaterial.Init("../data/shaders/vegetation.vs", "../data/shaders/vegetation.fs");
+    mGrassMaterial.Init
+    (
+        "../data/shaders/vegetation/grass.vs", 
+        "../data/shaders/vegetation/grass.fs",
+        "../data/shaders/vegetation/grass.gs"
+    );
 
     // Init vegetation meshes
     MeshBasicVertexData gMd;
@@ -247,7 +224,6 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     glw::SetUniformTexture("uLutTexture", p, LutTexture->Id, 4);
     glw::SetUniformTexture("uSnowTexture", p, mSnowTexture.Id, 5);
     glw::SetUniformTexture("uNormalTexture", p, mNormal.Id, 6);
-    glw::SetUniformTexture("uGrassBlades", p, mGrassBlades.Id, 7);
 
     // Random stuff
     glw::SetUniform1f("uTiling1", p, &mTiling1);
@@ -300,33 +276,19 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
         }
     }
 
-    // Draw vegetation
-    glDisable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
+    // Draw grass
     mGrassMaterial.Use();
-
-    unsigned int vp = mGrassMaterial.Id;
-    glw::SetUniformTexture("uAlbedoTexture", vp, mGrass1AlbedoTex.Id, 0);
-    glw::SetUniformTexture("uOpacityTexture", vp, mGrass1OpacityTex.Id, 1);
-
-    //double start = glfwGetTime();
     if (mUseInstancing)
     {
-        for (unsigned int c = 0; c < mChunksVisible.size(); c++)
+        for (unsigned int i = 0; i < mChunksVisible.size(); i++)
         {
-            float dToCam = glm::distance(mChunksVisible[c].RealChunkPos,*CamPos);
-            if (dToCam > 1000.0f)continue;
-            mGrassInstanceMesh.Render(mChunksVisible[c].Deco.GrassTransforms);
+            mChunksVisible[i].ChunkGrass.Render();
         }
     }
     else
     {
-        // Draw grass of ALL chunks...
+
     }
-    //double elapsed = glfwGetTime() - start;
-    //printf("LOG:Elapsed draw grass:%f\n",elapsed / 1000.0f);
-    glDisable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
 
     // Debug chunks
     if (VisualDebug)
@@ -474,5 +436,42 @@ void Terrain::RenderInstanced(std::vector<Chunk>& chunks)
     mChunkMeshInstance.Render(curTransforms);
 
     if (mDrawWire) { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
+}
+
+void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
+{
+    // Data to build the point mesh
+    std::vector<BasicVertexPoint> grassVertex;
+    std::vector<unsigned int> grassEle;
+
+    // Starting and end points of the chunk
+    glm::vec2 cStart = glm::ivec2(p.x, p.y);
+    cStart *= (ElementSide - 1) * ElementSize;
+    glm::vec2 cEnd = cStart + glm::vec2((ElementSide - 1) * ElementSize);
+    glm::mat4 vTrans;
+    
+    // Add grass
+    float grassDensity = 6.0f;
+    for (int ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
+    {
+        for (float cj = cStart.y; cj < cEnd.y; cj += ElementSize / grassDensity)
+        {
+            vTrans = glm::mat4();
+            unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
+            float vY = mHmapF.Data[vIdx] * 200.0f * MapScale;
+            //if (vY > 200.0f || vY < 24.0f)continue;
+            glm::vec3 vp = glm::vec3(ci, 0.0f, cj) * MapScale;
+            glm::vec2 randPos = glm::diskRand(10.0f);
+            vp.x += randPos.x;
+            vp.z += randPos.y;
+            vp.y = vY;
+            vTrans = glm::translate(vTrans, vp);
+            vTrans = glm::scale(vTrans, glm::vec3(2.0f));
+            grassVertex.push_back(BasicVertexPoint(vp.x, vp.y, vp.z));
+            grassEle.push_back(grassEle.size());
+        }
+    }
+    chunk.ChunkGrass.Init(grassVertex, grassEle);
+    chunk.ChunkGrass.DMode = DrawMode::kPoints;
 }
 

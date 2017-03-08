@@ -18,7 +18,6 @@ uniform sampler2D uHeightMap;
 uniform sampler2D uLutTexture;
 uniform sampler2D uSnowTexture;
 uniform sampler2D uNormalTexture;
-uniform sampler2D uGrassBlades;
 uniform vec3 uSunPosition;
 uniform float uTiling1;
 uniform float uTiling2;
@@ -151,108 +150,6 @@ vec3 GetAtmosphereColor(vec3 base)
     return iColor + base * iSecondaryColor;
 }
 
-#define MAX_RAYDEPTH 5                                     //Number of iterations.
-#define PLANE_NUM 32.0                                      //Number of grass slice grid planes per unit in tangent space.
-#define PLANE_NUM_INV (1.0/PLANE_NUM)
-#define PLANE_NUM_INV_DIV2 (PLANE_NUM_INV/2)
-#define GRASS_SLICE_NUM 8                                   // Number of grass slices in texture grassblades.
-#define GRASS_SLICE_NUM_INV (1.0/GRASS_SLICE_NUM)
-#define GRASS_SLICE_NUM_INV_DIV2 (GRASS_SLICE_NUM_INV/2)
-#define GRASSDEPTH GRASS_SLICE_NUM_INV                      //Depth set to inverse of number of grass slices so no stretching occurs.
-#define TC1_TO_TC2_RATIO 8                                  //Ratio of texture coordinate set 1 to texture coordinate set 2, used for the animation lookup.
-#define PREMULT (GRASS_SLICE_NUM_INV*PLANE_NUM)             //Saves a multiply in the shader.
-#define AVERAGE_COLOR vec4(0.32156,0.513725,0.0941176,1.0)  //Used to fill remaining opacity, can be replaced by a texture lookup.
-
-vec4 GetGrass(vec3 n)
-{
-    // Initialize increments/decrements and per fragment constants
-    vec4 color = vec4(0.0,0.0,0.0,0.0);
-
-    // Atributes into
-    vec3 eyeDir = -normalize(uCampos - iPosition);
-    mat3 tbn = GetTBNMatrix(n,eyeDir,iTexcoord * uTiling1);
-    vec3 eyeDirTan = normalize(tbn * eyeDir);
-    // oEyeDirTan = normalize(mul(TBNMatrix,eyeDirO)); // eye vector in tangent space
-
-    vec2 plane_offset = vec2(0.0,0.0);                  
-    vec3 rayEntry = vec3(iTexcoord.xy * uTiling1,0.0);
-    float zOffset = 0.0;
-    int zFlag = 1;
-
-    // The signs of eyeDirTan determines if we increment or decrement along the tangent space axis
-    // plane_correct, planemod and pre_dir_correct are used to avoid unneccessary if-conditions. 
-    vec2 sign = vec2(sign(eyeDirTan.x),sign(eyeDirTan.y));  
-    vec2 plane_correct = vec2((sign.x+1)*GRASS_SLICE_NUM_INV_DIV2,
-                              (sign.y+1)*GRASS_SLICE_NUM_INV_DIV2);
-    vec2 planemod = vec2(floor(rayEntry.x*PLANE_NUM)/PLANE_NUM,
-                         floor(rayEntry.y*PLANE_NUM)/PLANE_NUM);
-    vec2 pre_dir_correct = vec2((sign.x+1)*PLANE_NUM_INV_DIV2,
-                                (sign.y+1)*PLANE_NUM_INV_DIV2);
-
-    int hitcount;
-    for(hitcount =0; hitcount < MAX_RAYDEPTH % (MAX_RAYDEPTH+1); hitcount++)    // %([MAX_RAYDEPTH]+1) speeds up compilation.
-                                                                                // It may proof to be faster to early exit this loop
-                                                                                // depending on the hardware used.
-    {
-        // Calculate positions of the intersections with the next grid 
-        // planes on the u,v tangent space axis independently.
-        vec2 dir_correct = vec2(sign.x*plane_offset.x+pre_dir_correct.x,
-                                sign.y*plane_offset.y+pre_dir_correct.y);           
-        vec2 distance = vec2((planemod.x + dir_correct.x - rayEntry.x)/(eyeDirTan.x),
-                             (planemod.y + dir_correct.y - rayEntry.y)/(eyeDirTan.y));
-                    
-        vec3 rayHitpointX = rayEntry + eyeDirTan *distance.x;   
-        vec3 rayHitpointY = rayEntry + eyeDirTan *distance.y;
-        
-        // Check if we hit the ground. If so, calculate the intersection and 
-        // look up the ground texture and blend colors.
-        if ((rayHitpointX.z <= -GRASSDEPTH)&& (rayHitpointY.z <= -GRASSDEPTH))  
-        {
-            float distanceZ = (-GRASSDEPTH)/eyeDirTan.z; // rayEntry.z is 0.0 anyway 
-
-            vec3 rayHitpointZ = rayEntry + eyeDirTan * distanceZ;
-            vec2 orthoLookupZ = vec2(rayHitpointZ.x,rayHitpointZ.y);
-                        
-            color = (color)+((1.0-color.w)); /* * tex2D(ground,orthoLookupZ));*/
-            if(zFlag == 1) zOffset = distanceZ;  // write the distance from rayEntry to intersection
-            zFlag = 0;                          // Early exit here if faster.     
-        }  
-        else
-        {
-            vec2 orthoLookup; //Will contain texture lookup coordinates for grassblades texture.
-
-            //check if we hit a u or v plane, calculate lookup accordingly with wind shear displacement.
-            if(distance.x <= distance.y)
-            {
-                //vec4 windX = (tex2D(windnoise,texCoord2+rayHitpointX.xy/TC1_TO_TC2_RATIO)-0.5)/2;
-                vec4 windX = vec4(1.0f);
-                float lookupX = -(rayHitpointX.z+(planemod.x+sign.x*plane_offset.x)*PREMULT)-plane_correct.x;
-                orthoLookup=vec2(rayHitpointX.y+windX.x*(GRASSDEPTH+rayHitpointX.z),lookupX); 
-                
-                plane_offset.x += PLANE_NUM_INV; // increment/decrement to next grid plane on u axis
-                if(zFlag == 1) zOffset = distance.x;
-            }
-            else 
-            {
-                //vec4 windY = (tex2D(windnoise,texCoord2+rayHitpointY.xy/TC1_TO_TC2_RATIO)-0.5)/2;
-                vec4 windY = vec4(1.0f);
-
-                float lookupY = -(rayHitpointY.z+(planemod.y+sign.y*plane_offset.y)*PREMULT)-plane_correct.y;
-                orthoLookup = vec2(rayHitpointY.x+windY.y*(GRASSDEPTH+rayHitpointY.z) ,lookupY);
-            
-                plane_offset.y += PLANE_NUM_INV;  // increment/decrement to next grid plane on v axis
-                if(zFlag == 1) zOffset = distance.y;
-            }
-            color += (1.0-color.w)*texture(uGrassBlades,orthoLookup);
-    
-            if(color.w >= 0.49){zFlag = 0;} //Early exit here if faster.
-        }
-    }   
-    color += (1.0-color.w)*AVERAGE_COLOR;   //  Fill remaining transparency in case there is some left. Can be replaced by a texture lookup
-                                            //  into a fully opaque grass slice using orthoLookup.
-    return color;
-}
-
 void main()
 {
     // Load normal and hack to work with world machine normals
@@ -265,8 +162,6 @@ void main()
     // Lambert
     float l = max(dot(normalize(normal),uSunPosition),0.0f);
     oColor = vec4(baseAtm * l,1.0f) * CloudsShadowing();
-
-    oColor = GetGrass(normalize(normal));
 
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));

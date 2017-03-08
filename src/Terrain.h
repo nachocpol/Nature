@@ -7,11 +7,6 @@
 #include "glm.hpp"
 #include "GLWrapper.h"
 
-struct ChunkDeco
-{
-    std::vector<glm::mat4> GrassTransforms;
-};
-
 struct Chunk
 {
     Chunk(){}
@@ -19,7 +14,7 @@ struct Chunk
     glm::vec3 RealChunkPos;
     glw::Mesh ChunkMesh;
     BoundingSphere BSphere;
-    ChunkDeco Deco;
+    glw::Mesh ChunkGrass;   // per chunk grass
 };
 
 class Terrain
@@ -54,6 +49,7 @@ private:
     void InitMeshAsGrid(glw::Mesh& mesh,unsigned int size, float eleSize);
     void RenderChunk(Chunk& c);
     void RenderInstanced(std::vector<Chunk>& chunks);
+    void AddGrass(Chunk& chunk,glm::ivec2 p);
 
     // Chunks
     std::vector<Chunk> mChunks;
@@ -72,7 +68,6 @@ private:
     glw::Texture mCliffTexture;
     glw::Texture mSnowTexture;
     glw::Texture mNormal;
-    glw::Texture mGrassBlades;
 
     // Frustrum culling
     std::vector<float> mChunkHeight;
@@ -119,9 +114,13 @@ private:
     // Vegetation
     unsigned int mGrassCnt = 0;
     unsigned int mMaxGrassChunk = 0;
-    glw::Material mGrassMaterial;
+    glw::MaterialGeo mGrassMaterial;
     glw::InstancedMesh mGrassInstanceMesh;
+
     // Grass 1
     glw::Texture mGrass1AlbedoTex;
     glw::Texture mGrass1OpacityTex;
+
+    // Terrain heigthmap (float texture)
+    TextureDefF mHmapF;
 };

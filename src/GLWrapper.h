@@ -39,6 +39,7 @@ namespace glw
     {
         Mesh():DMode(kTriangles) {}
         void Init(std::vector<BasicVertex> vertex,std::vector<unsigned int> ele);
+        void Init(std::vector<BasicVertexPoint> vertex, std::vector<unsigned int> ele);
         void Render();
 
         GLuint Id;
@@ -93,6 +94,20 @@ namespace glw
         Shader Fs;
         Shader Tc;
         Shader Te;
+        GLuint Id;
+    };
+
+    struct MaterialGeo
+    {
+        MaterialGeo();
+        bool Init(  const char* vs, const char* fs,
+                    const char* gs);
+        void Use();
+        void Release();
+
+        Shader Vs;
+        Shader Fs;
+        Shader Gs;
         GLuint Id;
     };
 
