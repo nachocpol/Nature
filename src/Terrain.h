@@ -115,7 +115,9 @@ private:
     unsigned int mGrassCnt = 0;
     unsigned int mMaxGrassChunk = 0;
     glw::MaterialGeo mGrassMaterial;
-    glw::InstancedMesh mGrassInstanceMesh;
+    float mLodRange = 450.0f;
+    float mNearLodRange = 100.0f;
+    bool mGrassWire = false;
 
     // Grass 1
     glw::Texture mGrass1AlbedoTex;

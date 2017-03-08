@@ -147,30 +147,6 @@ void Terrain::Init()
         "../data/shaders/vegetation/grass.gs"
     );
 
-    // Init vegetation meshes
-    MeshBasicVertexData gMd;
-    gMd.vertex =
-    {
-        BasicVertex(-0.5f,0.0f,0.0f,0.0f,1.0f),
-        BasicVertex( 0.5f,0.0f,0.0f,1.0f,1.0f),
-        BasicVertex( 0.5f,1.0f,0.0f,1.0f,0.0f),
-        BasicVertex(-0.5f,1.0f,0.0f,0.0f,0.0f),
-
-        BasicVertex( 0.0f,0.0f,0.5f,0.0f,1.0f),
-        BasicVertex( 0.0f,0.0f,-0.5f,1.0f,1.0f),
-        BasicVertex( 0.0f,1.0f,-0.5f,1.0f,0.0f),
-        BasicVertex( 0.0f,1.0f, 0.5f,0.0f,0.0f)
-    };
-    gMd.ele =
-    {
-        0,1,2,
-        0,2,3,
-        4,5,6,
-        4,6,7
-    };
-    mGrassInstanceMesh.IMesh.Init(gMd.vertex,gMd.ele);
-    mGrassInstanceMesh.InitInstances(mMaxGrassChunk, BufferUsage::kDynamic);
-
     // Grass 1
     mGrass1AlbedoTex.Init(TextureDef("../data/textures/grass_01/diffus.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
     mGrass1OpacityTex.Init(TextureDef("../data/textures/grass_01/opacity.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
@@ -278,12 +254,17 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
 
     // Draw grass
     glDisable(GL_CULL_FACE);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if(mGrassWire)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     mGrassMaterial.Use();
+    glw::SetUniform1f("mLodRange", mGrassMaterial.Id, &mLodRange);
+    glw::SetUniform1f("mNearLodRange", mGrassMaterial.Id, &mNearLodRange);
+
     if (mUseInstancing)
     {
         for (unsigned int i = 0; i < mChunksVisible.size(); i++)
         {
+            // Early exit so we dont draw far grass (prevent from having it on the shader)
+            if (glm::distance(*CamPos, mChunksVisible[i].RealChunkPos) > mLodRange + 800.0f)continue;
             mChunksVisible[i].ChunkGrass.Render();
         }
     }
@@ -291,7 +272,7 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     {
 
     }
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    if (mGrassWire)glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_CULL_FACE);
 
     // Debug chunks
@@ -339,6 +320,12 @@ void Terrain::RenderUi()
         ImGui::InputFloat("Rayleigh Scale Depth(terrain)", &mRScaleDepth);
         ImGui::InputFloat("Mie Scale Depth(terrain)", &mMScaleDepth);
         ImGui::InputFloat("Mie phase asymmetry factor(terrain)", &mG);
+        ImGui::Separator();
+        
+        ImGui::Text("Grass");
+        ImGui::InputFloat("Lod range", &mLodRange);
+        ImGui::InputFloat("Near lod range", &mNearLodRange);
+        ImGui::Checkbox("Wireframe", &mGrassWire);
         ImGui::Separator();
     }
     ImGui::End();

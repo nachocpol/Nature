@@ -18,6 +18,7 @@ out vec4 oColor;
 
 void main()
 {	
+	/*
 	if(iLod == 1)
 	{
 		oColor = vec4(0.0f,1.0f,1.0f,1.0f);
@@ -34,6 +35,8 @@ void main()
 	{
 		oColor = vec4(1.0f,0.0f,0.0f,1.0f);
 	}
+	*/
+	oColor = vec4(0.07f,0.38f,0.1f,1.0f);
 
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));
     gl_FragDepth = log2(iLogz) * Fcoef_half;
