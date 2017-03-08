@@ -277,6 +277,8 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     }
 
     // Draw grass
+    glDisable(GL_CULL_FACE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     mGrassMaterial.Use();
     if (mUseInstancing)
     {
@@ -289,6 +291,8 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     {
 
     }
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_CULL_FACE);
 
     // Debug chunks
     if (VisualDebug)
@@ -451,15 +455,15 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     glm::mat4 vTrans;
     
     // Add grass
-    float grassDensity = 6.0f;
-    for (int ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
+    float grassDensity = 16.0f;
+    for (float ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
     {
         for (float cj = cStart.y; cj < cEnd.y; cj += ElementSize / grassDensity)
         {
             vTrans = glm::mat4();
             unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
             float vY = mHmapF.Data[vIdx] * 200.0f * MapScale;
-            //if (vY > 200.0f || vY < 24.0f)continue;
+            if (vY > 200.0f || vY < 24.0f)continue;
             glm::vec3 vp = glm::vec3(ci, 0.0f, cj) * MapScale;
             glm::vec2 randPos = glm::diskRand(10.0f);
             vp.x += randPos.x;
