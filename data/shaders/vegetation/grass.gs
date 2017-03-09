@@ -18,6 +18,8 @@ uniform float mNearLodRange;
 layout (triangle_strip,max_vertices = 21) out;
 out float iLogz;
 flat out int iLod;
+out vec3 iPosition;
+out vec3 iWPos;
 
 float GetWind(float s)
 {
@@ -43,86 +45,55 @@ mat4 RotationMatrix(vec3 axis, float angle)
                 0.0,                                0.0,                                0.0,                                1.0);
 }
 
-mat4 YRotMatrix(float angle)
+mat4 TranslateMatrix(vec3 t)
 {
-	float c = cos(angle);
-	float s = sin(angle);
 	return mat4
 	(
-		c,		0.0f,	-s,		0.0f,
-		0.0f,	1.0f,	0.0f,	0.0f,
-		s,		0.0f,	c,		0.0f,
-		0.0f,	0.0f,	0.0f,	1.0f
+		1.0f,0.0f,0.0f,0.0f,
+		0.0f,1.0f,0.0f,0.0f,
+		0.0f,0.0f,1.0f,0.0f,
+		t.x,t.y,t.z,1.0f
 	);
+}
+
+void GenVertex(float Fcoef,vec3 v,mat4 m,int lod)
+{
+	iPosition = v;
+	iWPos = (m * vec4(v,1.0f)).xyz;
+	gl_Position = uProjection * uView * vec4(iWPos,1.0f);
+	iLogz = 1.0f + gl_Position.w;
+	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
+	iLod = lod;
+	EmitVertex();
 }
 
 void GenBladeQuad(float Fcoef,vec3 b,vec3 t,int lod,mat4 model)
 {
-	// Frist quad 		
-	vec3 bl = gPosition[0] + vec3(-b.x,b.y,b.z);
-	gl_Position = uProjection * uView * model * vec4(bl,1.0f);
-	iLogz = 1.0f + gl_Position.w;
-	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-	iLod = lod;
-	EmitVertex();
-
-	vec3 br = gPosition[0] + vec3( b.x,b.y,b.z);
-	gl_Position = uProjection * uView * model * vec4(br,1.0f);
-	iLogz = 1.0f + gl_Position.w;
-	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-	iLod = lod;
-	EmitVertex();
-
-	vec3 tr = gPosition[0] + vec3( t.x,t.y,t.z);
-	gl_Position = uProjection * uView * model * vec4(tr,1.0f);
-	iLogz = 1.0f + gl_Position.w;
-	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-	iLod = lod;
-	EmitVertex();
+	// Frist quad 	
+	vec3 bl = vec3(-b.x,b.y,b.z);
+	GenVertex(Fcoef,bl,model,lod);
+	vec3 br = vec3( b.x,b.y,b.z);
+	GenVertex(Fcoef,br,model,lod);
+	vec3 tr = vec3( t.x,t.y,t.z);
+	GenVertex(Fcoef,tr,model,lod);
 
 	// Second quad
-	gl_Position = uProjection * uView * model * vec4(bl,1.0f);
-	iLogz = 1.0f + gl_Position.w;
-	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-	iLod = lod;
-	EmitVertex();
-
-	gl_Position = uProjection * uView * model * vec4(tr,1.0f);
-	iLogz = 1.0f + gl_Position.w;
-	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-	iLod = lod;
-	EmitVertex();
-
-	vec3 tl = gPosition[0] + vec3(-t.x,t.y,t.z);
-	gl_Position = uProjection * uView * model * vec4(tl,1.0f);
-	iLogz = 1.0f + gl_Position.w;
-	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-	iLod = lod;
-	EmitVertex();
+	GenVertex(Fcoef,bl,model,lod);
+	GenVertex(Fcoef,tr,model,lod);
+	vec3 tl = vec3(-t.x,t.y,t.z);
+	GenVertex(Fcoef,tl,model,lod);
 }
 
 void GenBladeTop(float Fcoef,vec3 b,vec3 t,int lod,mat4 model)
 {
-	vec3 bl = gPosition[0] + vec3(-b.x,b.y,b.z);
-	gl_Position = uProjection * uView * model * vec4(bl,1.0f);
-	iLogz = 1.0f + gl_Position.w;
-	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-	iLod = lod;
-	EmitVertex();
+	vec3 bl = vec3(-b.x,b.y,b.z);
+	GenVertex(Fcoef,bl,model,lod);
 
-	vec3 br = gPosition[0] + vec3( b.x,b.y,b.z);
-	gl_Position = uProjection * uView * model * vec4(br,1.0f);
-	iLogz = 1.0f + gl_Position.w;
-	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-	iLod = lod;
-	EmitVertex();
+	vec3 br = vec3( b.x,b.y,b.z);
+	GenVertex(Fcoef,br,model,lod);
 
-	vec3 tr = gPosition[0] + vec3( t.x,t.y,t.z);
-	gl_Position = uProjection * uView * model * vec4(tr,1.0f);
-	iLogz = 1.0f + gl_Position.w;
-	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-	iLod = lod;
-	EmitVertex();
+	vec3 tr = vec3( t.x,t.y,t.z);
+	GenVertex(Fcoef,tr,model,lod);
 }
 
 void main()
@@ -135,7 +106,7 @@ void main()
 	// LOD min 1 max 4
 	float camDist = distance(uCampos,gPosition[0]);
 	float d = (camDist - mNearLodRange) / mLodRange;
-	//if(camDist > mLodRange + 300.0f)return;
+	if(camDist > mLodRange + 300.0f)return;
 	d = clamp(d,0.0f,1.0f);
 	int maxQuads = int(mix(4,1,d));
 	float curH = bladeHeight / maxQuads;
@@ -147,8 +118,10 @@ void main()
 	float windAcum = 0.0f;
 	float windAcum2 = windAcum + bDelta;
 
-	// Rotation
-	mat4 yRot = RotationMatrix(vec3(0.0f,1.0f,0.0f),uTime * 0.05f);
+	// Transform
+	mat4 rot = RotationMatrix(vec3(0.0f,1.0f,0.0f),gPosition[0].x * gPosition[0].z);
+	mat4 trans = TranslateMatrix(gPosition[0]);
+	mat4 m = trans * rot;
 
 	// Blade body
 	for(int i=0;i<maxQuads-1;i++)
@@ -160,7 +133,7 @@ void main()
 			vec3(bladeHalfW * pow(widthAcum,1.5f),i * curH		,wind * windAcum),
 			vec3(bladeHalfW * pow(widthAcum2,1.5f),(i + 1) * curH	,wind * windAcum2),
 			maxQuads,
-			yRot
+			m
 		);
 		widthAcum -= bDelta;
 		widthAcum2 -= bDelta;
@@ -176,7 +149,7 @@ void main()
 		vec3(bladeHalfW * pow(widthAcum,1.5f),(maxQuads - 1) * curH	,wind * windAcum),
 		vec3(0.0f					, maxQuads * curH	 	,wind * windAcum2),
 		maxQuads,
-		yRot
+		m
 	);
 	EndPrimitive();
 }

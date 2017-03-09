@@ -70,8 +70,8 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
     float pMie = 3.0 / (8.0 * PI) * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
 
     // Sample the primary ray.
-    for (int i = 0; i < iSteps; i++) {
-
+    for (int i = 0; i < iSteps; i++) 
+    {
         // Calculate the primary ray sample position.
         vec3 iPos = r0 + r * (iTime + iStepSize * 0.5);
 
@@ -97,8 +97,8 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
         float jOdMie = 0.0;
 
         // Sample the secondary ray.
-        for (int j = 0; j < jSteps; j++) {
-
+        for (int j = 0; j < jSteps; j++) 
+        {
             // Calculate the secondary ray sample position.
             vec3 jPos = iPos + pSun * (jTime + jStepSize * 0.5);
 
@@ -122,7 +122,6 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
 
         // Increment the primary ray time.
         iTime += iStepSize;
-
     }
 
     // Calculate and return the final color.
@@ -138,16 +137,15 @@ vec3 GetRayDir(vec2 uv)
 
     mat4 iVp = iView;
     vec3 rd;
-    rd = (iVp * vec4(uv.x,uv.y,-1.0472f,1.0f)).xyz;
+    rd = (iVp * vec4(uv.x * uAspect,uv.y,-1.0472f,1.0f)).xyz;
     return normalize(rd);
 }
 
 void main()
 {
 	vec2 uv = iTexcoord * 2.0 - 1.0;
-	uv.x *= uAspect;
 	vec3 rayDir = GetRayDir(uv);
-	vec3 camPos = uCampos + vec3(0.0f,6371e3,0.0f);
+	vec3 camPos = vec3(0.0f,6371e3,0.0f);
 	vec3 uSunPosition = vec3(0.0f,0.3f,-1.0f);
 
 	vec3 atCol = atmosphere(

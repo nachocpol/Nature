@@ -125,29 +125,24 @@ void main()
 	float fade = GetFade(camDist);
 	if(fade <= 0.0f)discard;
     float n = Scattering();
-    n -= 1.0f;
 
     // Clouds shape
-    vec3 csPos = (uScaleFactor*0.5f)*iWPos;
-    csPos.y = 0.0f;
-    float cs = Fbm2(csPos);
+    //vec3 csPos = (uScaleFactor*0.5f)*iWPos;
+    //csPos.y = 0.0f;
+    //float cs = Fbm2(csPos);
 
     // Cloud colors
 	vec3 uCloudDark = vec3(0.57f,0.63f,0.7f);
     vec3 uCloudMorning = vec3(0.95f,0.95f,0.95f);
     vec3 uCloudSunset = vec3(0.91f,0.65f,0.505f);
-    //float setFactor = dot(vec3(0.0f,0.0f,1.0f),normalize(uSundir));
 	vec3 uCloudBright = mix(uCloudSunset,uCloudMorning,sqrt(uSundir.y));
 	vec3 cloudColor = mix(uCloudBright,uCloudDark,n);
-	oColor = vec4(cloudColor,(n - 1.0f) * -1.0f);
+	oColor = vec4(cloudColor,n);
 	oColor.a *= fade;
 
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));
     gl_FragDepth = log2(iLogz) * Fcoef_half;
-    //const float C = 1.0;
-    //const float offset = 1.0;
-    //gl_FragDepth = (log(C * iCPos.z + offset) / log(C * uCamfar + offset));
 }
 
 

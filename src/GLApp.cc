@@ -207,7 +207,7 @@ void GLApp::Update()
     mPassConst.PTime = mTime;
     mPassConst.PCamNear = mCamera.GetNear();
     mPassConst.PCamFar = mCamera.GetFar();
-    mPassConst.PAspect = mViewport.z / mViewport.w;
+    mPassConst.PAspect = (float)mViewport.z / (float)mViewport.w;
     mPassConst.Update();
 
     mSky.SunPosition = mSunDirection;

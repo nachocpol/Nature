@@ -13,8 +13,22 @@ layout(std140)uniform uPass
 in vec2 iTexcoord;
 in float iLogz;
 flat in int iLod;
+in vec3 iPosition;
+in vec3 iWPos;
 
 out vec4 oColor;
+
+vec3 GetFog(   in vec3  rgb,        // original color of the pixel
+               in float distance,   // camera to point distance
+               in vec3  rayOri,     // camera position
+               in vec3  rayDir )    // camera to point vector
+{
+    float c = 0.01f;
+    float b = 0.01f;
+    float fogAmount = c * exp(-rayOri.y*b) * (1.0-exp( -distance*rayDir.y*b ))/rayDir.y;
+    vec3  fogColor  = vec3(0.5,0.6,0.7);
+    return mix( rgb, fogColor, fogAmount );
+}
 
 void main()
 {	
@@ -36,8 +50,10 @@ void main()
 		oColor = vec4(1.0f,0.0f,0.0f,1.0f);
 	}
 	*/
-	oColor = vec4(0.07f,0.38f,0.1f,1.0f);
+	oColor = vec4(0.07f,0.38f,0.1f,1.0f) * iPosition.y;
+	oColor.xyz = GetFog(oColor.xyz,distance(iWPos,uCampos),uCampos,normalize(iWPos - uCampos));
 
+	// Log z buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));
     gl_FragDepth = log2(iLogz) * Fcoef_half;
 }
