@@ -174,14 +174,24 @@ vec4 GetWaterColor()
 	//return vec4(vec3(distToFloor),1.0f);
 }
 
+vec3 GetFog(   in vec3  rgb,        // original color of the pixel
+               in float distance,   // camera to point distance
+               in vec3  rayOri,     // camera position
+               in vec3  rayDir )    // camera to point vector
+{
+    float c = 0.01f;
+    float b = 0.01f;
+    float fogAmount = c * exp(-rayOri.y*b) * (1.0-exp( -distance*rayDir.y*b ))/rayDir.y;
+    vec3  fogColor  = vec3(0.5,0.6,0.7);
+    return mix( rgb, fogColor, fogAmount );
+}
+
 void main()
 {
 	oColor = GetWaterColor();
-    
+    oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iWPos),uCampos,normalize(iWPos - uCampos));
+
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));
     gl_FragDepth = log2(iLogz) * Fcoef_half;
-    //const float C = 1.0;
-    //const float offset = 1.0;
-    //gl_FragDepth = (log(C * iCPos.z + offset) / log(C * uCamfar + offset));
 }

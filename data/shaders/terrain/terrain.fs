@@ -111,25 +111,6 @@ vec4 texture2DNoTile( sampler2D samp, in vec2 uv )
                      texture2DGrad( samp, uvd, ddxd, ddyd ), b.x), b.y );
 }
 
-mat3 GetTBNMatrix(vec3 N, vec3 p, vec2 uv)
-{
-    // get edge vectors of the pixel triangle
-    vec3 dp1 = dFdx( p );
-    vec3 dp2 = dFdy( p );
-    vec2 duv1 = dFdx( uv );
-    vec2 duv2 = dFdy( uv );
- 
-    // solve the linear system
-    vec3 dp2perp = cross( dp2, N );
-    vec3 dp1perp = cross( N, dp1 );
-    vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
-    vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
- 
-    // construct a scale-invariant frame 
-    float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
-    return mat3( T * invmax, B * invmax, N );
-}
-
 vec3 GetBaseColor()
 {
 	vec3 splat = texture(uSplatTexture,iTexcoord).xyz;
@@ -150,6 +131,19 @@ vec3 GetAtmosphereColor(vec3 base)
     return iColor + base * iSecondaryColor;
 }
 
+vec3 GetFog(   in vec3  rgb,        // original color of the pixel
+               in float distance,   // camera to point distance
+               in vec3  rayOri,     // camera position
+               in vec3  rayDir )    // camera to point vector
+{
+    float c = 0.01f;
+    float b = 0.01f;
+    float fogAmount = c * exp(-rayOri.y*b) * (1.0-exp( -distance*rayDir.y*b ))/rayDir.y;
+    vec3  fogColor  = vec3(0.5,0.6,0.7);
+    if(iPosition.y <= 20) fogAmount = 0.0f;
+    return mix( rgb, fogColor, fogAmount );
+}
+
 void main()
 {
     // Load normal and hack to work with world machine normals
@@ -162,6 +156,9 @@ void main()
     // Lambert
     float l = max(dot(normalize(normal),uSunPosition),0.0f);
     oColor = vec4(baseAtm * l,1.0f) * CloudsShadowing();
+
+    // Fog
+    oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iPosition),uCampos,normalize(iPosition - uCampos));
 
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));

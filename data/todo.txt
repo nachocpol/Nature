@@ -56,12 +56,15 @@
 	+ Fix water (depth is now changed tho)							[-]
 	+ When rendering terrain refract/reflect or the other objects	[x]
 		use a basic shader.
+
 	+ Instance grass per chunks 									[✓] 23 / 2 / 2017
 	+ Draw all grass in one draw call 								[x]
 	+ Grass underwater¿¿ dont Draw 									[x]
 	+ Draw all grass inside huge mesh (well it wont be that       	[x]
 		huge indeed) / geometry shader?
-	+ Implement fog! 												[x]
+	+ Use geometry shaders for grass prototype						[x]
+	
+	+ Implement fog! 												[✓] 9 / 3 / 2017
 	 (http://www.iquilezles.org/www/articles/fog/fog.htm)
 	+ Implement lens flares											[✓] 1 / 3 / 2017
 	+ Implement HDR													[✓] 28 / 2 / 2017

@@ -128,14 +128,14 @@ void GenBladeTop(float Fcoef,vec3 b,vec3 t,int lod,mat4 model)
 void main()
 {
 	// Blade proportions
-	const float bladeHalfW = 0.3f;
-	const float bladeHeight = 2.5f;
+	const float bladeHalfW = 0.25f;
+	const float bladeHeight = 2.0f;
 	float Fcoef = 2.0 / log2(uCamfar + 1.0);
 
 	// LOD min 1 max 4
 	float camDist = distance(uCampos,gPosition[0]);
 	float d = (camDist - mNearLodRange) / mLodRange;
-	if(camDist > mLodRange + 300.0f)return;
+	//if(camDist > mLodRange + 300.0f)return;
 	d = clamp(d,0.0f,1.0f);
 	int maxQuads = int(mix(4,1,d));
 	float curH = bladeHeight / maxQuads;
@@ -148,7 +148,7 @@ void main()
 	float windAcum2 = windAcum + bDelta;
 
 	// Rotation
-	mat4 yRot = YRotMatrix(0.1f);
+	mat4 yRot = RotationMatrix(vec3(0.0f,1.0f,0.0f),uTime * 0.05f);
 
 	// Blade body
 	for(int i=0;i<maxQuads-1;i++)
@@ -157,8 +157,8 @@ void main()
 		GenBladeQuad
 		(
 			Fcoef,
-			vec3(bladeHalfW * widthAcum ,i * curH		,wind * windAcum),
-			vec3(bladeHalfW * widthAcum2,(i + 1) * curH	,wind * windAcum2),
+			vec3(bladeHalfW * pow(widthAcum,1.5f),i * curH		,wind * windAcum),
+			vec3(bladeHalfW * pow(widthAcum2,1.5f),(i + 1) * curH	,wind * windAcum2),
 			maxQuads,
 			yRot
 		);
@@ -173,7 +173,7 @@ void main()
 	GenBladeTop
 	(
 		Fcoef,
-		vec3(bladeHalfW * widthAcum,(maxQuads - 1) * curH	,wind * windAcum),
+		vec3(bladeHalfW * pow(widthAcum,1.5f),(maxQuads - 1) * curH	,wind * windAcum),
 		vec3(0.0f					, maxQuads * curH	 	,wind * windAcum2),
 		maxQuads,
 		yRot
