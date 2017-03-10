@@ -259,11 +259,13 @@ void GLApp::Render()
     mWaterReflecRt.Enable();
     {
         // Sky
-        //mSky.Render();
+        mSky.Render();
+        /*
         glDepthMask(GL_FALSE);
         mTestSkyRtMat.Use();
         mBaseQuadRt.Render();
         glDepthMask(GL_TRUE);
+        */
 
         // Terrain
         mTerrain.Render(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.01f)));
@@ -307,11 +309,13 @@ void GLApp::Render()
     mBaseRt.Enable();
     {
         // Sky
-        //mSky.Render();
+        mSky.Render();
+        /*
         glDepthMask(GL_FALSE);
         mTestSkyRtMat.Use();
         mBaseQuadRt.Render();
         glDepthMask(GL_TRUE);
+        */
 
         // Terrain
         mTerrain.Render(false);

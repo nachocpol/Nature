@@ -48,8 +48,8 @@ void Sky::Init()
     mSkyMesh.Init(md.vertex, md.ele);
     mSkyMaterial.Init
     (
-        "../data/shaders/sky.vs",
-        "../data/shaders/sky.fs"
+        "../data/shaders/sky/sky2.vs",
+        "../data/shaders/sky/sky2.fs"
     );
 }
 
