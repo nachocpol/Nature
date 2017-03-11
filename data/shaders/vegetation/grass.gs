@@ -14,6 +14,7 @@ layout(std140)uniform uPass
 in vec3[] gPosition;
 uniform float mLodRange;
 uniform float mNearLodRange;
+uniform sampler2D uHeightMap;
 
 layout (triangle_strip,max_vertices = 21) out;
 out float iLogz;
@@ -96,11 +97,19 @@ void GenBladeTop(float Fcoef,vec3 b,vec3 t,int lod,mat4 model)
 	GenVertex(Fcoef,tr,model,lod);
 }
 
+float GetHeight()
+{
+	// 9.0f = Map scale (so we get the hmap values)
+	vec2 pos = gPosition[0].xz / 9.0f;
+	pos /= 2048.0f;
+	return texture(uHeightMap,pos).x * 200.0f * 9.0f;
+}
+
 void main()
 {
 	// Blade proportions
-	const float bladeHalfW = 0.25f;
-	const float bladeHeight = 2.0f;
+	const float bladeHalfW = 0.1f;
+	const float bladeHeight = 1.0f;
 	float Fcoef = 2.0 / log2(uCamfar + 1.0);
 
 	// LOD min 1 max 4
@@ -120,7 +129,7 @@ void main()
 
 	// Transform
 	mat4 rot = RotationMatrix(vec3(0.0f,1.0f,0.0f),gPosition[0].x * gPosition[0].z);
-	mat4 trans = TranslateMatrix(gPosition[0]);
+	mat4 trans = TranslateMatrix(vec3(gPosition[0].x,GetHeight(),gPosition[0].z));
 	mat4 m = trans * rot;
 
 	// Blade body
@@ -130,8 +139,8 @@ void main()
 		GenBladeQuad
 		(
 			Fcoef,
-			vec3(bladeHalfW * pow(widthAcum,1.5f),i * curH		,wind * windAcum),
-			vec3(bladeHalfW * pow(widthAcum2,1.5f),(i + 1) * curH	,wind * windAcum2),
+			vec3(bladeHalfW * sqrt(widthAcum),i * curH		,wind * windAcum),
+			vec3(bladeHalfW * sqrt(widthAcum2),(i + 1) * curH	,wind * windAcum2),
 			maxQuads,
 			m
 		);
@@ -146,7 +155,7 @@ void main()
 	GenBladeTop
 	(
 		Fcoef,
-		vec3(bladeHalfW * pow(widthAcum,1.5f),(maxQuads - 1) * curH	,wind * windAcum),
+		vec3(bladeHalfW * sqrt(widthAcum),(maxQuads - 1) * curH	,wind * windAcum),
 		vec3(0.0f					, maxQuads * curH	 	,wind * windAcum2),
 		maxQuads,
 		m

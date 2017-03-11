@@ -23,15 +23,16 @@ void main()
 
 	// Sun
 	float sunHeight = toSun.y;
-	float sunFactor = pow(max(dot(toAtmosphere,toSun),0.0f),2500.0f);
-	float sunIntensity = 5.0f;
-	vec3 sunColor = vec3(1.0f,1.0f,1.0f) * sunFactor * sunIntensity;
+	float sunFactor = pow(max(dot(toAtmosphere,toSun),0.0f),3800.0f);
+	float sunIntensity = mix(150.0f,300.0f,sunHeight);
+	vec3 sunColor = vec3(0.95f,0.7f,0.1f) * sunFactor * sunIntensity;
 	
 	// Atmosphere
 	// Basic mix of white at the horizon and bluish
-	vec3 atmosphereColor = mix(vec3(1.0f,1.0f,1.0f),vec3(0.1f,0.4f,0.9f),pow(iPosition.y,0.35f));
+	vec3 lowAtmCol = mix(vec3(0.95f,0.7f,0.1f),vec3(1.0f,1.0f,1.0f),sunHeight);
+	vec3 atmosphereColor = mix(lowAtmCol,vec3(0.1f,0.4f,0.9f),pow(iPosition.y,0.35f));
 	// Dark during the night
-	atmosphereColor = mix(vec3(0.0f),atmosphereColor,sunHeight);
+	atmosphereColor = mix(vec3(0.0f),atmosphereColor,pow(sunHeight,0.5f));
 
 	oColor = vec4(sunColor + atmosphereColor,1.0f);
 	if(iPosition.y <= 0.0f)oColor = vec4(0.2f);

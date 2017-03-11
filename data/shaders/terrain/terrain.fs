@@ -147,18 +147,20 @@ vec3 GetFog(   in vec3  rgb,        // original color of the pixel
 void main()
 {
     // Load normal and hack to work with world machine normals
-    vec3 normal = texture(uNormalTexture,iTexcoord).xzy;
-    normal.z = (normal.z - 1.0f) * -1.0f;
+    vec3 normal = normalize(texture(uNormalTexture,iTexcoord).xzy);
+    //normal.z = (normal.z - 1.0f) * -1.0f;
 
     vec3 base = GetBaseColor();
-    vec3 baseAtm = GetAtmosphereColor(base);
+    //vec3 baseAtm = GetAtmosphereColor(base);
 
-    // Lambert
-    float l = max(dot(normalize(normal),uSunPosition),0.0f);
-    oColor = vec4(baseAtm * l,1.0f) * CloudsShadowing();
+    // Lambert0
+    float l = max(dot(normalize(normal),normalize(uSunPosition)),0.0f);
+    oColor = vec4(base * l,1.0f) * CloudsShadowing();
+    oColor = vec4(l);
+    //oColor = vec4(normal,1.0f);
 
     // Fog
-    oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iPosition),uCampos,normalize(iPosition - uCampos));
+    //oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iPosition),uCampos,normalize(iPosition - uCampos));
 
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));

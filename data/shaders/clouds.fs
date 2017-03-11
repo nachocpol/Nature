@@ -101,7 +101,7 @@ float Scattering()
 	pos.y = 0.0f;
 	for(int i=0;i<uScatSamples;i++)
 	{
-		n += pow(Fbm2(pos),2.0f);
+		n += pow(Fbm5(pos),2.0f);
 		pos.y += step;
 	}
 	n /= float(uScatSamples);
@@ -110,7 +110,7 @@ float Scattering()
 
 float GetFade(float dist)
 {
-	float uFadeDist = 100200.0f;
+	float uFadeDist = 70000.0f;
 	float d = clamp(dist,0.0f,uFadeDist);
 	d = d / uFadeDist;
 	d = clamp(d,0.0f,1.0f);
@@ -137,7 +137,7 @@ void main()
     vec3 uCloudSunset = vec3(0.91f,0.65f,0.505f);
 	vec3 uCloudBright = mix(uCloudSunset,uCloudMorning,sqrt(uSundir.y));
 	vec3 cloudColor = mix(uCloudBright,uCloudDark,n);
-	oColor = vec4(cloudColor,n);
+	oColor = vec4(cloudColor,n) * 1.0f;
 	oColor.a *= fade;
 
     // Logarithmic z-buffer

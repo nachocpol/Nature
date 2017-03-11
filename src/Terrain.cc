@@ -258,7 +258,7 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     mGrassMaterial.Use();
     glw::SetUniform1f("mLodRange", mGrassMaterial.Id, &mLodRange);
     glw::SetUniform1f("mNearLodRange", mGrassMaterial.Id, &mNearLodRange);
-
+    glw::SetUniformTexture("uHeightMap", mGrassMaterial.Id,mHeightMap.Id, 0);
     if (mUseInstancing)
     {
         for (unsigned int i = 0; i < mChunksVisible.size(); i++)
@@ -442,7 +442,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     glm::mat4 vTrans;
     
     // Add grass
-    float grassDensity = 16.0f;
+    float grassDensity = 36.0f;
     for (float ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
     {
         for (float cj = cStart.y; cj < cEnd.y; cj += ElementSize / grassDensity)
@@ -465,4 +465,5 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     chunk.ChunkGrass.Init(grassVertex, grassEle);
     chunk.ChunkGrass.DMode = DrawMode::kPoints;
 }
+
 

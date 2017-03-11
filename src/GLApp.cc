@@ -208,7 +208,7 @@ void GLApp::Update()
     mPassConst.PCamNear = mCamera.GetNear();
     mPassConst.PCamFar = mCamera.GetFar();
     mPassConst.PAspect = (float)mViewport.z / (float)mViewport.w;
-    mPassConst.Update();
+    mPassConst.Update();    
 
     mSky.SunPosition = mSunDirection;
     mTerrain.SunPosition = mSunDirection;
@@ -277,7 +277,7 @@ void GLApp::Render()
         mCloudsMat.Use();
         
         glm::mat4 ctrans = glm::mat4();
-        ctrans = glm::translate(ctrans, glm::vec3(50000.0f, mCloudsHeight, 50000.0f));
+        ctrans = glm::translate(ctrans, glm::vec3(0.0f, mCloudsHeight, 0.0f));
         ctrans = glm::scale(ctrans, glm::vec3(100000.0f, 0.0f, 100000.0f));
 
         glw::SetUniformTexture("uLutTexture", mCloudsMat.Id, mLutTexture.Id, 0);
@@ -357,7 +357,7 @@ void GLApp::Render()
         mCloudsMat.Use();
 
         glm::mat4 ctrans = glm::mat4();
-        ctrans = glm::translate(ctrans, glm::vec3(50000.0f, mCloudsHeight, 50000.0f));
+        ctrans = glm::translate(ctrans, glm::vec3(25000.0f, mCloudsHeight, 25000.0f));
         ctrans = glm::scale(ctrans, glm::vec3(100000.0f, 0.0f, 100000.0f));
 
         glw::SetUniformTexture("uLutTexture", mCloudsMat.Id, mLutTexture.Id, 0);

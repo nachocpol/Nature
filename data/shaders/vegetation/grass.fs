@@ -50,7 +50,10 @@ void main()
 		oColor = vec4(1.0f,0.0f,0.0f,1.0f);
 	}
 	*/
-	oColor = vec4(0.07f,0.38f,0.1f,1.0f) * iPosition.y;
+	float wShade = iPosition.x * sign(iPosition.x);
+	wShade *= 10.0f;	// so the half width its 1
+	wShade = pow(wShade,0.6f);
+	oColor = vec4(0.07f,0.38f,0.1f,1.0f) * pow(iPosition.y,2.0f) * wShade;
 	oColor.xyz = GetFog(oColor.xyz,distance(iWPos,uCampos),uCampos,normalize(iWPos - uCampos));
 
 	// Log z buffer

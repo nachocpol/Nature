@@ -208,4 +208,3 @@ void LoadTextureFromFileF(TextureDefF& def)
 {
     def.Data = stbi_loadf(def.Path, &def.Size.x, &def.Size.y, &def.ElePerPixel, 0);
 }
-
