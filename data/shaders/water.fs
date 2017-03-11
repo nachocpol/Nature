@@ -99,24 +99,17 @@ vec2 GetUv(float shore)
 float GetDistanceToFloor(vec2 uv)
 {
 	float rawSDepth = texture(uRefractDepth,uv).x;
-	rawSDepth = pow(uCamfar + 1.0f,rawSDepth) - 1.0f;
-	float a = uCamfar / (uCamfar - uCamnear);
-	float b = uCamfar * uCamnear / (uCamnear - uCamfar);
-	float sceneDepth = (a + b / rawSDepth);
-	float curDepth = iCPos.z;
-	
-	//Calculate distances (water-floor-camera)
-	float dCamFloor = 2.0 * uCamnear * uCamfar /  ( uCamfar + uCamnear - (2.0 * sceneDepth - 1.0)*(uCamfar - uCamnear));
-	float dCamWat = 2.0 * uCamnear * uCamfar /  ( uCamfar + uCamnear - (2.0 * curDepth - 1.0)*(uCamfar - uCamnear));
-	//return dCamWat;
-	//return dCamFloor - dCamWat;
-	return 100.0f;
+    float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));
+    float curDepth = log2(iLogz) * Fcoef_half;
+    float d = curDepth - rawSDepth;
+	return d;
 }
 
 float GetWaterFade(float dist)
 {
-	float uWaterShoreFade = 2.0f;
-	return clamp(dist/uWaterShoreFade,0.0f,1.0f);
+	float uWaterShoreFade = 1.0f;
+	//return clamp(dist/uWaterShoreFade,0.0f,1.0f);
+	return 1.0f;
 }
 
 vec3 GetNormal()
@@ -169,8 +162,8 @@ vec4 GetWaterColor()
 	vec3 specColor = uSpecColor * spec;
 
 	// Fade the water at the shore
-	return vec4(c + specColor,1.0f);
-	//return vec4(c + specColor,GetWaterFade(distToFloor));
+	//return vec4(c + specColor,1.0f);
+	return vec4(c + specColor,GetWaterFade(distToFloor));
 	//return vec4(vec3(distToFloor),1.0f);
 }
 

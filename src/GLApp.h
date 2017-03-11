@@ -47,12 +47,12 @@ private:
 
     // Water
     float mWaterHeight = 20.0f;
-    float mWaterScale = 20480.0f;
+    float mWaterScale = 9216.0f;
     float mWaveSize = 860.0f;
     float mWaveStrenght = 0.02f;
     float mNormStrenght = 1.0f;
-    glm::vec2 mWaveSpeed = glm::vec2(0.001f, 0.0005f);
-    glm::vec2 mWaveSpeed2 = glm::vec2(-0.001f, 0.0005f);
+    glm::vec2 mWaveSpeed = glm::vec2(0.0001f, 0.0001f);
+    glm::vec2 mWaveSpeed2 = glm::vec2(-0.0001f, 0.0001f);
     float mWaterShinyFactor = 40.0f;
     glm::vec3 mSpecColor = glm::vec3(1.0f,1.0f,1.0f);
     glm::vec3 mWaterTint = glm::vec3(0.23f, 0.35f, 0.57f);

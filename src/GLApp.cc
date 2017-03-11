@@ -14,7 +14,7 @@
 
 GLApp::GLApp()
 {
-    mSunDirection = glm::vec3(0.0f, 0.2f, 1.0f);
+    mSunDirection = glm::vec3(0.0f, 0.05f, -1.0f);
 }
 
 GLApp::~GLApp()
@@ -325,8 +325,8 @@ void GLApp::Render()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         mWaterMaterial.Use();
         glm::mat4 wtrans = glm::mat4();
+        wtrans = glm::translate(wtrans, glm::vec3(mWaterScale,mWaterHeight, mWaterScale));
         wtrans = glm::scale(wtrans, glm::vec3(mWaterScale,1.0f,mWaterScale));
-        wtrans = glm::translate(wtrans, glm::vec3(0.0f,mWaterHeight, 0.0f));
         
         unsigned int wp = mWaterMaterial.Id;
 
@@ -339,8 +339,8 @@ void GLApp::Render()
         glw::SetUniform1f("uWaveSize", wp, &mWaveSize);
         glw::SetUniform1f("uWaveStrength", wp, &mWaveStrenght);
         glw::SetUniform1f("uNormStrenght", wp, &mNormStrenght);
-        glw::SetUniform3f("uWaveSpeed", wp, &mWaveSpeed.x);
-        glw::SetUniform3f("uWaveSpeed2", wp, &mWaveSpeed2.x);
+        glw::SetUniform2f("uWaveSpeed", wp, &mWaveSpeed.x);
+        glw::SetUniform2f("uWaveSpeed2", wp, &mWaveSpeed2.x);
         glw::SetUniform3f("uSundir", wp, &mSunDirection.x);
         glw::SetUniform1f("uWaterShinyFactor", wp, &mWaterShinyFactor);
         glw::SetUniform3f("uSpecColor", wp, &mSpecColor.x);

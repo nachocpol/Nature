@@ -442,7 +442,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     glm::mat4 vTrans;
     
     // Add grass
-    float grassDensity = 36.0f;
+    float grassDensity = 50.0f;
     for (float ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
     {
         for (float cj = cStart.y; cj < cEnd.y; cj += ElementSize / grassDensity)
@@ -455,10 +455,10 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
             glm::vec2 randPos = glm::diskRand(10.0f);
             vp.x += randPos.x;
             vp.z += randPos.y;
-            vp.y = vY;
+            vp.y = 0.0f;
             vTrans = glm::translate(vTrans, vp);
             vTrans = glm::scale(vTrans, glm::vec3(2.0f));
-            grassVertex.push_back(BasicVertexPoint(vp.x, vp.y, vp.z));
+            grassVertex.push_back(BasicVertexPoint(vp.x, 0.0f, vp.z));
             grassEle.push_back(grassEle.size());
         }
     }
