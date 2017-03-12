@@ -191,6 +191,8 @@ bool GLApp::Init()
         "../data/shaders/sky/skypp.fs"
     );
 
+    mCamera.GetPositionPtr()->y = mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z) + 2.0f;
+
     return true;
 }
 
@@ -212,6 +214,17 @@ void GLApp::Update()
 
     mSky.SunPosition = mSunDirection;
     mTerrain.SunPosition = mSunDirection;
+
+    // Firs person walker
+    glm::vec3 curCamPos = mCamera.GetPosition();
+    curCamPos.y = glm::mix
+    (
+        curCamPos.y, 
+        mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z) + 2.0f, 
+        1.0f
+    );
+    //mCamera.SetPosition(curCamPos);
+    //mCamera.SetPosition(glm::vec3(2048 * 9, 500.0f, 2048 * 9));
 }
 
 void GLApp::Render()

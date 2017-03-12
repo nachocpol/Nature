@@ -43,9 +43,16 @@ vec3 Uncharted2ToneMapping(vec3 color)
 	return color;
 }
 
+vec3 Vignette(vec3 input,vec2 uv)
+{
+	float d = distance(uv,vec2(0.5));
+	return input * smoothstep(0.85f,0.6f,d);
+}
+
 void main()
 {
 	vec3 scene = texture(uColorTexture,iTexcoord).xyz;
-	vec3 corrected = Uncharted2ToneMapping(scene);
+	vec3 corrected = ReinhardToneMapping(scene);
+	corrected = Vignette(corrected,iTexcoord);
 	oColor = vec4(corrected,1.0f);
 }

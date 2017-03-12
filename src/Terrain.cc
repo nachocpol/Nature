@@ -80,12 +80,16 @@ void Terrain::Init()
         "../data/shaders/terrain/terrain.te"
     );
 
-    mGrassTexture.Init(TextureDef("../data/textures/grass.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mCliffTexture.Init(TextureDef("../data/textures/cliff.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mGrassTexture.Init(TextureDef("../data/textures/terrain/grass_diffuse.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mCliffTexture.Init(TextureDef("../data/textures/terrain/cliff_diffuse.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
     mHeightMap.Init(TextureDef("../data/hmaps/lagodix/lagodixhm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mSplatMap.Init(TextureDef("../data/hmaps/lagodix/lagodixsplat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mSnowTexture.Init(TextureDef("../data/textures/snow.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mSnowTexture.Init(TextureDef("../data/textures/terrain/snow_diffuse.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
     mNormal.Init(TextureDef("../data/hmaps/lagodix/lagodixnorm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mGrassNormal.Init(TextureDef("../data/textures/terrain/grass_normal.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mCliffNormal.Init(TextureDef("../data/textures/terrain/cliff_normal.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mSnowNormal.Init(TextureDef("../data/textures/terrain/snow_normal.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
+
 
     // Load the hmpa so we can sample to find the chunks y pos
     TextureDef hMap;
@@ -200,6 +204,9 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     glw::SetUniformTexture("uLutTexture", p, LutTexture->Id, 4);
     glw::SetUniformTexture("uSnowTexture", p, mSnowTexture.Id, 5);
     glw::SetUniformTexture("uNormalTexture", p, mNormal.Id, 6);
+    glw::SetUniformTexture("uGrassNormTexture", p, mGrassNormal.Id, 7);
+    glw::SetUniformTexture("uCliffNormTexture", p, mCliffNormal.Id, 8);
+    glw::SetUniformTexture("uSnowNormTexture", p, mSnowNormal.Id, 9);
 
     // Random stuff
     glw::SetUniform1f("uTiling1", p, &mTiling1);
@@ -331,6 +338,28 @@ void Terrain::RenderUi()
     ImGui::End();
 }
 
+float& Terrain::GetHeight(float x, float z)
+{
+    /*
+    // Get value btw 0 and size of heightmap
+    float cx = (x - cSize) / MapScale;
+    float cz = (z - cSize )/ MapScale;
+    float h = (float)(mHeightMap.Def.Data[(int)cx * HeightMapSize + (int)cz]) / 255.0f;
+    h = h * 9.0f * 200.0f;
+    return h;
+    */
+    float cSize = (ElementSide * ElementSize) * MapScale;
+    float curSize = HeightMapSize - (ElementSide * ElementSize);
+
+    float alphaX = ((x - 0.0f) / MapScale) / curSize;
+    float cX = glm::mix(0.0f, (float)HeightMapSize, alphaX);
+    float alphaZ = ((z - 0.0f) / MapScale) / curSize;
+    float cZ = glm::mix(0.0f, (float)HeightMapSize, alphaZ);
+    float h = (float)(mHeightMap.Def.Data[(int)cX * HeightMapSize + (int)cZ]) / 255.0f;
+    h = h * 9.0f * 200.0f;
+    return h;
+}
+
 void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
 {
     std::vector<BasicVertex> vertex;
@@ -442,7 +471,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     glm::mat4 vTrans;
     
     // Add grass
-    float grassDensity = 50.0f;
+    float grassDensity = 65.0f;
     for (float ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
     {
         for (float cj = cStart.y; cj < cEnd.y; cj += ElementSize / grassDensity)

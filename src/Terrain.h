@@ -27,6 +27,7 @@ public:
     void Render(bool useClip,glm::vec4 plane = glm::vec4(0.0f));
     void RenderUi();
     glw::MaterialTess* GetMaterial() { return &mTerrainMaterial; }
+    float& GetHeight(float x,float z);
 
     // Number of chunks at each side of the
     // terrain. TotalChunk = ChunkSide * ChunkSide
@@ -68,6 +69,9 @@ private:
     glw::Texture mCliffTexture;
     glw::Texture mSnowTexture;
     glw::Texture mNormal;
+    glw::Texture mGrassNormal;
+    glw::Texture mCliffNormal;
+    glw::Texture mSnowNormal;
 
     // Frustrum culling
     std::vector<float> mChunkHeight;
@@ -79,8 +83,8 @@ private:
     bool mUseInstancing = true;
 
     // Texturing
-    float mTiling1 = 200.0f;
-    float mTiling2 = 100.0f;
+    float mTiling1 = 5000.0f;
+    float mTiling2 = 200.0f;
 
     // Some constants
     float kEarthR = 6300000.0f;

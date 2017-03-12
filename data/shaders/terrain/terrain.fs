@@ -13,10 +13,13 @@ layout(std140)uniform uPass
 
 uniform sampler2D uGrassTexture;
 uniform sampler2D uCliffTexture;
+uniform sampler2D uSnowTexture;
 uniform sampler2D uSplatTexture;
+uniform sampler2D uGrassNormTexture;
+uniform sampler2D uCliffNormTexture;
+uniform sampler2D uSnowNormTexture;
 uniform sampler2D uHeightMap;
 uniform sampler2D uLutTexture;
-uniform sampler2D uSnowTexture;
 uniform sampler2D uNormalTexture;
 uniform vec3 uSunPosition;
 uniform float uTiling1;
@@ -126,6 +129,42 @@ vec3 GetBaseColor()
     return finalColor;
 }
 
+mat3 CotangentFrame(vec3 N, vec3 p, vec2 uv)
+{
+    // get edge vectors of the pixel triangle
+    vec3 dp1 = dFdx( p );
+    vec3 dp2 = dFdy( p );
+    vec2 duv1 = dFdx( uv );
+    vec2 duv2 = dFdy( uv );
+ 
+    // solve the linear system
+    vec3 dp2perp = cross( dp2, N );
+    vec3 dp1perp = cross( N, dp1 );
+    vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+    vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+ 
+    // construct a scale-invariant frame 
+    float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
+    return mat3( T * invmax, B * invmax, N );
+}
+
+vec3 GetNormal(vec3 curNormal,vec3 view)
+{
+    vec3 splat = texture(uSplatTexture,iTexcoord).xyz;
+
+    vec3 grassN = normalize(texture(uGrassNormTexture,iTexcoord * uTiling1).xyz * 2.0f - 1.0f);
+    vec3 cliffN = normalize(texture(uCliffNormTexture,iTexcoord * uTiling2).xyz * 2.0f - 1.0f);
+    vec3 snowN = normalize(texture(uSnowNormTexture,iTexcoord * uTiling1).xyz * 2.0f - 1.0f);
+    
+    vec3 finalNormal = vec3(0.0f);
+    finalNormal = mix(finalNormal,grassN,splat.g);
+    finalNormal = mix(finalNormal,cliffN,splat.b);
+    finalNormal = mix(finalNormal,snowN,splat.r);  
+
+    mat3 tbn = CotangentFrame(curNormal,view,iTexcoord);
+    return normalize(tbn * finalNormal);
+}
+
 vec3 GetAtmosphereColor(vec3 base)
 {
     return iColor * iSecondaryColor;
@@ -150,10 +189,11 @@ void main()
     vec3 normal = texture(uNormalTexture,iTexcoord).xzy;
     normal = normalize(normal * 2.0f - 1.0f);
     normal.z *= -1.0f;
+    normal = GetNormal(normal,normalize(uCampos - iPosition));
 
     // Lambert
     vec3 base = GetBaseColor();
-    float l = max(dot(normalize(normal),normalize(uSunPosition)),0.0f);
+    float l = max(dot(normalize(normal),normalize(uSunPosition)),0.15f);
     oColor = vec4(base * l,1.0f) * CloudsShadowing();
 
     // Fog

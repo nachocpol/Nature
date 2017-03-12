@@ -545,6 +545,7 @@ void glw::Texture::Init(TextureDef def)
     if (Def.Path &&  !Def.Data)
     {
         data = stbi_load(def.Path, &x, &y, &elePerPixel, 0);
+        Def.Data = data;
         if (!data)
         {
             printf(" ERROR: Could not load image:%s\n", def.Path);

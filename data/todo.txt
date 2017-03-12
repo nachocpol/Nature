@@ -73,4 +73,6 @@
 	+ Water rt's are resized to full size !!!						[X]
 	+ Add starbust to the lens flares!								[x]
 	+ Add fxaa														[✓] 1 / 3 / 2017
-	+ Fix scattering, the sun changes size
+	+ Fix scattering, the sun changes size							[x]
+	+ Add normal mapping to the terrain								[x] 11 / 3 / 2017
+	+ Implement custom sky											[-]
