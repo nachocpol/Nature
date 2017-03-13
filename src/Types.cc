@@ -20,6 +20,12 @@ BasicVertexPoint::BasicVertexPoint(float px, float py, float pz)
     Position = glm::vec3(px, py, pz);
 }
 
+BasicVertexPoint2::BasicVertexPoint2(float px, float py)
+{
+    Position = glm::vec2(px, py);
+}
+
+
 void Frustrum::SetPlanes(glm::mat4 vp)
 {
     /*
@@ -208,3 +214,4 @@ void LoadTextureFromFileF(TextureDefF& def)
 {
     def.Data = stbi_loadf(def.Path, &def.Size.x, &def.Size.y, &def.ElePerPixel, 0);
 }
+

@@ -191,7 +191,7 @@ bool GLApp::Init()
         "../data/shaders/sky/skypp.fs"
     );
 
-    mCamera.GetPositionPtr()->y = mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z) + 2.0f;
+    //mCamera.GetPositionPtr()->y = mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z) + 2.0f;
 
     return true;
 }

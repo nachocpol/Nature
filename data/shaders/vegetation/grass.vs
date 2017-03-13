@@ -1,6 +1,6 @@
 #version 430 core
 
-layout (location = 0)in vec3 aPosition;
+layout (location = 0)in vec2 aPosition;
 layout(std140)uniform uPass
 {
 	mat4 uView;
@@ -11,7 +11,7 @@ layout(std140)uniform uPass
 	float uCamfar;
 };
 
-out vec3 gPosition;
+out vec2 gPosition;
 
 void main()
 {

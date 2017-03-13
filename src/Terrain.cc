@@ -461,7 +461,7 @@ void Terrain::RenderInstanced(std::vector<Chunk>& chunks)
 void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
 {
     // Data to build the point mesh
-    std::vector<BasicVertexPoint> grassVertex;
+    std::vector<BasicVertexPoint2> grassVertex;
     std::vector<unsigned int> grassEle;
 
     // Starting and end points of the chunk
@@ -487,7 +487,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
             vp.y = 0.0f;
             vTrans = glm::translate(vTrans, vp);
             vTrans = glm::scale(vTrans, glm::vec3(2.0f));
-            grassVertex.push_back(BasicVertexPoint(vp.x, 0.0f, vp.z));
+            grassVertex.push_back(BasicVertexPoint2(vp.x, vp.z));
             grassEle.push_back(grassEle.size());
         }
     }

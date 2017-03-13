@@ -40,6 +40,7 @@ namespace glw
         Mesh():DMode(kTriangles) {}
         void Init(std::vector<BasicVertex> vertex,std::vector<unsigned int> ele);
         void Init(std::vector<BasicVertexPoint> vertex, std::vector<unsigned int> ele);
+        void Init(std::vector<BasicVertexPoint2> vertex, std::vector<unsigned int> ele);
         void Render();
 
         GLuint Id;

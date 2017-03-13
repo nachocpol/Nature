@@ -11,12 +11,12 @@ layout(std140)uniform uPass
 	float uCamnear;
 	float uCamfar;
 };
-in vec3[] gPosition;
+in vec2[] gPosition;
 uniform float mLodRange;
 uniform float mNearLodRange;
 uniform sampler2D uHeightMap;
 
-layout (triangle_strip,max_vertices = 21) out;
+layout (triangle_strip,max_vertices = 3) out;
 out float iLogz;
 flat out int iLod;
 out vec3 iPosition;
@@ -65,6 +65,8 @@ void GenVertex(float Fcoef,vec3 v,mat4 m,int lod)
 	iLogz = 1.0f + gl_Position.w;
 	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
 	iLod = lod;
+	float d = distance(uCampos,iWPos);
+	if(d > 700.0f) gl_Position.w = gl_Position.z;
 	EmitVertex();
 }
 
@@ -100,7 +102,7 @@ void GenBladeTop(float Fcoef,vec3 b,vec3 t,int lod,mat4 model)
 float GetHeight()
 {
 	// 9.0f = Map scale (so we get the hmap values)
-	vec2 pos = gPosition[0].xz / 9.0f;
+	vec2 pos = gPosition[0].xy / 9.0f;
 	pos /= 2048.0f;
 	return texture(uHeightMap,pos).x * 200.0f * 9.0f;
 }
@@ -111,13 +113,14 @@ void main()
 	const float bladeHalfW = 0.1f;
 	const float bladeHeight = 1.0f;
 	float Fcoef = 2.0 / log2(uCamfar + 1.0);
+	float bladeY = GetHeight();
 
 	// LOD min 1 max 4
-	float camDist = distance(uCampos,gPosition[0]);
+	float camDist = distance(uCampos,vec3(gPosition[0].x,bladeY,gPosition[0].y));
 	float d = (camDist - mNearLodRange) / mLodRange;
-	if(camDist > mLodRange + 300.0f)return;
+	//if(camDist > mLodRange + 300.0f)return;
 	d = clamp(d,0.0f,1.0f);
-	int maxQuads = int(mix(4,1,d));
+	int maxQuads = int(mix(1,1,d));
 	float curH = bladeHeight / maxQuads;
 
 	// Mods for wind and width
@@ -128,8 +131,8 @@ void main()
 	float windAcum2 = windAcum + bDelta;
 
 	// Transform
-	mat4 rot = RotationMatrix(vec3(0.0f,1.0f,0.0f),gPosition[0].x * gPosition[0].z);
-	mat4 trans = TranslateMatrix(vec3(gPosition[0].x,GetHeight(),gPosition[0].z));
+	mat4 rot = RotationMatrix(vec3(0.0f,1.0f,0.0f),gPosition[0].x * gPosition[0].y);
+	mat4 trans = TranslateMatrix(vec3(gPosition[0].x,bladeY,gPosition[0].y));
 	mat4 m = trans * rot;
 
 	// Blade body

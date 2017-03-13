@@ -76,3 +76,4 @@
 	+ Fix scattering, the sun changes size							[x]
 	+ Add normal mapping to the terrain								[x] 11 / 3 / 2017
 	+ Implement custom sky											[-]
+	+ Grass, remove y from it!

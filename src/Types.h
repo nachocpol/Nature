@@ -23,6 +23,13 @@ struct BasicVertexPoint
     glm::vec3 Position;
 };
 
+struct BasicVertexPoint2
+{
+    BasicVertexPoint2() {};
+    BasicVertexPoint2(float px, float py);
+    glm::vec2 Position;
+};
+
 struct MeshBasicVertexData
 {
     std::vector<BasicVertex> vertex;

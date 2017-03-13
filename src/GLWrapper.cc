@@ -201,6 +201,34 @@ void glw::Mesh::Init(std::vector<BasicVertexPoint> vertex, std::vector<unsigned 
     }
     glBindVertexArray(0);
 }
+void glw::Mesh::Init(std::vector<BasicVertexPoint2> vertex, std::vector<unsigned int> ele)
+{
+    GLsizeiptr eleSize = sizeof(unsigned int) * ele.size();
+    GLsizeiptr vertexSize = sizeof(BasicVertexPoint2) * vertex.size();
+    NumElements = ele.size();
+
+    GLsizeiptr posSize = sizeof(glm::vec2);
+
+    glGenVertexArrays(1, &Id);
+    glBindVertexArray(Id);
+    {
+        // Generate and upload element buffer
+        glGenBuffers(1, &Ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, eleSize, ele.data(), GL_STATIC_DRAW);
+
+        // Generate and upload vertex buffer
+        glGenBuffers(1, &Vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, Vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertexSize, vertex.data(), GL_STATIC_DRAW);
+
+        // Setup vertex attributes
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, posSize, (GLvoid*)0);
+        glEnableVertexAttribArray(0);
+    }
+    glBindVertexArray(0);
+}
+
 
 void glw::Mesh::Render()
 {
