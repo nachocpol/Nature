@@ -338,26 +338,14 @@ void Terrain::RenderUi()
     ImGui::End();
 }
 
-float& Terrain::GetHeight(float x, float z)
+float Terrain::GetHeight(float x, float z)
 {
-    /*
-    // Get value btw 0 and size of heightmap
-    float cx = (x - cSize) / MapScale;
-    float cz = (z - cSize )/ MapScale;
-    float h = (float)(mHeightMap.Def.Data[(int)cx * HeightMapSize + (int)cz]) / 255.0f;
-    h = h * 9.0f * 200.0f;
-    return h;
-    */
-    float cSize = (ElementSide * ElementSize) * MapScale;
-    float curSize = HeightMapSize - (ElementSide * ElementSize);
-
-    float alphaX = ((x - 0.0f) / MapScale) / curSize;
-    float cX = glm::mix(0.0f, (float)HeightMapSize, alphaX);
-    float alphaZ = ((z - 0.0f) / MapScale) / curSize;
-    float cZ = glm::mix(0.0f, (float)HeightMapSize, alphaZ);
-    float h = (float)(mHeightMap.Def.Data[(int)cX * HeightMapSize + (int)cZ]) / 255.0f;
-    h = h * 9.0f * 200.0f;
-    return h;
+    float cx = x / 9.0f;
+    float cz = z / 9.0f;
+    float mx = glm::clamp(cx,0.0f,(float)HeightMapSize);
+    float mz = glm::clamp(cz,0.0f,(float)HeightMapSize);
+    int idx = (int)mz * HeightMapSize + (int)mx;
+    return mHmapF.Data[idx] * 200.0f * MapScale;
 }
 
 void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
@@ -471,6 +459,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     glm::mat4 vTrans;
     
     // Add grass
+    printf("Chunk end: %f,%f \n", cEnd.x, cEnd.y);
     float grassDensity = 65.0f;
     for (float ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
     {

@@ -220,10 +220,10 @@ void GLApp::Update()
     curCamPos.y = glm::mix
     (
         curCamPos.y, 
-        mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z) + 2.0f, 
-        1.0f
+        mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z) + 3.0f, 
+        mDeltaTime * 10.0f
     );
-    //mCamera.SetPosition(curCamPos);
+    mCamera.SetPosition(curCamPos);
     //mCamera.SetPosition(glm::vec3(2048 * 9, 500.0f, 2048 * 9));
 }
 

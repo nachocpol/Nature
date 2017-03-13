@@ -22,9 +22,16 @@ flat out int iLod;
 out vec3 iPosition;
 out vec3 iWPos;
 
+float Hash(vec3 p)
+{
+    p  = fract( p*0.3183099+.1 );
+	p *= 17.0;
+    return fract( p.x*p.y*p.z*(p.x+p.y+p.z) );
+}
+
 float GetWind(float s)
 {
-	float t = (uTime * 0.2f) + s;
+	float t = (uTime * 0.08f) + s;
 	return 	(cos(t * PI) * cos(t * PI)) * 
 			cos(t * 3.0f * PI) *
 			cos(t * 5.0f * PI) *
@@ -57,6 +64,17 @@ mat4 TranslateMatrix(vec3 t)
 	);
 }
 
+mat4 ScaleMatrix(vec3 s)
+{
+	return mat4
+	(
+		s.x,0.0f,0.0f,0.0f,
+		0.0f,s.y,0.0f,0.0f,
+		0.0f,0.0f,s.z,0.0f,
+		0.0f,0.0f,0.0f,1.0f
+	);
+}
+
 void GenVertex(float Fcoef,vec3 v,mat4 m,int lod)
 {
 	iPosition = v;
@@ -65,8 +83,6 @@ void GenVertex(float Fcoef,vec3 v,mat4 m,int lod)
 	iLogz = 1.0f + gl_Position.w;
 	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
 	iLod = lod;
-	float d = distance(uCampos,iWPos);
-	if(d > 700.0f) gl_Position.w = gl_Position.z;
 	EmitVertex();
 }
 
@@ -110,7 +126,7 @@ float GetHeight()
 void main()
 {
 	// Blade proportions
-	const float bladeHalfW = 0.1f;
+	const float bladeHalfW = 0.04f;
 	const float bladeHeight = 1.0f;
 	float Fcoef = 2.0 / log2(uCamfar + 1.0);
 	float bladeY = GetHeight();
@@ -118,9 +134,14 @@ void main()
 	// LOD min 1 max 4
 	float camDist = distance(uCampos,vec3(gPosition[0].x,bladeY,gPosition[0].y));
 	float d = (camDist - mNearLodRange) / mLodRange;
-	//if(camDist > mLodRange + 300.0f)return;
+	if(camDist > mLodRange + 300.0f)
+	{
+		iLod = 0;
+		EndPrimitive();
+		return;
+	}
 	d = clamp(d,0.0f,1.0f);
-	int maxQuads = int(mix(1,1,d));
+	int maxQuads = /*int(mix(1,1,d))*/ 1;
 	float curH = bladeHeight / maxQuads;
 
 	// Mods for wind and width
@@ -133,9 +154,11 @@ void main()
 	// Transform
 	mat4 rot = RotationMatrix(vec3(0.0f,1.0f,0.0f),gPosition[0].x * gPosition[0].y);
 	mat4 trans = TranslateMatrix(vec3(gPosition[0].x,bladeY,gPosition[0].y));
-	mat4 m = trans * rot;
+	mat4 scale = ScaleMatrix(vec3(Hash(vec3(gPosition[0].x,bladeY,gPosition[0].y)) + 2.5f));
+	mat4 m = trans * rot * scale;
 
 	// Blade body
+	/*
 	for(int i=0;i<maxQuads-1;i++)
 	{
 		float wind = GetWind(gPosition[0].x);
@@ -152,6 +175,7 @@ void main()
 		windAcum += bDelta;
 		windAcum2 += bDelta;
 	}
+	*/
 
 	// Blade top
 	float wind = GetWind(gPosition[0].x);

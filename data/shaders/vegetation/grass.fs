@@ -32,31 +32,13 @@ vec3 GetFog(   in vec3  rgb,        // original color of the pixel
 
 void main()
 {	
+	if(iLod == 0)discard;
 	
-	if(iLod == 1)
-	{
-		oColor = vec4(0.0f,1.0f,1.0f,1.0f);
-	}
-	else if(iLod == 2)
-	{
-		oColor = vec4(0.0f,0.0f,1.0f,1.0f);
-	}
-	else if(iLod == 3)
-	{
-		oColor = vec4(0.0f,1.0f,0.0f,1.0f);
-	}
-	else if(iLod == 4)
-	{
-		oColor = vec4(1.0f,0.0f,0.0f,1.0f);
-	}
-	
-	/*
 	float wShade = iPosition.x * sign(iPosition.x);
 	wShade *= 10.0f;	// so the half width its 1
 	wShade = pow(wShade,0.6f);
 	oColor = vec4(0.07f,0.38f,0.1f,1.0f) * pow(iPosition.y,2.0f) * wShade;
 	oColor.xyz = GetFog(oColor.xyz,distance(iWPos,uCampos),uCampos,normalize(iWPos - uCampos));
-	*/
 	
 	// Log z buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));

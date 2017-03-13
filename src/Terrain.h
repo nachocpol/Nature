@@ -27,7 +27,7 @@ public:
     void Render(bool useClip,glm::vec4 plane = glm::vec4(0.0f));
     void RenderUi();
     glw::MaterialTess* GetMaterial() { return &mTerrainMaterial; }
-    float& GetHeight(float x,float z);
+    float GetHeight(float x,float z);
 
     // Number of chunks at each side of the
     // terrain. TotalChunk = ChunkSide * ChunkSide
