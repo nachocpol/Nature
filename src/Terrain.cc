@@ -24,7 +24,8 @@ const float kPi = 3.141517f;
 
 Terrain::Terrain():
     ChunkSide(16), 
-    ElementSide(16),
+    ElementSide(4
+    ),
     mKr(0.0035f),
     mESun(14.0f),
     mKm(0.002f),
@@ -460,7 +461,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     
     // Add grass
     printf("Chunk end: %f,%f \n", cEnd.x, cEnd.y);
-    float grassDensity = 65.0f;
+    float grassDensity = 10.0f;
     for (float ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
     {
         for (float cj = cStart.y; cj < cEnd.y; cj += ElementSize / grassDensity)
@@ -468,7 +469,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
             vTrans = glm::mat4();
             unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
             float vY = mHmapF.Data[vIdx] * 200.0f * MapScale;
-            if (vY > 200.0f || vY < 24.0f)continue;
+            if (vY > 200.0f || vY < 44.0f)continue;
             glm::vec3 vp = glm::vec3(ci, 0.0f, cj) * MapScale;
             glm::vec2 randPos = glm::diskRand(10.0f);
             vp.x += randPos.x;

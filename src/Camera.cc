@@ -14,7 +14,7 @@ Camera::Camera():
     mNear(0.2f),
     mFar(70000000.0f)
 {
-    SetFov(60.0f);
+    SetFov(75.0f);
 }
 
 Camera::~Camera()

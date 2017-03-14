@@ -28,6 +28,7 @@ public:
     void RenderUi();
     glw::MaterialTess* GetMaterial() { return &mTerrainMaterial; }
     float GetHeight(float x,float z);
+    int GetHeightMapId() { return mHeightMap.Id; }
 
     // Number of chunks at each side of the
     // terrain. TotalChunk = ChunkSide * ChunkSide

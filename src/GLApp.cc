@@ -216,15 +216,19 @@ void GLApp::Update()
     mTerrain.SunPosition = mSunDirection;
 
     // Firs person walker
-    glm::vec3 curCamPos = mCamera.GetPosition();
-    curCamPos.y = glm::mix
-    (
-        curCamPos.y, 
-        mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z) + 3.0f, 
-        mDeltaTime * 10.0f
-    );
-    mCamera.SetPosition(curCamPos);
-    //mCamera.SetPosition(glm::vec3(2048 * 9, 500.0f, 2048 * 9));
+    if (mWalkerMode)
+    {
+        glm::vec3 curCamPos = mCamera.GetPosition();
+        float terrainHeight = mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z);
+        if (terrainHeight < mWaterHeight)terrainHeight = mWaterHeight;
+        curCamPos.y = glm::mix
+        (
+            curCamPos.y, 
+            terrainHeight + 10.0f, 
+            mDeltaTime * 10.0f
+        );
+        mCamera.SetPosition(curCamPos);
+    }
 }
 
 void GLApp::Render()
@@ -346,8 +350,8 @@ void GLApp::Render()
         glw::SetUniformTexture("uReflectionTexture", wp, mWaterReflecRt.RenderTexture.Id, 0);
         glw::SetUniformTexture("uRefractionTexture", wp, mWaterRefracRt.RenderTexture.Id, 1);
         glw::SetUniformTexture("uDudvTexture", wp, mWaterDuDvTexture.Id, 2);
-        glw::SetUniformTexture("uRefractDepth", wp, mWaterRefracRt.DepthTexture.Id, 3);
-        glw::SetUniformTexture("uNormTexture", wp, mWaterNormTexture.Id, 4);
+        glw::SetUniformTexture("uNormTexture", wp, mWaterNormTexture.Id, 3);
+        glw::SetUniformTexture("uTerrainTexture", wp, mTerrain.GetHeightMapId(), 4);
         glw::SetTransform(mWaterMaterial.Id, &wtrans[0][0]);
         glw::SetUniform1f("uWaveSize", wp, &mWaveSize);
         glw::SetUniform1f("uWaveStrength", wp, &mWaveStrenght);
@@ -545,6 +549,7 @@ void GLApp::RenderUi()
         ImGui::DragFloat("Camera speed", &mCamera.Speed, 0.1f, 0.01f, 4.0f);
         ImGui::DragFloat("Camera sensitivity", &mCamera.Sensitivity, 0.05f, 0.1f, 1.0f);
         ImGui::Checkbox("Camera Locked", &mCamera.LockMouse);
+        ImGui::Checkbox("Walker mode", &mWalkerMode);
         float tmpFov = *mCamera.GetFov();
         ImGui::InputFloat("Camera FOV", &tmpFov);
         mCamera.SetFov(tmpFov);
