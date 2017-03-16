@@ -24,8 +24,7 @@ const float kPi = 3.141517f;
 
 Terrain::Terrain():
     ChunkSide(16), 
-    ElementSide(4
-    ),
+    ElementSide(32),
     mKr(0.0035f),
     mESun(14.0f),
     mKm(0.002f),
@@ -69,16 +68,12 @@ void Terrain::Init()
     mTerrainMaterial.Init
     (
         "../data/shaders/terrain/terrain.vs",
-        "../data/shaders/terrain/terrain.fs",
-        "../data/shaders/terrain/terrain.tc",
-        "../data/shaders/terrain/terrain.te"
+        "../data/shaders/terrain/terrain.fs"
     );
     mTerrainMaterialInst.Init
     (
         "../data/shaders/terrain/terraininst.vs",
-        "../data/shaders/terrain/terrain.fs",
-        "../data/shaders/terrain/terrain.tc",
-        "../data/shaders/terrain/terrain.te"
+        "../data/shaders/terrain/terrain.fs"
     );
 
     mGrassTexture.Init(TextureDef("../data/textures/terrain/grass_diffuse.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
@@ -116,7 +111,7 @@ void Terrain::Init()
             mChunks[idx].ChunkPosition = p;
 
             InitMeshAsGrid(mChunks[idx].ChunkMesh, ElementSide, ElementSize);
-            mChunks[idx].ChunkMesh.DMode = DrawMode::kPatches3;
+            mChunks[idx].ChunkMesh.DMode = DrawMode::kTriangles;
 
             // Build bounding sphere
             // Set the chuks position as the initial position
@@ -140,7 +135,8 @@ void Terrain::Init()
 
     // Init instanced mesh (chunks)
     InitMeshAsGrid(mChunkMeshInstance.IMesh, ElementSide, ElementSize);
-    mChunkMeshInstance.IMesh.DMode = DrawMode::kPatches3;
+    // Change this if using tess
+    mChunkMeshInstance.IMesh.DMode = DrawMode::kTriangles;
     mChunkMeshInstance.InitInstances(ChunkSide * ChunkSide, BufferUsage::kDynamic);
     curTransforms.resize(mChunks.size());
 

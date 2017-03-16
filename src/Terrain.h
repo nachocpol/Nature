@@ -26,7 +26,7 @@ public:
     void Update(Frustrum viewFrust);
     void Render(bool useClip,glm::vec4 plane = glm::vec4(0.0f));
     void RenderUi();
-    glw::MaterialTess* GetMaterial() { return &mTerrainMaterial; }
+    glw::Material* GetMaterial() { return &mTerrainMaterial; }
     float GetHeight(float x,float z);
     int GetHeightMapId() { return mHeightMap.Id; }
 
@@ -60,8 +60,8 @@ private:
     std::vector<glm::mat4> curTransforms;
 
     // Material
-    glw::MaterialTess mTerrainMaterialInst;
-    glw::MaterialTess mTerrainMaterial;
+    glw::Material mTerrainMaterialInst;
+    glw::Material mTerrainMaterial;
 
     // Textures
     glw::Texture mHeightMap;

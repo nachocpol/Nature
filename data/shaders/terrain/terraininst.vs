@@ -34,6 +34,7 @@ out vec2 iTexcoord;
 out vec3 iPosition;
 out vec3 iColor;
 out vec3 iSecondaryColor;
+out float iLogz;
 
 float scale(float fCos)
 {
@@ -95,11 +96,25 @@ vec2 GetUv()
 	return p/uHeightMapSize;
 }
 
+float GetHeight(vec2 uv)
+{ 
+    // 200 = height scale
+    // 9 = terrain scale UNIFORMS!
+    return texture(uHeightMap,uv).x * 200.0f;
+}
+
 void main()
 {
 	AtmosphericScattering();
 	vec2 uv = GetUv();
 	iTexcoord = uv;
-	iPosition = (aInstancedModel * vec4(aPosition,1.0f)).xyz;
+	vec3 curPos = aPosition;
+	curPos.y = GetHeight(uv);
+	iPosition = (aInstancedModel * vec4(curPos,1.0f)).xyz;
 	gl_ClipDistance[0] = dot(vec4(iPosition,1.0f),uClipPlane);
+	gl_Position = uProjection * uView * vec4(iPosition, 1.0f);
+
+	float Fcoef = 2.0 / log2(uCamfar + 1.0);
+    iLogz = 1.0f + gl_Position.w;
+    gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
 }

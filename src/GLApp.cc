@@ -14,7 +14,7 @@
 
 GLApp::GLApp()
 {
-    mSunDirection = glm::vec3(0.0f, 0.05f, -1.0f);
+    mSunDirection = glm::vec3(0.0f, 0.25f, -1.0f);
 }
 
 GLApp::~GLApp()
