@@ -130,6 +130,7 @@ void main()
 	const float bladeHeight = 1.0f;
 	float Fcoef = 2.0 / log2(uCamfar + 1.0);
 	float bladeY = GetHeight();
+	//bladeY = 100.0;
 
 	// LOD min 1 max 4
 	float camDist = distance(uCampos,vec3(gPosition[0].x,bladeY,gPosition[0].y));
@@ -154,7 +155,7 @@ void main()
 	// Transform
 	mat4 rot = RotationMatrix(vec3(0.0f,1.0f,0.0f),gPosition[0].x * gPosition[0].y);
 	mat4 trans = TranslateMatrix(vec3(gPosition[0].x,bladeY,gPosition[0].y));
-	mat4 scale = ScaleMatrix(vec3(Hash(vec3(gPosition[0].x,bladeY,gPosition[0].y)) + 2.5f));
+	mat4 scale = ScaleMatrix(vec3(Hash(vec3(gPosition[0].x,bladeY,gPosition[0].y)) + 1.0f));
 	mat4 m = trans * rot * scale;
 
 	// Blade body

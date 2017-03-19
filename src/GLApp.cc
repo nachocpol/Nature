@@ -89,8 +89,8 @@ bool GLApp::Init()
     mCloudsPlane.Init(wVert, cele);
 
     // Init water
-    mWaterReflecRt.Init(glm::vec2(mViewport.z/2.0f, mViewport.w/2.0f), true);
-    mWaterRefracRt.Init(glm::vec2(mViewport.z / 2.0f, mViewport.w / 2.0f), true);
+    mWaterReflecRt.Init(initWindowSize / 2.0f, true);
+    mWaterRefracRt.Init(initWindowSize / 2.0f, true);
     mWaterMesh.Init(wVert, cele);
     mWaterMaterial.Init("../data/shaders/water.vs", "../data/shaders/water.fs");
     mWaterDuDvTexture.Init(TextureDef("../data/textures/wdudv.png", glm::vec2(0.0f), TextureUsage::kTexturing));
@@ -127,8 +127,8 @@ bool GLApp::Init()
     mSky.Init();
 
     // Bloom
-    mBloomRt.Init(initWindowSize);
-    mBloomRtV.Init(initWindowSize);
+    mBloomRt.Init(initWindowSize / 4.0f);
+    mBloomRtV.Init(initWindowSize / 4.0f);
     mBloomFinal.Init(initWindowSize);
     mBloomRtMat.Init
     (
@@ -143,21 +143,21 @@ bool GLApp::Init()
 
     // Lens flares
     // Downsample and threshold
-    mThresholdRt.Init(initWindowSize);
+    mThresholdRt.Init(initWindowSize / 4.0f);
     mThresholdRtMat.Init
     (
         "../data/shaders/lensflares/lfthreshold.vs",
         "../data/shaders/lensflares/lfthreshold.fs"
     );
     // Feature generation
-    mLensFeaturesRt.Init(initWindowSize);
+    mLensFeaturesRt.Init(initWindowSize / 4.0f);
     mLensFeaturesRtMat.Init
     (
         "../data/shaders/lensflares/lffeatures.vs",
         "../data/shaders/lensflares/lffeatures.fs"
     );
-    mLensBlurHRt.Init(initWindowSize);
-    mLensBlurVRt.Init(initWindowSize);
+    mLensBlurHRt.Init(initWindowSize / 4.0f);
+    mLensBlurVRt.Init(initWindowSize / 4.0f);
     mLensDustTex.Init(TextureDef("../data/textures/lensdust.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
     mLensStarTex.Init(TextureDef("../data/textures/lensstar.jpg", glm::vec2(0.0f), TextureUsage::kTexturing));
     mLensMergeRt.Init(initWindowSize);
@@ -243,17 +243,22 @@ void GLApp::Render()
         mViewport.w = ws.y;
         mCamera.Resize((float)ws.x / (float)ws.y);
 
+        glm::vec2 windowDown4 = ws;
+        windowDown4 *= 0.25f;
+        glm::vec2 windowDown2 = ws;
+        windowDown2 *= 0.5f;
+
         // Resize render targets
         mBaseRt.Resize(ws);
-        mWaterReflecRt.Resize(ws);
-        mWaterRefracRt.Resize(ws);
-        mThresholdRt.Resize(ws);
-        mLensFeaturesRt.Resize(ws);
-        mBloomRt.Resize(ws);
-        mBloomRtV.Resize(ws);
+        mWaterReflecRt.Resize(windowDown2);
+        mWaterRefracRt.Resize(windowDown2);
+        mThresholdRt.Resize(windowDown4);
+        mLensFeaturesRt.Resize(windowDown4);
+        mBloomRt.Resize(windowDown4);
+        mBloomRtV.Resize(windowDown4);
         mBloomFinal.Resize(ws);
-        mLensBlurHRt.Resize(ws);
-        mLensBlurVRt.Resize(ws);
+        mLensBlurHRt.Resize(windowDown4);
+        mLensBlurVRt.Resize(windowDown4);
         mLensMergeRt.Resize(ws);
         mToneMapRt.Resize(ws);
         mFxaaRt.Resize(ws);

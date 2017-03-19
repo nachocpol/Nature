@@ -70,7 +70,7 @@
 	+ Implement HDR													[✓] 28 / 2 / 2017
 	+ Implement Bloom												[✓] 28 / 2 / 2017
 	+ Implement tone mapping										[✓] 1 / 3 / 2017
-	+ Water rt's are resized to full size !!!						[X]
+	+ Water rt's are resized to full size !!!						[✓]	19 / 3 / 2017 
 	+ Add starbust to the lens flares!								[x]
 	+ Add fxaa														[✓] 1 / 3 / 2017
 	+ Fix scattering, the sun changes size							[x]
@@ -79,3 +79,5 @@
 	+ Grass, remove y from it!										[✓] 14 / 3 / 2017
 	+ Update water to fade with terrain height						[✓] 14 / 3 / 2017
 	+ Water discard early											[x]
+	+ First person walker											[✓] 15 / 3 / 2017
+	+ Bloom and lens flares rendered at lower res 					[✓] 19 / 3 / 2017

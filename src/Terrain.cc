@@ -456,13 +456,15 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     glm::mat4 vTrans;
     
     // Add grass
-    printf("Chunk end: %f,%f \n", cEnd.x, cEnd.y);
+    glm::vec3 n;
     float grassDensity = 10.0f;
     for (float ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
     {
         for (float cj = cStart.y; cj < cEnd.y; cj += ElementSize / grassDensity)
         {
             vTrans = glm::mat4();
+
+            // Check min max height
             unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
             float vY = mHmapF.Data[vIdx] * 200.0f * MapScale;
             if (vY > 200.0f || vY < 44.0f)continue;

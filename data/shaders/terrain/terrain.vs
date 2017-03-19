@@ -91,7 +91,7 @@ void AtmosphericScattering()
 
 vec2 GetUv()
 {
-	float uHeightMapSize = 2048.0f * 9.0f;
+	float uHeightMapSize = 2048.0f * 4.0f;
 	vec2 p = (uModel * vec4(aPosition,1.0f)).xz;
 	return p/uHeightMapSize;
 }
