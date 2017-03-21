@@ -208,19 +208,8 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     // Random stuff
     glw::SetUniform1f("uTiling1", p, &mTiling1);
     glw::SetUniform1f("uTiling2", p, &mTiling2);
-
-    // Scattering parameters
     glw::SetUniform3f("uSunPosition", p, &SunPosition.x);
-    glw::SetUniform1i("uSamples", p, &mSamples);
-    glw::SetUniform1f("uInnerRadius", p, &mInnerRadius);
-    glw::SetUniform3f("u3InvWavelength", p, &m3InvWavelength.x);
-    glw::SetUniform1f("uKrESun", p, &mKrESun);
-    glw::SetUniform1f("uKmESun", p, &mKmESun);
-    glw::SetUniform1f("uKr4PI", p, &mKr4PI);
-    glw::SetUniform1f("uKm4PI", p, &mKm4PI);
-    glw::SetUniform1f("uScale", p, &mScale);
-    glw::SetUniform1f("uScaleDepth", p, &mRScaleDepth);
-    glw::SetUniform1f("uScaleOverScaleDepth", p, &mScaleOverScaleDepth);
+
 
     // Draw terrain
     if (mUseInstancing)
@@ -261,14 +250,15 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     if(mGrassWire)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     mGrassMaterial.Use();
     glw::SetUniform1f("mLodRange", mGrassMaterial.Id, &mLodRange);
-    glw::SetUniform1f("mNearLodRange", mGrassMaterial.Id, &mNearLodRange);
+    glw::SetUniform1f("mNearLodRa   nge", mGrassMaterial.Id, &mNearLodRange);
     glw::SetUniformTexture("uHeightMap", mGrassMaterial.Id,mHeightMap.Id, 0);
-    if (mUseInstancing)
+    if (mUseInstancing && plane.y != -1.0)
     {
         for (unsigned int i = 0; i < mChunksVisible.size(); i++)
         {
             // Early exit so we dont draw far grass (prevent from having it on the shader)
-            if (glm::distance(*CamPos, mChunksVisible[i].RealChunkPos) > mLodRange + 800.0f)continue;
+            const int chunkSize = ElementSide * ElementSize * MapScale;
+            if (glm::distance(*CamPos, mChunksVisible[i].RealChunkPos) > (mLodRange + chunkSize))continue;
             mChunksVisible[i].ChunkGrass.Render();
         }
     }
@@ -457,7 +447,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     
     // Add grass
     glm::vec3 n;
-    float grassDensity = 10.0f;
+    float grassDensity = 30.0f;
     for (float ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
     {
         for (float cj = cStart.y; cj < cEnd.y; cj += ElementSize / grassDensity)

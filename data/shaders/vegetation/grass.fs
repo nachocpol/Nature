@@ -12,7 +12,6 @@ layout(std140)uniform uPass
 
 in vec2 iTexcoord;
 in float iLogz;
-flat in int iLod;
 in vec3 iPosition;
 in vec3 iWPos;
 
@@ -31,9 +30,7 @@ vec3 GetFog(   in vec3  rgb,        // original color of the pixel
 }
 
 void main()
-{	
-	if(iLod == 0)discard;
-	
+{		
 	float wShade = iPosition.x * sign(iPosition.x);
 	wShade *= 10.0f;	// so the half width its 1
 	wShade = pow(wShade,0.6f);

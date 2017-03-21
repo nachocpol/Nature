@@ -120,7 +120,7 @@ private:
     unsigned int mGrassCnt = 0;
     unsigned int mMaxGrassChunk = 0;
     glw::MaterialGeo mGrassMaterial;
-    float mLodRange = 150.0f;
+    float mLodRange = 300.0f;
     float mNearLodRange = 50.0f;
     bool mGrassWire = false;
 

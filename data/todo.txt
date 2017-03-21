@@ -81,3 +81,7 @@
 	+ Water discard early											[x]
 	+ First person walker											[✓] 15 / 3 / 2017
 	+ Bloom and lens flares rendered at lower res 					[✓] 19 / 3 / 2017
+	+ Optimization: grass is not being rendered on the
+	  water refraction texture.										[✓] 21 / 3 / 2017
+	+ Make new fog!
+	+ Test day/night cycle

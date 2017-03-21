@@ -27,10 +27,6 @@ uniform float uTiling2;
 
 in vec2 iTexcoord;
 in vec3 iPosition;
-in vec3 iColor;
-in vec3 iSecondaryColor;
-in vec3 iNormal;
-in vec3 iClipPos;
 in float iLogz;
 
 out vec4 oColor;
@@ -165,22 +161,12 @@ vec3 GetNormal(vec3 curNormal,vec3 view)
     return normalize(tbn * finalNormal);
 }
 
-vec3 GetAtmosphereColor(vec3 base)
+vec3 GetFog(vec3 c, float d,float h)
 {
-    return iColor * iSecondaryColor;
-}
-
-vec3 GetFog(   in vec3  rgb,        // original color of the pixel
-               in float distance,   // camera to point distance
-               in vec3  rayOri,     // camera position
-               in vec3  rayDir )    // camera to point vector
-{
-    float c = 0.01f;
-    float b = 0.01f;
-    float fogAmount = c * exp(-rayOri.y*b) * (1.0-exp( -distance*rayDir.y*b ))/rayDir.y;
-    vec3  fogColor  = vec3(0.5,0.6,0.7);
-    if(iPosition.y <= 20) fogAmount = 0.0f;
-    return mix( rgb, fogColor, fogAmount );
+    const vec3 fogColor = vec3(0.0);
+    float fogMod = clamp(d / 4000.0,0.0,1.0);
+    fogMod *= pow(1.0 - (h /(200.0 * 9.0)),2.0);
+    return mix(c,fogColor,fogMod);
 }
 
 void main()
@@ -197,8 +183,8 @@ void main()
     oColor = vec4(base * l,1.0f) * CloudsShadowing();
 
     // Fog
-    oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iPosition),uCampos,normalize(iPosition - uCampos));
-
+    oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iPosition),iPosition.y);
+    
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));
     gl_FragDepth = log2(iLogz) * Fcoef_half;

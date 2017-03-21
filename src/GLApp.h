@@ -83,7 +83,7 @@ private:
     glw::Material mBloomMergeMat;
     int kBloomHorizontal = 1;
     int kBloomVertical = 0;
-    float mBloomSampleIntensity = 0.5f;
+    float mBloomSampleIntensity = 0.15f;
 
     // Lens flares
     glw::RenderTarget mThresholdRt; 
