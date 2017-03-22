@@ -198,8 +198,8 @@ bool GLApp::Init()
 
 void GLApp::Update()
 {
-    //mSunDirection.y = cos(mTime * 0.5);
-    //mSunDirection.x = sin(mTime * 0.5);
+    mSunDirection.y = cos(mTime * 0.5);
+    mSunDirection.x = sin(mTime * 0.5);
     mRunning = !mWindow.Events();
 
     mCamera.Update();

@@ -135,7 +135,7 @@ void main()
 	vec3 uCloudDark = vec3(0.57f,0.63f,0.7f);
     vec3 uCloudMorning = vec3(0.95f,0.95f,0.95f);
     vec3 uCloudSunset = vec3(0.91f,0.65f,0.505f);
-	vec3 uCloudBright = mix(uCloudSunset,uCloudMorning,sqrt(uSundir.y));
+	vec3 uCloudBright = mix(uCloudSunset,uCloudMorning,	(sqrt(uSundir.y),0.0,1.0));
 	vec3 cloudColor = mix(uCloudBright,uCloudDark,n);
 	oColor = vec4(cloudColor,n) * 1.0f;
 	oColor.a *= fade;

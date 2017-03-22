@@ -184,7 +184,7 @@ void main()
 
     // Fog
     oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iPosition),iPosition.y);
-    
+
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));
     gl_FragDepth = log2(iLogz) * Fcoef_half;
