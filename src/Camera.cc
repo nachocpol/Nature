@@ -10,7 +10,7 @@
 Camera::Camera():
     mUp(0.0f,1.0f,0.0),
     mPosition(10048.0f,50.0f, 10048.0f),
-    mFront(0.0f,0.0f,0.0f),
+    mFront(mPosition + glm::vec3(0.0f,0.0f,-1.0f)),
     mNear(0.2f),
     mFar(70000000.0f)
 {

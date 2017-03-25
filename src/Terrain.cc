@@ -240,7 +240,6 @@ void Terrain::Render(bool useClip, glm::vec4 plane, bool blackPass)
     if(mGrassWire)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     mGrassMaterial.Use();
     glw::SetUniform1f("mLodRange", mGrassMaterial.Id, &mLodRange);
-    glw::SetUniform1f("mNearLodRange", mGrassMaterial.Id, &mNearLodRange);
     glw::SetUniformTexture("uHeightMap", mGrassMaterial.Id,mHeightMap.Id, 0);
     if (mUseInstancing && plane.y != -1.0)
     {
@@ -298,7 +297,6 @@ void Terrain::RenderUi()
         
         ImGui::Text("Grass");
         ImGui::InputFloat("Lod range", &mLodRange);
-        ImGui::InputFloat("Near lod range", &mNearLodRange);
         ImGui::Checkbox("Wireframe", &mGrassWire);
         ImGui::Separator();
     }

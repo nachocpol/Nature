@@ -13,7 +13,6 @@ layout(std140)uniform uPass
 };
 in vec2[] gPosition;
 uniform float mLodRange;
-uniform float mNearLodRange;
 uniform sampler2D uHeightMap;
 
 layout (triangle_strip,max_vertices = 3) out;

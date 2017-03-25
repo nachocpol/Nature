@@ -39,11 +39,6 @@ void Sky::Render()
 
     GLuint p = mSkyMaterial.Id;
     glw::SetUniform3f("uSunPosition",p, &SunPosition.x);
-
-    glm::mat4 strans = glm::mat4();
-    strans = glm::translate(strans, glm::vec3(0.0f, 0.0f, 0.0f));
-    strans = glm::scale(strans, glm::vec3(2.0f)); //radius of sphere is 0.5f
-    glw::SetTransform(mSkyMaterial.Id, &strans[0][0]);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     mSkyMesh.Render();
     // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

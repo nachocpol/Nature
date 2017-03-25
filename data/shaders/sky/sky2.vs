@@ -11,8 +11,6 @@ layout(std140)uniform uPass
 	float uCamfar;
 };
 
-uniform mat4 uModel;
-
 out vec3 iPosition;
 
 void main()

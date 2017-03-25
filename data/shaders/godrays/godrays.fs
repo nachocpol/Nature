@@ -1,7 +1,22 @@
 #version 430 core
 
+layout(std140)uniform uPass
+{
+	mat4 uView;
+	mat4 uProjection;
+	vec3 uCampos;
+	float uTime;
+	float uCamnear;
+	float uCamfar;
+};
+
 uniform sampler2D uColorTexture;
 uniform vec2 uSunScreenSpace;
+uniform int uSamples;
+uniform float uExposure;
+uniform float uDecay ;
+uniform float uDensity;
+uniform float uWeight;
 
 in vec2 iTexcoord;
 
@@ -9,21 +24,17 @@ out vec4 oColor;
 
 void main()
 {
-	float uExposure = 0.5;
-    float uDecay = 0.95;
-    float uDensity = 3.5;
-    float uWeight = 0.97;
-    const int uSamples = 190;
-
 	//Sun pos in texture coordinates
-	vec2 sunPos =  uSunScreenSpace * 0.5 + 0.5;
-	sunPos = clamp(sunPos,vec2(0.0),vec2(1.0));
+	vec2 sunPos =  uSunScreenSpace;
+	sunPos.x = sin(uTime) + 1.0 * 0.5;
+	sunPos.x = uSunScreenSpace.x;
+	sunPos.y = 0.5;
 
 	//Extend the rays
  	vec4 finalColor = vec4(0.0);
   	vec2 deltaTc = iTexcoord - sunPos;
   	vec2 curTc = iTexcoord;
-  	deltaTc *= 1.0 / float(uSamples) * uDensity;
+  	deltaTc *= (1.0 / float(uSamples)) * uDensity;
  	float illumDecay = 1.0;
 
   	for(int i=0;i<uSamples;i++)

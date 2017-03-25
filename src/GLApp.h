@@ -92,8 +92,8 @@ private:
     glw::Material mLensFeaturesRtMat;
     int mGhostSamples = 6;
     float mGhostDispers = 0.3f;
-    float mHaloWidth = 0.4f;
-    float mChromDistort = 5.0f;
+    float mHaloWidth = 0.49f;
+    float mChromDistort = 4.0f;
     glw::RenderTarget mLensBlurHRt;
     glw::RenderTarget mLensBlurVRt;
     glw::Texture mLensDustTex;
@@ -117,4 +117,16 @@ private:
     glw::RenderTarget mGodRaysBlackPRt;
     glw::RenderTarget mGodRaysRt;
     glw::Material mGodRaysMat;
+    int mGodRaysSamples = 100;
+    /*
+    float mGodRaysExposure = 0.2f;
+    float mGodRaysDecay = 0.97f;
+    float mGodRaysDensity = 2.2f;
+    float mGodRaysWeight = 0.3f;
+    */
+    float mGodRaysExposure = 0.0034f;
+    float mGodRaysDecay = 1.0f;
+    float mGodRaysDensity = 0.84f;
+    float mGodRaysWeight = 5.6f;
+    glm::vec2 mSunNormCoords;
 };

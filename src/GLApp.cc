@@ -200,8 +200,8 @@ bool GLApp::Init()
 
 void GLApp::Update()
 {
-    mSunDirection.y = cos(mTime * 0.5);
-    mSunDirection.x = sin(mTime * 0.5);
+    //mSunDirection.y = cos(mTime * 0.5);
+    //mSunDirection.x = sin(mTime * 0.5);
     mRunning = !mWindow.Events();
 
     mCamera.Update();
@@ -404,15 +404,24 @@ void GLApp::Render()
     mGodRaysRt.Enable();
     {
         // Sun screen space
-        glm::vec4 result = glm::vec4(0.0f);
-        glm::vec4 sun = glm::vec4(mSunDirection.x, mSunDirection.y, mSunDirection.z, 1.0);
-        result = mCamera.Projection * mCamera.View * sun;
-        result = result / result.w;
-        glm::vec2 sunCoord = glm::vec2(result.x, result.y);
+        glm::vec3 sunEyePos = mCamera.GetPosition() + mSunDirection;
+        glm::vec4 sunProj =  mCamera.Projection * mCamera.View * glm::vec4(sunEyePos, 1.0f);
+        sunProj.x /= sunProj.w;
+        sunProj.y /= sunProj.w;
+        sunProj.x = (sunProj.x + 1.0f) * 0.5f;
+        sunProj.y = (sunProj.y + 1.0f) * 0.5f;
+        mSunNormCoords = glm::vec2(sunProj.x, sunProj.y);
+        printf("Sun: %f , %f\n", mSunNormCoords.x, mSunNormCoords.y);
 
+        unsigned int grId = mGodRaysMat.Id;
         mGodRaysMat.Use();
-        glw::SetUniformTexture("uColorTexture", mGodRaysMat.Id, mGodRaysBlackPRt.RenderTexture.Id, 0);
-        glw::SetUniform2f("uSunScreenSpace", mGodRaysMat.Id,&sunCoord.x);
+        glw::SetUniformTexture("uColorTexture", grId, mGodRaysBlackPRt.RenderTexture.Id, 0);
+        glw::SetUniform2f("uSunScreenSpace", grId,&mSunNormCoords.x);
+        glw::SetUniform1i("uSamples", grId, &mGodRaysSamples);
+        glw::SetUniform1f("uExposure", grId, &mGodRaysExposure);
+        glw::SetUniform1f("uDecay", grId, &mGodRaysDecay);
+        glw::SetUniform1f("uDensity", grId, &mGodRaysDensity);
+        glw::SetUniform1f("uWeight", grId, &mGodRaysWeight);
         mBaseQuadRt.Render();
     }
     mGodRaysRt.Disable();
@@ -543,7 +552,7 @@ void GLApp::RenderUi()
 
     ImGui::Begin("Postprocessing");
     {
-        // Blooms
+        // Bloom
         ImGui::Text("Bloom");
         ImGui::InputFloat("Bloom sample intensity", &mBloomSampleIntensity);
         ImGui::Separator();
@@ -555,6 +564,14 @@ void GLApp::RenderUi()
         ImGui::InputFloat("Ghost dispers", &mGhostDispers);
         ImGui::InputFloat("Halo width", &mHaloWidth);
         ImGui::InputFloat("Chromatic distortion", &mChromDistort);
+        ImGui::Separator();
+        // God rays
+        ImGui::Text("God rays");
+        ImGui::InputInt("God rays samples", &mGodRaysSamples);
+        ImGui::InputFloat("God rays exposure", &mGodRaysExposure);
+        ImGui::InputFloat("God rays decay", &mGodRaysDecay);
+        ImGui::InputFloat("God rays density", &mGodRaysDensity);
+        ImGui::InputFloat("God rays weight", &mGodRaysWeight);
         ImGui::Separator();
     }
     ImGui::End();

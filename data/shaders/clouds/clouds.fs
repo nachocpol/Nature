@@ -119,7 +119,6 @@ float GetFade(float dist)
 
 void main()
 {
-	vec3 sunDir = vec3(0.4f,0.6f,0.0f);
 	vec2 uWind = vec2(0.05f,0.05f) * uTime;
 	float camDist = distance(uCampos,iWPos);
 	float fade = GetFade(camDist);
@@ -131,11 +130,14 @@ void main()
     //csPos.y = 0.0f;
     //float cs = Fbm2(csPos);
 
+    // Sun height
+    float sunHeight = clamp(uSundir.y,0.0,1.0);
+    
     // Cloud colors
 	vec3 uCloudDark = vec3(0.57f,0.63f,0.7f);
     vec3 uCloudMorning = vec3(0.95f,0.95f,0.95f);
     vec3 uCloudSunset = vec3(0.91f,0.65f,0.505f);
-	vec3 uCloudBright = mix(uCloudSunset,uCloudMorning,	(sqrt(uSundir.y),0.0,1.0));
+	vec3 uCloudBright = mix(uCloudSunset,uCloudMorning,sqrt(sunHeight));
 	vec3 cloudColor = mix(uCloudBright,uCloudDark,n);
 	oColor = vec4(cloudColor,n) * 1.0f;
 	oColor.a *= fade;

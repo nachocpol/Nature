@@ -86,7 +86,7 @@ void main()
 		// Dark during the night
 		atmosphereColor = mix(vec3(0.0f),atmosphereColor,pow(sunHeight,0.5f));
 
-		oColor = vec4(sunColor + atmosphereColor,1.0f);
+		oColor = vec4(/*sunColor +*/ atmosphereColor,1.0f);
 	}
 
 	if(iPosition.y <= 0.0f)oColor = vec4(0.2f);
