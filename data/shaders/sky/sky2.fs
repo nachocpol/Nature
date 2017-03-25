@@ -16,6 +16,44 @@ in vec3 iPosition;
 
 out vec4 oColor;
 
+/*
+	Simple 2d pseudo random
+*/
+vec2 rand2(vec2 p)
+{
+    p = vec2(dot(p, vec2(12.9898,78.233)), dot(p, vec2(26.65125, 83.054543))); 
+    return fract(sin(p) * 43758.5453);
+}
+
+/*
+	1D pseudo random
+*/
+float rand(vec2 p)
+{
+    return fract(sin(dot(p.xy ,vec2(54.90898,18.233))) * 4337.5453);
+}
+
+float Stars(in vec2 x, float numCells, float size, float br)
+{
+    vec2 n = x * numCells;
+    vec2 f = floor(n);
+
+	float d = 1.0e10;
+    for (int i = -1; i <= 1; ++i)
+    {
+        for (int j = -1; j <= 1; ++j)
+        {
+            vec2 g = f + vec2(float(i), float(j));
+			g = n - g - rand2(mod(g, numCells)) + rand(g);
+            // Control size
+            g *= 1. / (numCells * size);
+			d = min(d, dot(g, g));
+        }
+    }
+
+    return br * (smoothstep(.95, 1., (1. - sqrt(d))));
+}
+
 void main()
 {
 	vec3 toAtmosphere = normalize(iPosition - vec3(0.0f));
@@ -28,6 +66,11 @@ void main()
 	if(sunHeight <= 0.0f)
 	{
 		oColor.xyz = vec3(0.0,0.0,0.0);
+		vec2 scaledToAtm = toAtmosphere.xz * 20.0;
+		if(toAtmosphere.y > 0.1)
+		{
+			oColor.xyz += vec3(Stars(scaledToAtm,8.0,0.05,0.5));
+		}
 	}
 	// Daytime sky
 	else

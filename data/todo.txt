@@ -84,4 +84,4 @@
 	+ Optimization: grass is not being rendered on the
 	  water refraction texture.										[✓] 21 / 3 / 2017
 	+ Make new fog!
-	+ Test day/night cycle
+	+ Test day/night cycle	

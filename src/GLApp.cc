@@ -84,8 +84,8 @@ bool GLApp::Init()
         0,2,1,
         0,3,2
     };
-    mCloudsMat.Init("../data/shaders/clouds.vs",
-                    "../data/shaders/clouds.fs");
+    mCloudsMat.Init("../data/shaders/clouds/clouds.vs",
+                    "../data/shaders/clouds/clouds.fs");
     mCloudsPlane.Init(wVert, cele);
 
     // Init water
@@ -183,15 +183,17 @@ bool GLApp::Init()
         "../data/shaders/aa/fxaa.fs"
     );
 
-    // Test sky
-    mTestSkyRt.Init(initWindowSize);
-    mTestSkyRtMat.Init
+    // God rays
+    mGodRaysRt.Init(initWindowSize);
+    mGodRaysBlackPRt.Init(initWindowSize);
+    mGodRaysMat.Init
     (
-        "../data/shaders/sky/skypp.vs",
-        "../data/shaders/sky/skypp.fs"
+        "../data/shaders/godrays/godrays.vs",
+        "../data/shaders/godrays/godrays.fs"
     );
 
-    //mCamera.GetPositionPtr()->y = mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z) + 2.0f;
+    // Set initial camera position
+    mCamera.GetPositionPtr()->y = mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z) + 2.0f;
 
     return true;
 }
@@ -264,6 +266,8 @@ void GLApp::Render()
         mLensMergeRt.Resize(ws);
         mToneMapRt.Resize(ws);
         mFxaaRt.Resize(ws);
+        mGodRaysBlackPRt.Resize(ws);
+        mGodRaysRt.Resize(ws);
     }
 
     glClearColor(0.3f,0.3f,0.3f, 1.0f);
@@ -284,12 +288,6 @@ void GLApp::Render()
     {
         // Sky
         mSky.Render();
-        /*
-        glDepthMask(GL_FALSE);
-        mTestSkyRtMat.Use();
-        mBaseQuadRt.Render();
-        glDepthMask(GL_TRUE);
-        */
 
         // Terrain
         mTerrain.Render(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.01f)));
@@ -334,12 +332,6 @@ void GLApp::Render()
     {
         // Sky
         mSky.Render();
-        /*
-        glDepthMask(GL_FALSE);
-        mTestSkyRtMat.Use();
-        mBaseQuadRt.Render();
-        glDepthMask(GL_TRUE);
-        */
 
         // Terrain
         mTerrain.Render(false);
@@ -396,6 +388,34 @@ void GLApp::Render()
         glEnable(GL_CULL_FACE);
     }
     mBaseRt.Disable();
+
+    // God rays (black pass)
+    mGodRaysBlackPRt.Enable();
+    {
+        // Sky
+        mSky.Render();
+
+        // Terrain
+        mTerrain.Render(false, glm::vec4(0.0f), true);
+    }
+    mGodRaysBlackPRt.Disable();
+
+    // God rays
+    mGodRaysRt.Enable();
+    {
+        // Sun screen space
+        glm::vec4 result = glm::vec4(0.0f);
+        glm::vec4 sun = glm::vec4(mSunDirection.x, mSunDirection.y, mSunDirection.z, 1.0);
+        result = mCamera.Projection * mCamera.View * sun;
+        result = result / result.w;
+        glm::vec2 sunCoord = glm::vec2(result.x, result.y);
+
+        mGodRaysMat.Use();
+        glw::SetUniformTexture("uColorTexture", mGodRaysMat.Id, mGodRaysBlackPRt.RenderTexture.Id, 0);
+        glw::SetUniform2f("uSunScreenSpace", mGodRaysMat.Id,&sunCoord.x);
+        mBaseQuadRt.Render();
+    }
+    mGodRaysRt.Disable();
 
     // Bloom
     // Horizontal blur
@@ -510,7 +530,7 @@ void GLApp::Render()
 
     // Final draw
     mBaseMatRt.Use();
-    glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mFxaaRt.RenderTexture.Id, 0);
+    glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mGodRaysRt.RenderTexture.Id, 0);
     mBaseQuadRt.Render();
 
     RenderUi();

@@ -24,31 +24,9 @@ const float kPi = 3.141517f;
 
 Terrain::Terrain():
     ChunkSide(16), 
-    ElementSide(32),
-    mKr(0.0035f),
-    mESun(14.0f),
-    mKm(0.002f),
-    mWaveLength(0.65f, 0.57f, 0.45f),
-    mSamples(1),
-    mFSamples((float)mSamples),
-    mOuterRadius(kAtmosphereR),
-    mInnerRadius(kEarthR),
-    mRScaleDepth(0.35f),
-    mMScaleDepth(0.1f),
-    mG(-0.990f),
-    SunPosition(0.0f, 0.5f, 1.0f)
+    ElementSide(32)
 {
-    mPow4WaveLength = glm::pow(mWaveLength, glm::vec3(4.0f));
-    m3InvWavelength = 1.0f / mPow4WaveLength;
-    mOuterRadius2 = pow(mOuterRadius, 2.0f);
-    mInnerRadius2 = pow(mInnerRadius, 2.0f);
-    mKrESun = mKr * mESun;
-    mKmESun = mKm * mESun;
-    mKr4PI = mKr * 4.0f * kPi;
-    mKm4PI = mKm * 4.0f * kPi;
-    mScale = 1.0f / (mOuterRadius - mInnerRadius);
-    mScaleOverScaleDepth = mScale / mRScaleDepth;
-    mG2 = pow(mG, 2.0f);
+
 }
 
 Terrain::~Terrain()
@@ -74,6 +52,11 @@ void Terrain::Init()
     (
         "../data/shaders/terrain/terraininst.vs",
         "../data/shaders/terrain/terrain.fs"
+    );
+    mTerrainBlackMaterial.Init
+    (
+        "../data/shaders/terrain/terraininst.vs",
+        "../data/shaders/terrain/terrainblack.fs"
     );
 
     mGrassTexture.Init(TextureDef("../data/textures/terrain/grass_diffuse.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
@@ -169,8 +152,15 @@ void Terrain::Update(Frustrum viewFrust)
     }
 }
 
-void Terrain::Render(bool useClip, glm::vec4 plane)
+void Terrain::Render(bool useClip, glm::vec4 plane, bool blackPass)
 {
+    // Check if we have to perform "black pass
+    if (blackPass)
+    {
+        RenderBlackPass();
+        return;
+    }
+
     // Set the current material
     GLuint p = 0;
     if (mUseInstancing)
@@ -250,7 +240,7 @@ void Terrain::Render(bool useClip, glm::vec4 plane)
     if(mGrassWire)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     mGrassMaterial.Use();
     glw::SetUniform1f("mLodRange", mGrassMaterial.Id, &mLodRange);
-    glw::SetUniform1f("mNearLodRa   nge", mGrassMaterial.Id, &mNearLodRange);
+    glw::SetUniform1f("mNearLodRange", mGrassMaterial.Id, &mNearLodRange);
     glw::SetUniformTexture("uHeightMap", mGrassMaterial.Id,mHeightMap.Id, 0);
     if (mUseInstancing && plane.y != -1.0)
     {
@@ -304,16 +294,6 @@ void Terrain::RenderUi()
         ImGui::Checkbox("Visual debug", &VisualDebug);
         ImGui::Checkbox("Draw wireframe", &mDrawWire);
         ImGui::Checkbox("Use instancing", &mUseInstancing);
-        ImGui::InputFloat("Rayleigh scattering constant(terrain)", &mKr);
-        ImGui::InputFloat("Sun brightness constant(terrain)", &mESun);
-        ImGui::InputFloat("Mie scattering constant(terrain)", &mKm);
-        ImGui::InputFloat3("Particles wavelength(terrain)", &mWaveLength.x);
-        ImGui::InputInt("Samples(terrain)", &mSamples);
-        ImGui::InputFloat("Outer Radius(terrain)", &mOuterRadius);
-        ImGui::InputFloat("Inner Radius(terrain)", &mInnerRadius);
-        ImGui::InputFloat("Rayleigh Scale Depth(terrain)", &mRScaleDepth);
-        ImGui::InputFloat("Mie Scale Depth(terrain)", &mMScaleDepth);
-        ImGui::InputFloat("Mie phase asymmetry factor(terrain)", &mG);
         ImGui::Separator();
         
         ImGui::Text("Grass");
@@ -447,7 +427,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     
     // Add grass
     glm::vec3 n;
-    float grassDensity = 30.0f;
+    float grassDensity = 2.0f;
     for (float ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
     {
         for (float cj = cStart.y; cj < cEnd.y; cj += ElementSize / grassDensity)
@@ -471,6 +451,32 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     }
     chunk.ChunkGrass.Init(grassVertex, grassEle);
     chunk.ChunkGrass.DMode = DrawMode::kPoints;
+}
+
+void Terrain::RenderBlackPass()
+{
+    // Only for instancing... Just remove version without instancing
+    if (!mUseInstancing)
+    {
+        printf("WARNING: Black pass can only be done if instancing is enabled.\n");
+        return;
+    }
+
+    mTerrainBlackMaterial.Use();
+    glw::SetUniformTexture("uHeightMap", mTerrainBlackMaterial.Id, mHeightMap.Id, 0);
+    // We wont need clip planes
+    glw::SetClipPlane(0, glm::vec4(0.0f, 1.0f, 0.0f, 99999.0f), mTerrainBlackMaterial.Id);
+
+    // Render visible chunks
+    if (FrustrumCulling)
+    {
+        RenderInstanced(mChunksVisible);
+    }
+    // Render all chunks
+    else
+    {
+        RenderInstanced(mChunks);
+    }
 }
 
 

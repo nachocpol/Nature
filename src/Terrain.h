@@ -24,7 +24,7 @@ public:
     ~Terrain();
     void Init();
     void Update(Frustrum viewFrust);
-    void Render(bool useClip,glm::vec4 plane = glm::vec4(0.0f));
+    void Render(bool useClip,glm::vec4 plane = glm::vec4(0.0f),bool blackPass = false);
     void RenderUi();
     glw::Material* GetMaterial() { return &mTerrainMaterial; }
     float GetHeight(float x,float z);
@@ -52,6 +52,7 @@ private:
     void RenderChunk(Chunk& c);
     void RenderInstanced(std::vector<Chunk>& chunks);
     void AddGrass(Chunk& chunk,glm::ivec2 p);
+    void RenderBlackPass();
 
     // Chunks
     std::vector<Chunk> mChunks;
@@ -62,6 +63,7 @@ private:
     // Material
     glw::Material mTerrainMaterialInst;
     glw::Material mTerrainMaterial;
+    glw::Material mTerrainBlackMaterial;
 
     // Textures
     glw::Texture mHeightMap;
@@ -86,35 +88,6 @@ private:
     // Texturing
     float mTiling1 = 5000.0f;
     float mTiling2 = 200.0f;
-
-    // Some constants
-    float kEarthR = 6300000.0f;
-    float kAtmosphereR = 6500000.0f;
-
-    // Atmospheric scattering values
-    float mKr;                  // Rayleigh scattering constant
-    float mESun;                // Sun brightness constant
-    float mKm;                  // Mie scattering constant
-    glm::vec3 mWaveLength;      // Particles wavelength
-    int mSamples;               // Number of sample rays to use in integral equation
-    float mFSamples;
-    float mOuterRadius;
-    float mInnerRadius;
-    float mRScaleDepth;
-    float mMScaleDepth;
-    float mG;                   // The Mie phase asymmetry factor
-    float mG2;
-
-    glm::vec3  mPow4WaveLength;
-    glm::vec3  m3InvWavelength;	// 1 / pow(wavelength, 4) for the red, green, and blue channels
-    float mOuterRadius2;	    // fOuterRadius^2
-    float mInnerRadius2;	    // fInnerRadius^2
-    float mKrESun;			    // Kr * ESun
-    float mKmESun;			    // Km * ESun
-    float mKr4PI;			    // Kr * 4 * PI
-    float mKm4PI;			    // Km * 4 * PI
-    float mScale;			    // (1.0f / (m_fOuterRadius - m_fInnerRadius)) / m_fRayleighScaleDepth)
-    float mScaleOverScaleDepth;	// fScale / fScaleDepth
 
     // Vegetation
     unsigned int mGrassCnt = 0;

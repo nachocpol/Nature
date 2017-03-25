@@ -72,8 +72,6 @@ private:
 
     // Sky
     Sky mSky;
-    glw::RenderTarget mTestSkyRt;
-    glw::Material mTestSkyRtMat;
 
     // Bloom
     glw::RenderTarget mBloomRt;
@@ -114,4 +112,9 @@ private:
     // FXAA
     glw::RenderTarget mFxaaRt;
     glw::Material mFxaaRtMat;
+
+    // God rays
+    glw::RenderTarget mGodRaysBlackPRt;
+    glw::RenderTarget mGodRaysRt;
+    glw::Material mGodRaysMat;
 };
