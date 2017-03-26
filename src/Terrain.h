@@ -102,4 +102,9 @@ private:
 
     // Terrain heigthmap (float texture)
     TextureDefF mHmapF;
+
+    // Moon direction
+    glm::vec3 mMoonDirection;
+    float mNightAten = 0.0f;
+    float mDayAten = 1.0f;
 };

@@ -150,6 +150,15 @@ void Terrain::Update(Frustrum viewFrust)
             }
         }
     }
+
+    // Update moon dir
+    mMoonDirection = SunPosition;
+
+    // Calc smooth night atenuation
+    // Range -1,1 -> 0,1
+    float sunHeight = (SunPosition.y + 1.0f) * 0.5f;
+    mNightAten = glm::mix(0.2f, 1.0f, sunHeight);
+    printf("Night aten:%f\n", mNightAten);
 }
 
 void Terrain::Render(bool useClip, glm::vec4 plane, bool blackPass)
@@ -198,7 +207,17 @@ void Terrain::Render(bool useClip, glm::vec4 plane, bool blackPass)
     // Random stuff
     glw::SetUniform1f("uTiling1", p, &mTiling1);
     glw::SetUniform1f("uTiling2", p, &mTiling2);
-    glw::SetUniform3f("uSunPosition", p, &SunPosition.x);
+    if (SunPosition.y <= 0.0f)
+    {
+        glw::SetUniform1f("uNightAten", p, &mNightAten);
+        glw::SetUniform3f("uSunPosition", p, &mMoonDirection.x);
+    }
+    else
+    {
+        glw::SetUniform1f("uNightAten", p, &mNightAten);
+        glw::SetUniform3f("uSunPosition", p, &SunPosition.x);
+    }
+    
 
 
     // Draw terrain

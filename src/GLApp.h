@@ -35,6 +35,7 @@ private:
     glw::Mesh mBaseQuadRt;
     glm::vec2 mWind;//asfsafsafsafs
     glm::vec3 mSunDirection;
+    bool mSimulateDayCycle = false;
     bool mWalkerMode = false;
 
     // Clouds
@@ -44,6 +45,7 @@ private:
     int mScatSamplesLow = 1;
     float mScatSampleDist = 1.2f;
     glw::Material mCloudsMat;
+    glw::Material mCloudsBlackmat;
     glw::Mesh mCloudsPlane;
 
     // Water
@@ -118,15 +120,9 @@ private:
     glw::RenderTarget mGodRaysRt;
     glw::Material mGodRaysMat;
     int mGodRaysSamples = 100;
-    /*
-    float mGodRaysExposure = 0.2f;
-    float mGodRaysDecay = 0.97f;
-    float mGodRaysDensity = 2.2f;
-    float mGodRaysWeight = 0.3f;
-    */
-    float mGodRaysExposure = 0.0034f;
-    float mGodRaysDecay = 1.0f;
-    float mGodRaysDensity = 0.84f;
-    float mGodRaysWeight = 5.6f;
-    glm::vec2 mSunNormCoords;
+    float mGodRaysExposure = 0.0003f;
+    float mGodRaysDecay = 0.94f;
+    float mGodRaysDensity = 0.3f;
+    float mGodRaysWeight = 150.0f;
+    glm::vec3 mSunNormCoords;
 };

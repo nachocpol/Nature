@@ -84,8 +84,16 @@ bool GLApp::Init()
         0,2,1,
         0,3,2
     };
-    mCloudsMat.Init("../data/shaders/clouds/clouds.vs",
-                    "../data/shaders/clouds/clouds.fs");
+    mCloudsMat.Init
+    (
+        "../data/shaders/clouds/clouds.vs",
+        "../data/shaders/clouds/clouds.fs"
+    );
+    mCloudsBlackmat.Init
+    (
+        "../data/shaders/clouds/clouds.vs",
+        "../data/shaders/clouds/cloudsblack.fs"
+    );
     mCloudsPlane.Init(wVert, cele);
 
     // Init water
@@ -184,7 +192,7 @@ bool GLApp::Init()
     );
 
     // God rays
-    mGodRaysRt.Init(initWindowSize);
+    mGodRaysRt.Init(initWindowSize / 1.0f);
     mGodRaysBlackPRt.Init(initWindowSize);
     mGodRaysMat.Init
     (
@@ -200,9 +208,13 @@ bool GLApp::Init()
 
 void GLApp::Update()
 {
-    //mSunDirection.y = cos(mTime * 0.5);
-    //mSunDirection.x = sin(mTime * 0.5);
     mRunning = !mWindow.Events();
+
+    if (mSimulateDayCycle)
+    {
+        mSunDirection.y = cos(mTime * 0.5);
+        mSunDirection.x = sin(mTime * 0.5);
+    }
 
     mCamera.Update();
     mTerrain.Update(mCamera.CameraFrustrum);
@@ -270,7 +282,9 @@ void GLApp::Render()
         mGodRaysRt.Resize(ws);
     }
 
-    glClearColor(0.3f,0.3f,0.3f, 1.0f);
+    // Set clear color to black so the god rays can be blended with
+    // the scene
+    glClearColor(0.0f,0.0f,0.0f, 1.0f);
     glViewport( mViewport.x, mViewport.y,
                 mViewport.z, mViewport.w);
     glEnable(GL_DEPTH_TEST);
@@ -331,7 +345,7 @@ void GLApp::Render()
     mBaseRt.Enable();
     {
         // Sky
-        mSky.Render();
+        //mSky.Render();
 
         // Terrain
         mTerrain.Render(false);
@@ -397,6 +411,29 @@ void GLApp::Render()
 
         // Terrain
         mTerrain.Render(false, glm::vec4(0.0f), true);
+
+        // Clouds
+        /*
+        glDisable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        mCloudsBlackmat.Use();
+
+        glm::mat4 ctrans = glm::mat4();
+        ctrans = glm::translate(ctrans, glm::vec3(0.0f, mCloudsHeight, 0.0f));
+        ctrans = glm::scale(ctrans, glm::vec3(100000.0f, 0.0f, 100000.0f));
+
+        glw::SetUniformTexture("uLutTexture", mCloudsBlackmat.Id, mLutTexture.Id, 0);
+        glw::SetUniform1f("uScaleFactor", mCloudsBlackmat.Id, &mCloudScaleFactor);
+        glw::SetTransform(mCloudsBlackmat.Id, &ctrans[0][0]);
+        glw::SetUniform3f("uSundir", mCloudsBlackmat.Id, &mSunDirection.x);
+        glw::SetUniform1i("uScatSamples", mCloudsBlackmat.Id, &mScatSamplesLow);
+        glw::SetUniform1f("uSampleDist", mCloudsBlackmat.Id, &mScatSampleDist);
+
+        mCloudsPlane.Render();
+        glDisable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
+        */
     }
     mGodRaysBlackPRt.Disable();
 
@@ -404,19 +441,19 @@ void GLApp::Render()
     mGodRaysRt.Enable();
     {
         // Sun screen space
-        glm::vec3 sunEyePos = mCamera.GetPosition() + mSunDirection;
+        glm::vec3 sunEyePos = mCamera.GetPosition() + (mSunDirection);
         glm::vec4 sunProj =  mCamera.Projection * mCamera.View * glm::vec4(sunEyePos, 1.0f);
-        sunProj.x /= sunProj.w;
-        sunProj.y /= sunProj.w;
-        sunProj.x = (sunProj.x + 1.0f) * 0.5f;
-        sunProj.y = (sunProj.y + 1.0f) * 0.5f;
-        mSunNormCoords = glm::vec2(sunProj.x, sunProj.y);
-        printf("Sun: %f , %f\n", mSunNormCoords.x, mSunNormCoords.y);
+        // Save projected z
+        float sunZ = sunProj.z;
+        sunProj /= sunProj.w;
+        sunProj = (sunProj + 1.0f) * 0.5f;
+        mSunNormCoords = glm::vec3(sunProj.x, sunProj.y,sunZ);
 
         unsigned int grId = mGodRaysMat.Id;
         mGodRaysMat.Use();
         glw::SetUniformTexture("uColorTexture", grId, mGodRaysBlackPRt.RenderTexture.Id, 0);
-        glw::SetUniform2f("uSunScreenSpace", grId,&mSunNormCoords.x);
+        glw::SetUniform3f("uSunScreenSpace", grId,&mSunNormCoords.x);
+        glw::SetUniform3f("uSunDirection", grId, &mSunDirection.x);
         glw::SetUniform1i("uSamples", grId, &mGodRaysSamples);
         glw::SetUniform1f("uExposure", grId, &mGodRaysExposure);
         glw::SetUniform1f("uDecay", grId, &mGodRaysDecay);
@@ -519,11 +556,12 @@ void GLApp::Render()
     }
     mLensMergeRt.Disable();
 
-    // Tone map
+    // Tone map & god rays merge
     mToneMapRt.Enable();
     {
         mToneMapRtMat.Use();
         glw::SetUniformTexture("uColorTexture", mToneMapRtMat.Id, mLensMergeRt.RenderTexture.Id, 0);
+        glw::SetUniformTexture("uGodRaysTexture", mToneMapRtMat.Id, mGodRaysRt.RenderTexture.Id, 1);
         mBaseQuadRt.Render();
     }
     mToneMapRt.Disable();
@@ -539,7 +577,7 @@ void GLApp::Render()
 
     // Final draw
     mBaseMatRt.Use();
-    glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mGodRaysRt.RenderTexture.Id, 0);
+    glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mFxaaRt.RenderTexture.Id, 0);
     mBaseQuadRt.Render();
 
     RenderUi();
@@ -586,6 +624,7 @@ void GLApp::RenderUi()
 
         // Parameters
         ImGui::InputFloat3("Sun direction", &mSunDirection.x);
+        ImGui::Checkbox("Simulate day cycle", &mSimulateDayCycle);
         ImGui::Separator();
 
         // Camera

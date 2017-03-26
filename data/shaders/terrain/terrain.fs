@@ -24,6 +24,7 @@ uniform sampler2D uNormalTexture;
 uniform vec3 uSunPosition;
 uniform float uTiling1;
 uniform float uTiling2;
+uniform float uNightAten;
 
 in vec2 iTexcoord;
 in vec3 iPosition;
@@ -181,7 +182,8 @@ void main()
     vec3 base = GetBaseColor();
     float l = max(dot(normalize(normal),normalize(uSunPosition)),0.15f);
     oColor = vec4(base * l,1.0f) * CloudsShadowing();
-
+    oColor *= uNightAten;
+    
     // Fog
     oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iPosition),iPosition.y);
 

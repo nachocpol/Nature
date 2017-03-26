@@ -1,6 +1,7 @@
 #version 430 core
 
 uniform sampler2D uColorTexture;
+uniform sampler2D uGodRaysTexture;
 
 in vec2 iTexcoord;
 
@@ -52,6 +53,8 @@ vec3 Vignette(vec3 input,vec2 uv)
 void main()
 {
 	vec3 scene = texture(uColorTexture,iTexcoord).xyz;
+	vec3 godRays = texture(uGodRaysTexture,iTexcoord).xyz;
+	scene += godRays;
 	vec3 corrected = ReinhardToneMapping(scene);
 	corrected = Vignette(corrected,iTexcoord);
 	oColor = vec4(corrected,1.0f);
