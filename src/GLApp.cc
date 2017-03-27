@@ -215,6 +215,12 @@ void GLApp::Update()
         mSunDirection.y = cos(mTime * 0.5);
         mSunDirection.x = sin(mTime * 0.5);
     }
+    else
+    {
+        mDayTime = glm::mix(0.0f, glm::pi<float>(), mDayTimeSlider);
+        mSunDirection.y = sin(mDayTime);
+        mSunDirection.x = cos(mDayTime);
+    }
 
     mCamera.Update();
     mTerrain.Update(mCamera.CameraFrustrum);
@@ -304,7 +310,7 @@ void GLApp::Render()
         mSky.Render();
 
         // Terrain
-        mTerrain.Render(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.01f)));
+        mTerrain.Render(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.1f)));
 
         // Clouds
         glDisable(GL_CULL_FACE);
@@ -322,8 +328,11 @@ void GLApp::Render()
         glw::SetUniform3f("uSundir",mCloudsMat.Id, &mSunDirection.x);
         glw::SetUniform1i("uScatSamples", mCloudsMat.Id, &mScatSamplesLow);
         glw::SetUniform1f("uSampleDist", mCloudsMat.Id, &mScatSampleDist);
+        glw::SetUniform1f("uCutOff", mCloudsMat.Id, &mCloudCutOff);
+        glw::SetUniform1f("uDensity", mCloudsMat.Id, &mCloudDensity);
 
         mCloudsPlane.Render();
+
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
     }
@@ -337,7 +346,7 @@ void GLApp::Render()
     mPassConst.Update();
     mWaterRefracRt.Enable();
     {
-        mTerrain.Render(true, glm::vec4(0.0f, -1.0f, 0.0f, (mWaterHeight ) + 0.01f));
+        mTerrain.Render(true, glm::vec4(0.0f, -1.0f, 0.0f, (mWaterHeight ) + 0.1f));
     }
     mWaterRefracRt.Disable();
 
@@ -345,7 +354,7 @@ void GLApp::Render()
     mBaseRt.Enable();
     {
         // Sky
-        //mSky.Render();
+        mSky.Render();
 
         // Terrain
         mTerrain.Render(false);
@@ -396,14 +405,18 @@ void GLApp::Render()
         glw::SetUniform3f("uSundir", mCloudsMat.Id, &mSunDirection.x);
         glw::SetUniform1i("uScatSamples", mCloudsMat.Id, &mScatSamples);
         glw::SetUniform1f("uSampleDist", mCloudsMat.Id, &mScatSampleDist);
+        glw::SetUniform1f("uCutOff", mCloudsMat.Id, &mCloudCutOff);
+        glw::SetUniform1f("uDensity", mCloudsMat.Id, &mCloudDensity);
 
         mCloudsPlane.Render();
+
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
     }
     mBaseRt.Disable();
 
     // God rays (black pass)
+    /*
     mGodRaysBlackPRt.Enable();
     {
         // Sky
@@ -413,7 +426,6 @@ void GLApp::Render()
         mTerrain.Render(false, glm::vec4(0.0f), true);
 
         // Clouds
-        /*
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -433,9 +445,9 @@ void GLApp::Render()
         mCloudsPlane.Render();
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
-        */
     }
     mGodRaysBlackPRt.Disable();
+    
 
     // God rays
     mGodRaysRt.Enable();
@@ -462,6 +474,7 @@ void GLApp::Render()
         mBaseQuadRt.Render();
     }
     mGodRaysRt.Disable();
+    */
 
     // Bloom
     // Horizontal blur
@@ -561,7 +574,7 @@ void GLApp::Render()
     {
         mToneMapRtMat.Use();
         glw::SetUniformTexture("uColorTexture", mToneMapRtMat.Id, mLensMergeRt.RenderTexture.Id, 0);
-        glw::SetUniformTexture("uGodRaysTexture", mToneMapRtMat.Id, mGodRaysRt.RenderTexture.Id, 1);
+        /*glw::SetUniformTexture("uGodRaysTexture", mToneMapRtMat.Id, mGodRaysRt.RenderTexture.Id, 1);*/
         mBaseQuadRt.Render();
     }
     mToneMapRt.Disable();
@@ -625,6 +638,7 @@ void GLApp::RenderUi()
         // Parameters
         ImGui::InputFloat3("Sun direction", &mSunDirection.x);
         ImGui::Checkbox("Simulate day cycle", &mSimulateDayCycle);
+        ImGui::SliderFloat("Day time", &mDayTimeSlider, 0.0f, 1.0f);
         ImGui::Separator();
 
         // Camera
@@ -658,6 +672,8 @@ void GLApp::RenderUi()
         ImGui::InputFloat("Clouds scale factor", &mCloudScaleFactor);
         ImGui::InputInt("Clouds scatter samples", &mScatSamples);
         ImGui::InputFloat("Clouds scat sample dist", &mScatSampleDist);
+        ImGui::SliderFloat("Clouds cutoff", &mCloudCutOff, 0.0f, 1.0f);
+        ImGui::SliderFloat("Clouds density", &mCloudDensity, 0.0f, 1.0f);
         ImGui::Separator();
     }
     ImGui::End();

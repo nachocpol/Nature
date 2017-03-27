@@ -158,7 +158,7 @@ void Terrain::Update(Frustrum viewFrust)
     // Range -1,1 -> 0,1
     float sunHeight = (SunPosition.y + 1.0f) * 0.5f;
     mNightAten = glm::mix(0.2f, 1.0f, sunHeight);
-    printf("Night aten:%f\n", mNightAten);
+    //printf("Night aten:%f\n", mNightAten);
 }
 
 void Terrain::Render(bool useClip, glm::vec4 plane, bool blackPass)

@@ -15,6 +15,8 @@ uniform float uScaleFactor;
 uniform vec3 uSundir;
 uniform int uScatSamples;
 uniform float uSampleDist;
+uniform float uCutOff = 0.3;
+uniform float uDensity = 0.93;
 
 in vec2 iTexcoord;
 in vec3 iWPos;
@@ -124,6 +126,15 @@ void main()
 	float fade = GetFade(camDist);
 	if(fade <= 0.0f)discard;
     float n = Scattering();
+    if(n < uCutOff)
+    {
+    	n = 0.0;
+    }
+    else
+    {
+    	n = 1.0 - pow(uDensity,n - uCutOff);
+    	n  *= 10.0;
+    }
 
     // Clouds shape
     //vec3 csPos = (uScaleFactor*0.5f)*iWPos;

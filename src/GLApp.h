@@ -37,6 +37,8 @@ private:
     glm::vec3 mSunDirection;
     bool mSimulateDayCycle = false;
     bool mWalkerMode = false;
+    float mDayTime = 0.0f;
+    float mDayTimeSlider = 0.0f;
 
     // Clouds
     float mCloudsHeight = 6000.0f;
@@ -44,6 +46,8 @@ private:
     int mScatSamples = 4;
     int mScatSamplesLow = 1;
     float mScatSampleDist = 1.2f;
+    float mCloudDensity = 0.93f;
+    float mCloudCutOff = 0.3f;
     glw::Material mCloudsMat;
     glw::Material mCloudsBlackmat;
     glw::Mesh mCloudsPlane;
@@ -51,11 +55,11 @@ private:
     // Water
     float mWaterHeight = 40.0f;
     float mWaterScale = 9216.0f;
-    float mWaveSize = 200.0f;
+    float mWaveSize = 50.0f;
     float mWaveStrenght = 0.02f;
     float mNormStrenght = 1.0f;
-    glm::vec2 mWaveSpeed = glm::vec2(0.0001f, 0.0001f);
-    glm::vec2 mWaveSpeed2 = glm::vec2(-0.0001f, 0.0001f);
+    glm::vec2 mWaveSpeed = glm::vec2(0.0005f, 0.0005f);
+    glm::vec2 mWaveSpeed2 = glm::vec2(-0.0004f, 0.0004f);
     float mWaterShinyFactor = 500.0f;
     glm::vec3 mSpecColor = glm::vec3(1.0f,1.0f,1.0f);
     glm::vec3 mWaterTint = glm::vec3(0.23f, 0.35f, 0.57f);

@@ -141,6 +141,7 @@ void main()
 	vec3 cloudColor = mix(uCloudBright,uCloudDark,n);
 	cloudColor = vec3(0.0);
 	oColor = vec4(cloudColor,pow(n,0.1)) * 1.0f;
+	if(n > 0.2)oColor = vec4(0.0,0.0,0.0,1.0);
 	oColor.a *= fade;
 
     // Logarithmic z-buffer
