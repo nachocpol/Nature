@@ -24,7 +24,7 @@ GLApp::~GLApp()
 
 bool GLApp::Init()
 {
-    mViewport = glm::uvec4(0, 0, 1280, 1024);
+    mViewport = glm::uvec4(0, 0, 1050, 780);
     glm::vec2 initWindowSize = glm::vec2(mViewport.z, mViewport.w);
 
     // Initialize window
@@ -250,6 +250,12 @@ void GLApp::Update()
             mDeltaTime * 10.0f
         );
         mCamera.SetPosition(curCamPos);
+    }
+
+    // Show/hide gui btn
+    if (Input::GetInstance()->GetKey(INPUT_KEY_0))
+    {
+        mShowGui = !mShowGui;
     }
 }
 
@@ -595,7 +601,8 @@ void GLApp::Render()
     glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mFxaaRt.RenderTexture.Id, 0);
     mBaseQuadRt.Render();
 
-    RenderUi();
+    if(!mShowGui)
+        RenderUi();
     mWindow.Swap();
 }
 

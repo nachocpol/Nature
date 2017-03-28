@@ -25,6 +25,7 @@ private:
 
     Window mWindow;
     glm::uvec4 mViewport;
+    bool mShowGui = false;
 
     // Scene
     Terrain mTerrain;
