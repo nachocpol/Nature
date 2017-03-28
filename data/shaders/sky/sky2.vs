@@ -12,6 +12,7 @@ layout(std140)uniform uPass
 };
 
 out vec3 iPosition;
+out vec3 iAtribPos;
 
 void main()
 {
@@ -20,5 +21,6 @@ void main()
 	vec3 displacedPos = aPosition * 2.0f;	// radius = 1
 	gl_Position = uProjection * mat4(v) * vec4(displacedPos,1.0f);
 
+	iAtribPos = aPosition;
 	iPosition = displacedPos;
 }

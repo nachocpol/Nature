@@ -16,6 +16,8 @@ layout(std140)uniform uPass
 uniform sampler2D uHeightMap;
 uniform vec2 uChunkPos;
 uniform vec4 uClipPlane;
+uniform float uTerrainHeightScale;
+uniform float uTerrainScale;
 
 out vec2 iTexcoord;
 out vec3 iPosition;
@@ -24,16 +26,15 @@ out float iLogz;
 
 vec2 GetUv()
 {
-	float uHeightMapSize = 2048.0f * 9.0f;
+	// texture size!
+	float uHeightMapSize = 2048.0f * uTerrainScale;
 	vec2 p = (aInstancedModel * vec4(aPosition,1.0f)).xz;
 	return p/uHeightMapSize;
 }
 
 float GetHeight(vec2 uv)
 { 
-    // 200 = height scale
-    // 9 = terrain scale UNIFORMS!
-    return texture(uHeightMap,uv).x * 200.0f;
+    return texture(uHeightMap,uv).x * uTerrainHeightScale;
 }
 
 void main()

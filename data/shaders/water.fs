@@ -26,6 +26,8 @@ uniform float uWaterShinyFactor;
 uniform vec3 uSpecColor;
 uniform vec3 uWaterTint;
 uniform float uWaterTintFactor;
+uniform float uTerrainHeightScale;
+uniform float uTerrainScale;
 
 in vec2 iTexcoord;
 in vec4 iCPos;
@@ -62,7 +64,7 @@ float GetDistanceToFloor()
 	samples[3] = texture(uTerrainTexture,iTexcoord + vec2(-tTexelSize,tTexelSize)).r;
 	float sampleCur = texture(uTerrainTexture,iTexcoord).r;
 	float tHeight = (samples[0] + samples[1] + samples[2] + samples[3] + sampleCur) * 0.2f;
-	tHeight  = tHeight * 9.0f * 200.0f;
+	tHeight  = tHeight * uTerrainScale * uTerrainHeightScale;
 	float curHeight = iWPos.y;
 
 	return curHeight - tHeight;
@@ -70,8 +72,12 @@ float GetDistanceToFloor()
 
 float GetWaterFade(float dist)
 {
-	float uWaterShoreFade = 8.0f;
-	return clamp(pow(dist/uWaterShoreFade,2.0f),0.0f,1.0f);
+	float uWaterShoreFade = 2.0;
+	float fadeFactor = dist / uWaterShoreFade;
+	fadeFactor = clamp(fadeFactor,0.0,1.0);
+	//return mix(0.0,1.0,fadeFactor);
+	return 1.0;
+	//return clamp(pow(dist/uWaterShoreFade,1.0f),0.0f,1.0f);
 }
 
 vec3 GetNormal()
@@ -139,7 +145,7 @@ vec3 GetFog(   in vec3  rgb,        // original color of the pixel
 void main()
 {
 	oColor = GetWaterColor();
-    oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iWPos),uCampos,normalize(iWPos - uCampos));
+    //oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iWPos),uCampos,normalize(iWPos - uCampos));
 
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));

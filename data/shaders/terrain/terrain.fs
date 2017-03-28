@@ -115,15 +115,15 @@ vec3 GetBaseColor()
 {
 	vec3 splat = texture(uSplatTexture,iTexcoord).xyz;
 
-	vec3 grass = texture(uGrassTexture,iTexcoord * uTiling1).xyz;
+	//vec3 grass = texture(uGrassTexture,iTexcoord * uTiling1).xyz;
 	vec3 cliff = texture(uCliffTexture,iTexcoord * uTiling2).xyz;
     vec3 snow = texture(uSnowTexture,iTexcoord * uTiling1).xyz;
-	
+    
     vec3 finalColor = vec3(0.0f);
-    finalColor = mix(finalColor,grass,splat.g);
-    finalColor = mix(finalColor,cliff,splat.b);
-    finalColor = mix(finalColor,snow,splat.r);  
-    return finalColor;
+    //finalColor = mix(finalColor,grass,splat.g);
+    //finalColor = mix(finalColor,cliff,splat.b);
+    //finalColor = mix(finalColor,snow,splat.r);  
+    return mix(cliff,snow,splat.x);
 }
 
 mat3 CotangentFrame(vec3 N, vec3 p, vec2 uv)
@@ -149,14 +149,15 @@ vec3 GetNormal(vec3 curNormal,vec3 view)
 {
     vec3 splat = texture(uSplatTexture,iTexcoord).xyz;
 
-    vec3 grassN = normalize(texture(uGrassNormTexture,iTexcoord * uTiling1).xyz * 2.0f - 1.0f);
+    //vec3 grassN = normalize(texture(uGrassNormTexture,iTexcoord * uTiling1).xyz * 2.0f - 1.0f);
     vec3 cliffN = normalize(texture(uCliffNormTexture,iTexcoord * uTiling2).xyz * 2.0f - 1.0f);
     vec3 snowN = normalize(texture(uSnowNormTexture,iTexcoord * uTiling1).xyz * 2.0f - 1.0f);
-    
+
     vec3 finalNormal = vec3(0.0f);
-    finalNormal = mix(finalNormal,grassN,splat.g);
-    finalNormal = mix(finalNormal,cliffN,splat.b);
-    finalNormal = mix(finalNormal,snowN,splat.r);  
+    //finalNormal = mix(finalNormal,grassN,splat.g);
+    //finalNormal = mix(finalNormal,cliffN,splat.b);
+    //finalNormal = mix(finalNormal,snowN,splat.r);  
+    finalNormal = mix(cliffN,snowN,splat.x);
 
     mat3 tbn = CotangentFrame(curNormal,view,iTexcoord);
     return normalize(tbn * finalNormal);
@@ -185,7 +186,7 @@ void main()
     oColor *= uNightAten;
     
     // Fog
-    oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iPosition),iPosition.y);
+    //oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iPosition),iPosition.y);
 
     // Logarithmic z-buffer
     float Fcoef_half = 0.5f * (2.0 / log2(uCamfar + 1.0));

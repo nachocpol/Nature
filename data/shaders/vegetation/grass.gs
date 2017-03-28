@@ -14,6 +14,8 @@ layout(std140)uniform uPass
 in vec2[] gPosition;
 uniform float mLodRange;
 uniform sampler2D uHeightMap;
+uniform float uTerrainHeightScale;
+uniform float uTerrainScale;
 
 layout (triangle_strip,max_vertices = 3) out;
 out float iLogz;
@@ -114,10 +116,10 @@ void GenBladeTop(float Fcoef,vec3 b,vec3 t,mat4 model)
 
 float GetHeight()
 {
-	// 9.0f = Map scale (so we get the hmap values)
-	vec2 pos = gPosition[0].xy / 9.0f;
+	// Map scale (so we get the hmap values)
+	vec2 pos = gPosition[0].xy / uTerrainScale;
 	pos /= 2048.0f;
-	return texture(uHeightMap,pos).x * 200.0f * 9.0f;
+	return texture(uHeightMap,pos).x * uTerrainHeightScale * uTerrainScale;
 }
 
 void main()

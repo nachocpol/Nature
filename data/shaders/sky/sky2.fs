@@ -13,6 +13,7 @@ layout(std140)uniform uPass
 uniform vec3 uSunPosition;
 
 in vec3 iPosition;
+in vec3 iAtribPos;
 
 out vec4 oColor;
 
@@ -65,8 +66,9 @@ void main()
 	// Nighttime sky
 	if(sunHeight <= 0.0f)
 	{
+		vec3 newToAtm = normalize(iAtribPos - vec3(0.0));
 		oColor.xyz = vec3(0.0,0.0,0.0);
-		vec2 scaledToAtm = toAtmosphere.xz * 20.0;
+		vec2 scaledToAtm = newToAtm.xz * 20.0;
 		if(toAtmosphere.y > 0.1)
 		{
 			oColor.xyz += vec3(Stars(scaledToAtm,8.0,0.05,0.5));

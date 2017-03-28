@@ -63,7 +63,7 @@ private:
     float mWaterShinyFactor = 500.0f;
     glm::vec3 mSpecColor = glm::vec3(1.0f,1.0f,1.0f);
     glm::vec3 mWaterTint = glm::vec3(0.23f, 0.35f, 0.57f);
-    float mWaterTintFactor = 0.05f;
+    float mWaterTintFactor = 0.0f;
 
     glw::RenderTarget mWaterReflecRt;
     glw::RenderTarget mWaterRefracRt;

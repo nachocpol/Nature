@@ -60,14 +60,14 @@ void Terrain::Init()
     );
 
     mGrassTexture.Init(TextureDef("../data/textures/terrain/grass_diffuse.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mCliffTexture.Init(TextureDef("../data/textures/terrain/cliff_diffuse.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mHeightMap.Init(TextureDef("../data/hmaps/lagodix/lagodixhm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mSplatMap.Init(TextureDef("../data/hmaps/lagodix/lagodixsplat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mSnowTexture.Init(TextureDef("../data/textures/terrain/snow_diffuse.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mNormal.Init(TextureDef("../data/hmaps/lagodix/lagodixnorm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mCliffTexture.Init(TextureDef("../data/textures/terrain/cliff_diffuse.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mHeightMap.Init(TextureDef("../data/hmaps/snowmountain/snowhm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mSplatMap.Init(TextureDef("../data/hmaps/snowmountain/snowsplat.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mSnowTexture.Init(TextureDef("../data/textures/terrain/snow_diffuse.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mNormal.Init(TextureDef("../data/hmaps/snowmountain/snownorm.png", glm::vec2(0.0f), TextureUsage::kTexturing));
     mGrassNormal.Init(TextureDef("../data/textures/terrain/grass_normal.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mCliffNormal.Init(TextureDef("../data/textures/terrain/cliff_normal.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
-    mSnowNormal.Init(TextureDef("../data/textures/terrain/snow_normal.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mCliffNormal.Init(TextureDef("../data/textures/terrain/cliff_normal.png", glm::vec2(0.0f), TextureUsage::kTexturing));
+    mSnowNormal.Init(TextureDef("../data/textures/terrain/snow_normal.png", glm::vec2(0.0f), TextureUsage::kTexturing));
 
 
     // Load the hmpa so we can sample to find the chunks y pos
@@ -108,7 +108,7 @@ void Terrain::Init()
             // Find terrain height
             unsigned int yDataIdx = (int)bSpherePos.z * HeightMapSize + (int)bSpherePos.x;
             unsigned char yData = hMap.Data[yDataIdx];
-            bSpherePos.y = ((float)yData / 255.0f) * 200.0f;
+            bSpherePos.y = ((float)yData / 255.0f) * HeightScale;
             mChunks[idx].BSphere = BoundingSphere(bSpherePos * MapScale, diagonal * MapScale); 
 
             // Add grass
@@ -217,7 +217,8 @@ void Terrain::Render(bool useClip, glm::vec4 plane, bool blackPass)
         glw::SetUniform1f("uNightAten", p, &mNightAten);
         glw::SetUniform3f("uSunPosition", p, &SunPosition.x);
     }
-    
+    glw::SetUniform1f("uTerrainHeightScale", p, &HeightScale);
+    glw::SetUniform1f("uTerrainScale", p, &MapScale);
 
 
     // Draw terrain
@@ -257,9 +258,14 @@ void Terrain::Render(bool useClip, glm::vec4 plane, bool blackPass)
     // Draw grass
     glDisable(GL_CULL_FACE);
     if(mGrassWire)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        
     mGrassMaterial.Use();
-    glw::SetUniform1f("mLodRange", mGrassMaterial.Id, &mLodRange);
-    glw::SetUniformTexture("uHeightMap", mGrassMaterial.Id,mHeightMap.Id, 0);
+    unsigned int grassId = mGrassMaterial.Id;
+    glw::SetUniform1f("mLodRange", grassId, &mLodRange);
+    glw::SetUniformTexture("uHeightMap", grassId,mHeightMap.Id, 0);
+    glw::SetUniform1f("uTerrainHeightScale", grassId, &HeightScale);
+    glw::SetUniform1f("uTerrainScale", grassId, &MapScale);
+
     if (mUseInstancing && plane.y != -1.0)
     {
         for (unsigned int i = 0; i < mChunksVisible.size(); i++)
@@ -329,7 +335,7 @@ float Terrain::GetHeight(float x, float z)
     float mx = glm::clamp(cx,0.0f,(float)HeightMapSize);
     float mz = glm::clamp(cz,0.0f,(float)HeightMapSize);
     int idx = (int)mz * HeightMapSize + (int)mx;
-    return mHmapF.Data[idx] * 200.0f * MapScale;
+    return mHmapF.Data[idx] * HeightScale * MapScale;
 }
 
 void Terrain::InitMeshAsGrid(glw::Mesh& mesh, unsigned int size, float eleSize)
@@ -453,7 +459,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
 
             // Check min max height
             unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
-            float vY = mHmapF.Data[vIdx] * 200.0f * MapScale;
+            float vY = mHmapF.Data[vIdx] * HeightScale * MapScale;
             if (vY > 200.0f || vY < 44.0f)continue;
             glm::vec3 vp = glm::vec3(ci, 0.0f, cj) * MapScale;
             glm::vec2 randPos = glm::diskRand(10.0f);

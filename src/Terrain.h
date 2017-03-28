@@ -40,6 +40,7 @@ public:
     // Size of the heightmap used
     unsigned int HeightMapSize = 2048;
     float MapScale = 9.0f;
+    float HeightScale = 400.0f;
     bool FrustrumCulling = true;
     bool VisualDebug = false;
 

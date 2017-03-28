@@ -385,6 +385,8 @@ void GLApp::Render()
         glw::SetUniform3f("uSpecColor", wp, &mSpecColor.x);
         glw::SetUniform3f("uWaterTint", wp, &mWaterTint.x);
         glw::SetUniform1f("uWaterTintFactor", wp, &mWaterTintFactor);
+        glw::SetUniform1f("uTerrainHeightScale", wp, &mTerrain.HeightScale);
+        glw::SetUniform1f("uTerrainScale", wp, &mTerrain.MapScale);
 
         mWaterMesh.Render();
         glDisable(GL_BLEND);

@@ -99,7 +99,7 @@ float Scattering()
 	float step = uSampleDist / float(uScatSamples);
 	float n = 0.0f;
 	vec3 pos = uScaleFactor*iWPos + vec3(uWind.x,0.0f,uWind.y);
-	pos.x *= 1.25f;	// strech the cloud, realistic?
+	pos.x *= 1.0f;	// strech the cloud, realistic?
 	pos.y = 0.0f;
 	for(int i=0;i<uScatSamples;i++)
 	{
