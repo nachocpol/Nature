@@ -450,7 +450,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
     
     // Add grass
     glm::vec3 n;
-    float grassDensity = 2.0f;
+    float grassDensity = 10.0f;
     for (float ci = cStart.x; ci < cEnd.x; ci += ElementSize / grassDensity)
     {
         for (float cj = cStart.y; cj < cEnd.y; cj += ElementSize / grassDensity)
@@ -460,7 +460,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
             // Check min max height
             unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
             float vY = mHmapF.Data[vIdx] * HeightScale * MapScale;
-            if (vY > 400.0f || vY < 160.0f)continue;
+            if (vY > 230.0f || vY < 210.0f)continue;
             glm::vec3 vp = glm::vec3(ci, 0.0f, cj) * MapScale;
             glm::vec2 randPos = glm::diskRand(10.0f);
             vp.x += randPos.x;

@@ -54,10 +54,10 @@ private:
     glw::Mesh mCloudsPlane;
 
     // Water
-    float mWaterHeight = 40.0f;
+    float mWaterHeight = 211.0f;
     float mWaterScale = 9216.0f;
     float mWaveSize = 50.0f;
-    float mWaveStrenght = 0.02f;
+    float mWaveStrenght = 0.2f;
     float mNormStrenght = 1.0f;
     glm::vec2 mWaveSpeed = glm::vec2(0.0005f, 0.0005f);
     glm::vec2 mWaveSpeed2 = glm::vec2(-0.0004f, 0.0004f);

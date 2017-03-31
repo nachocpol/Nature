@@ -72,11 +72,11 @@ float GetDistanceToFloor()
 
 float GetWaterFade(float dist)
 {
-	float uWaterShoreFade = 2.0;
+	float uWaterShoreFade = 0.5;
 	float fadeFactor = dist / uWaterShoreFade;
 	fadeFactor = clamp(fadeFactor,0.0,1.0);
-	//return mix(0.0,1.0,fadeFactor);
-	return 1.0;
+	return mix(0.0,1.0,fadeFactor);
+	//return 1.0;
 	//return clamp(pow(dist/uWaterShoreFade,1.0f),0.0f,1.0f);
 }
 
