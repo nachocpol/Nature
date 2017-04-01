@@ -29,7 +29,7 @@ vec2 GetUv()
 	// texture size!
 	float uHeightMapSize = 2048.0f * uTerrainScale;
 	vec2 p = (aInstancedModel * vec4(aPosition,1.0f)).xz;
-	return p/uHeightMapSize;
+	return clamp(p/uHeightMapSize,vec2(0.001),vec2(0.999));
 }
 
 float GetHeight(vec2 uv)

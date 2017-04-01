@@ -86,4 +86,4 @@
 	+ Make new fog!
 	+ Test day/night cycle	
 	+ water.fs GetDistanceToFloor: check if uTerrainScale is ok?
-	
+	+ Make camera that orbits around the scene
