@@ -203,6 +203,9 @@ bool GLApp::Init()
     // Set initial camera position
     mCamera.GetPositionPtr()->y = mTerrain.GetHeight(mCamera.GetPosition().x, mCamera.GetPosition().z) + 2.0f;
 
+	// Init gpu debug timers
+	mFrameTimer.Init();
+
     return true;
 }
 
@@ -293,6 +296,8 @@ void GLApp::Render()
         mGodRaysBlackPRt.Resize(ws);
         mGodRaysRt.Resize(ws);
     }
+
+	mFrameTimer.Start();
 
     // Set clear color to black so the god rays can be blended with
     // the scene
@@ -601,14 +606,24 @@ void GLApp::Render()
     glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mFxaaRt.RenderTexture.Id, 0);
     mBaseQuadRt.Render();
 
+	mFrameTime = mFrameTimer.End();
+
     if(!mShowGui)
         RenderUi();
+
     mWindow.Swap();
 }
 
 void GLApp::RenderUi()
 {
     ImGui_ImplGlfwGL3_NewFrame();
+
+	ImGui::Begin("Frame timing");
+	{
+		ImGui::Text("Frame time:%f", mFrameTime);
+		ImGui::Separator();
+	}
+	ImGui::End();
 
     ImGui::Begin("Postprocessing");
     {

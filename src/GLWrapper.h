@@ -152,4 +152,15 @@ namespace glw
         Texture RenderTexture;
         Texture DepthTexture;
     };
+
+	struct GpuTimer
+	{
+		void Init();
+		void Release();
+		void Start();
+		float End();
+		GLuint Ids[2];
+		unsigned int CurFront = 1;
+		unsigned int CurBack  = 0;
+	};
 }

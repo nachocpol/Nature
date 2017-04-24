@@ -25,7 +25,11 @@ private:
 
     Window mWindow;
     glm::uvec4 mViewport;
-    bool mShowGui = false;
+	bool mShowGui = false;
+
+	// Debug timing
+	glw::GpuTimer mFrameTimer;
+	float mFrameTime;
 
     // Scene
     Terrain mTerrain;

@@ -746,4 +746,47 @@ void glw::RenderTarget::Disable()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void glw::GpuTimer::Init()
+{
+	glGenQueries(2, &Ids[0]);
+
+	// Dummy call so the double buffer works
+	glQueryCounter(Ids[CurFront], GL_TIMESTAMP);
+}
+
+void glw::GpuTimer::Release()
+{
+	glDeleteQueries(2, &Ids[0]);
+}
+
+void glw::GpuTimer::Start()
+{
+	glBeginQuery(GL_TIME_ELAPSED, Ids[CurBack]);
+}
+
+float glw::GpuTimer::End()
+{
+	GLuint64 timeStart = 0;
+	GLuint64 timeEnd = 0;
+
+	glQueryCounter(Ids[CurFront][1], GL_TIMESTAMP);
+	glGetQueryObjectui64v(Ids[CurFront][0], GL_QUERY_RESULT, &timeStart);
+	glGetQueryObjectui64v(Ids[CurFront][1], GL_QUERY_RESULT, &timeEnd);
+	float e = ((float)timeEnd - (float)timeStart) / 1000000.0f;
+
+	// Swap buffers
+	if (CurBack)
+	{
+		CurBack  = 0;
+		CurFront = 1;
+	}
+	else
+	{
+		CurBack  = 1;
+		CurFront = 0;
+	}
+
+	return e;
+}
+
 
