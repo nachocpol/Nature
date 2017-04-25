@@ -29,7 +29,9 @@ private:
 
 	// Debug timing
 	glw::GpuTimer mFrameTimer;
-	float mFrameTime;
+	glw::GpuTimer mTerrainTimerReflect;
+	glw::GpuTimer mTerrainTimerRefract;
+	glw::GpuTimer mTerrainTimerFinal;
 
     // Scene
     Terrain mTerrain;

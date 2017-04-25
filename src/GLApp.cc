@@ -205,6 +205,9 @@ bool GLApp::Init()
 
 	// Init gpu debug timers
 	mFrameTimer.Init();
+	mTerrainTimerReflect.Init();
+	mTerrainTimerRefract.Init();
+	mTerrainTimerFinal.Init();
 
     return true;
 }
@@ -321,7 +324,9 @@ void GLApp::Render()
         mSky.Render();
 
         // Terrain
+		mTerrainTimerReflect.Start();
         mTerrain.Render(true, glm::vec4(0.0f, 1.0f, 0.0f, -(mWaterHeight + 0.1f)));
+		mTerrainTimerReflect.End();
 
         // Clouds
         glDisable(GL_CULL_FACE);
@@ -357,7 +362,9 @@ void GLApp::Render()
     mPassConst.Update();
     mWaterRefracRt.Enable();
     {
+		mTerrainTimerRefract.Start();
         mTerrain.Render(true, glm::vec4(0.0f, -1.0f, 0.0f, (mWaterHeight ) + 0.1f));
+		mTerrainTimerRefract.End();
     }
     mWaterRefracRt.Disable();
 
@@ -368,7 +375,9 @@ void GLApp::Render()
         mSky.Render();
 
         // Terrain
+		mTerrainTimerFinal.Start();
         mTerrain.Render(false);
+		mTerrainTimerFinal.End();
 
         // Water
         glEnable(GL_BLEND);
@@ -606,21 +615,24 @@ void GLApp::Render()
     glw::SetUniformTexture("uColorTexture", mBaseMatRt.Id, mFxaaRt.RenderTexture.Id, 0);
     mBaseQuadRt.Render();
 
-	mFrameTime = mFrameTimer.End();
 
     if(!mShowGui)
         RenderUi();
 
     mWindow.Swap();
+	mFrameTimer.End();
 }
 
 void GLApp::RenderUi()
-{
+{	
     ImGui_ImplGlfwGL3_NewFrame();
 
 	ImGui::Begin("Frame timing");
 	{
-		ImGui::Text("Frame time:%f", mFrameTime);
+		ImGui::Text("Frame time:%f", mFrameTimer.TimerMili);
+		ImGui::Text("Terrain time reflect:%f", mTerrainTimerReflect.TimerMili);
+		ImGui::Text("Terrain time refract:%f", mTerrainTimerRefract.TimerMili);
+		ImGui::Text("Terrain time final:%f", mTerrainTimerFinal.TimerMili);
 		ImGui::Separator();
 	}
 	ImGui::End();

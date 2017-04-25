@@ -158,9 +158,13 @@ namespace glw
 		void Init();
 		void Release();
 		void Start();
+		// Returns time in seconds
 		float End();
-		GLuint Ids[2];
-		unsigned int CurFront = 1;
-		unsigned int CurBack  = 0;
+
+		GLuint StartQuery;
+		GLuint EndQuery;
+
+		float TimerSeconds;
+		float TimerMili;
 	};
 }

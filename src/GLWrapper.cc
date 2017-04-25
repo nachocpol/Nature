@@ -748,43 +748,40 @@ void glw::RenderTarget::Disable()
 
 void glw::GpuTimer::Init()
 {
-	glGenQueries(2, &Ids[0]);
-
-	// Dummy call so the double buffer works
-	glQueryCounter(Ids[CurFront], GL_TIMESTAMP);
+	glGenQueries(1, &StartQuery);
+	glGenQueries(1, &EndQuery);
 }
 
 void glw::GpuTimer::Release()
 {
-	glDeleteQueries(2, &Ids[0]);
+	glDeleteQueries(1, &StartQuery);
+	glDeleteQueries(1, &EndQuery);
 }
 
 void glw::GpuTimer::Start()
-{
-	glBeginQuery(GL_TIME_ELAPSED, Ids[CurBack]);
+{ 
+	glQueryCounter(StartQuery, GL_TIMESTAMP);
 }
 
 float glw::GpuTimer::End()
 {
+	GLint done = 1;
 	GLuint64 timeStart = 0;
 	GLuint64 timeEnd = 0;
 
-	glQueryCounter(Ids[CurFront][1], GL_TIMESTAMP);
-	glGetQueryObjectui64v(Ids[CurFront][0], GL_QUERY_RESULT, &timeStart);
-	glGetQueryObjectui64v(Ids[CurFront][1], GL_QUERY_RESULT, &timeEnd);
-	float e = ((float)timeEnd - (float)timeStart) / 1000000.0f;
+	glQueryCounter(EndQuery, GL_TIMESTAMP);
+	while (!done)
+	{
+		glGetQueryObjectiv(EndQuery, GL_QUERY_RESULT_AVAILABLE, &done);
+	}
+	glGetQueryObjectui64v(StartQuery, GL_QUERY_RESULT, &timeStart);
+	glGetQueryObjectui64v(EndQuery, GL_QUERY_RESULT, &timeEnd);
+	float e = ((float)timeEnd - (float)timeStart);
 
-	// Swap buffers
-	if (CurBack)
-	{
-		CurBack  = 0;
-		CurFront = 1;
-	}
-	else
-	{
-		CurBack  = 1;
-		CurFront = 0;
-	}
+	e /= 1000000.0f;	// nanoseconds -> miliseconds
+	TimerMili = e;
+	e /= 1000.0f;		// miliseconds -> seconds
+	TimerSeconds = e;
 
 	return e;
 }
