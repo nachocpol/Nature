@@ -209,6 +209,10 @@ bool GLApp::Init()
 	mTerrainTimerRefract.Init();
 	mTerrainTimerFinal.Init();
 
+	mCloudsFinal.Init();
+	mWaterFinal.Init();
+	mPostProcessing.Init();
+
     return true;
 }
 
@@ -380,6 +384,7 @@ void GLApp::Render()
 		mTerrainTimerFinal.End();
 
         // Water
+		mWaterFinal.Start();
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         mWaterMaterial.Use();
@@ -410,8 +415,10 @@ void GLApp::Render()
 
         mWaterMesh.Render();
         glDisable(GL_BLEND);
-        
+		mWaterFinal.End();
+
         // Clouds
+		mCloudsFinal.Start();
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -434,6 +441,7 @@ void GLApp::Render()
 
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
+		mCloudsFinal.End();
     }
     mBaseRt.Disable();
 
@@ -498,6 +506,7 @@ void GLApp::Render()
     mGodRaysRt.Disable();
     */
 
+	mPostProcessing.Start();
     // Bloom
     // Horizontal blur
     mBloomRt.Enable();
@@ -609,6 +618,7 @@ void GLApp::Render()
         mBaseQuadRt.Render();
     }
     mFxaaRt.Disable();
+	mPostProcessing.End();
 
     // Final draw
     mBaseMatRt.Use();
@@ -629,10 +639,13 @@ void GLApp::RenderUi()
 
 	ImGui::Begin("Frame timing");
 	{
-		ImGui::Text("Frame time:%f", mFrameTimer.TimerMili);
-		ImGui::Text("Terrain time reflect:%f", mTerrainTimerReflect.TimerMili);
-		ImGui::Text("Terrain time refract:%f", mTerrainTimerRefract.TimerMili);
-		ImGui::Text("Terrain time final:%f", mTerrainTimerFinal.TimerMili);
+		ImGui::Text("Frame time:                %f", mFrameTimer.TimerMili);
+		ImGui::Text("Terrain time reflect:      %f", mTerrainTimerReflect.TimerMili);
+		ImGui::Text("Terrain time refract:      %f", mTerrainTimerRefract.TimerMili);
+		ImGui::Text("Terrain time final:        %f", mTerrainTimerFinal.TimerMili);
+		ImGui::Text("Clouds final time:         %f", mCloudsFinal.TimerMili);
+		ImGui::Text("Water final time:          %f", mWaterFinal.TimerMili);
+		ImGui::Text("Postprocessing final time: %f", mPostProcessing.TimerMili);
 		ImGui::Separator();
 	}
 	ImGui::End();

@@ -33,6 +33,10 @@ private:
 	glw::GpuTimer mTerrainTimerRefract;
 	glw::GpuTimer mTerrainTimerFinal;
 
+	glw::GpuTimer mCloudsFinal;
+	glw::GpuTimer mWaterFinal;
+	glw::GpuTimer mPostProcessing;
+
     // Scene
     Terrain mTerrain;
     Camera mCamera;
