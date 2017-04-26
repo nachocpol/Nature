@@ -37,6 +37,14 @@ private:
 	glw::GpuTimer mWaterFinal;
 	glw::GpuTimer mPostProcessing;
 
+	glw::GpuTimer mBloomFinalTimer;
+	glw::GpuTimer mLensFlaresFinal;
+	glw::GpuTimer mToneMapFinal;
+	glw::GpuTimer mFxaaFinal;
+
+	glw::GpuTimer mSkyReflect;
+	glw::GpuTimer mSkyFinal;
+
     // Scene
     Terrain mTerrain;
     Camera mCamera;

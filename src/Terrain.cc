@@ -134,6 +134,7 @@ void Terrain::Init()
     // Grass 1
     mGrass1AlbedoTex.Init(TextureDef("../data/textures/grass_01/diffus.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
     mGrass1OpacityTex.Init(TextureDef("../data/textures/grass_01/opacity.tga", glm::vec2(0.0f), TextureUsage::kTexturing));
+
 }
 
 void Terrain::Update(Frustrum viewFrust)

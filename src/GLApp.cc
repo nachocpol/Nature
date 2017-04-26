@@ -213,6 +213,14 @@ bool GLApp::Init()
 	mWaterFinal.Init();
 	mPostProcessing.Init();
 
+	mBloomFinalTimer.Init();
+	mLensFlaresFinal.Init();
+	mToneMapFinal.Init();
+	mFxaaFinal.Init();
+
+	mSkyReflect.Init();
+	mSkyFinal.Init();
+
     return true;
 }
 
@@ -325,7 +333,9 @@ void GLApp::Render()
     mWaterReflecRt.Enable();
     {
         // Sky
+		mSkyReflect.Start();
         mSky.Render();
+		mSkyReflect.End();
 
         // Terrain
 		mTerrainTimerReflect.Start();
@@ -376,7 +386,9 @@ void GLApp::Render()
     mBaseRt.Enable();
     {
         // Sky
+		mSkyFinal.Start();
         mSky.Render();
+		mSkyFinal.End();
 
         // Terrain
 		mTerrainTimerFinal.Start();
@@ -509,6 +521,7 @@ void GLApp::Render()
 	mPostProcessing.Start();
     // Bloom
     // Horizontal blur
+	mBloomFinalTimer.Start();
     mBloomRt.Enable();
     {
         mBloomRtMat.Use();
@@ -539,9 +552,11 @@ void GLApp::Render()
         mBaseQuadRt.Render();
     }
     mBloomFinal.Disable();
+	mBloomFinalTimer.End();
 
     // Lens flares
     // Threshold
+	mLensFlaresFinal.Start();
     mThresholdRt.Enable();
     {
         mThresholdRtMat.Use();
@@ -599,8 +614,10 @@ void GLApp::Render()
         mBaseQuadRt.Render();
     }
     mLensMergeRt.Disable();
+	mLensFlaresFinal.End();
 
     // Tone map & god rays merge
+	mToneMapFinal.Start();
     mToneMapRt.Enable();
     {
         mToneMapRtMat.Use();
@@ -609,8 +626,10 @@ void GLApp::Render()
         mBaseQuadRt.Render();
     }
     mToneMapRt.Disable();
+	mToneMapFinal.End();
 
     // Fxaa
+	mFxaaFinal.Start();
     mFxaaRt.Enable();
     {
         mFxaaRtMat.Use();
@@ -618,6 +637,7 @@ void GLApp::Render()
         mBaseQuadRt.Render();
     }
     mFxaaRt.Disable();
+	mFxaaFinal.End();
 	mPostProcessing.End();
 
     // Final draw
@@ -640,12 +660,23 @@ void GLApp::RenderUi()
 	ImGui::Begin("Frame timing");
 	{
 		ImGui::Text("Frame time:                %f", mFrameTimer.TimerMili);
-		ImGui::Text("Terrain time reflect:      %f", mTerrainTimerReflect.TimerMili);
-		ImGui::Text("Terrain time refract:      %f", mTerrainTimerRefract.TimerMili);
-		ImGui::Text("Terrain time final:        %f", mTerrainTimerFinal.TimerMili);
+		ImGui::Separator();
+		ImGui::Text("Terrain reflect time:      %f", mTerrainTimerReflect.TimerMili);
+		ImGui::Text("Terrain refract time:      %f", mTerrainTimerRefract.TimerMili);
+		ImGui::Text("Terrain final time :       %f", mTerrainTimerFinal.TimerMili);
+		ImGui::Separator();
 		ImGui::Text("Clouds final time:         %f", mCloudsFinal.TimerMili);
+		ImGui::Separator();
 		ImGui::Text("Water final time:          %f", mWaterFinal.TimerMili);
+		ImGui::Separator();
 		ImGui::Text("Postprocessing final time: %f", mPostProcessing.TimerMili);
+		ImGui::Text("Bloom final time:          %f", mBloomFinalTimer.TimerMili);
+		ImGui::Text("Lens flare time:           %f", mLensFlaresFinal.TimerMili);
+		ImGui::Text("ToneMap time:              %f", mToneMapFinal.TimerMili);
+		ImGui::Text("Fxaa time:                 %f", mFxaaFinal.TimerMili);
+		ImGui::Separator();
+		ImGui::Text("Sky reflect time:          %f", mSkyReflect.TimerMili);
+		ImGui::Text("Sky final time:            %f", mSkyFinal.TimerMili);
 		ImGui::Separator();
 	}
 	ImGui::End();
