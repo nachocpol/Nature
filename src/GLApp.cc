@@ -458,7 +458,6 @@ void GLApp::Render()
     mBaseRt.Disable();
 
     // God rays (black pass)
-    /*
     mGodRaysBlackPRt.Enable();
     {
         // Sky
@@ -468,6 +467,7 @@ void GLApp::Render()
         mTerrain.Render(false, glm::vec4(0.0f), true);
 
         // Clouds
+		/*
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -487,6 +487,7 @@ void GLApp::Render()
         mCloudsPlane.Render();
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
+		*/
     }
     mGodRaysBlackPRt.Disable();
     
@@ -516,7 +517,7 @@ void GLApp::Render()
         mBaseQuadRt.Render();
     }
     mGodRaysRt.Disable();
-    */
+   
 
 	mPostProcessing.Start();
     // Bloom
@@ -622,7 +623,7 @@ void GLApp::Render()
     {
         mToneMapRtMat.Use();
         glw::SetUniformTexture("uColorTexture", mToneMapRtMat.Id, mLensMergeRt.RenderTexture.Id, 0);
-        /*glw::SetUniformTexture("uGodRaysTexture", mToneMapRtMat.Id, mGodRaysRt.RenderTexture.Id, 1);*/
+        glw::SetUniformTexture("uGodRaysTexture", mToneMapRtMat.Id, mGodRaysRt.RenderTexture.Id, 1);
         mBaseQuadRt.Render();
     }
     mToneMapRt.Disable();

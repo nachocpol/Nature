@@ -38,6 +38,20 @@ void Camera::Resize(float aspect)
 
 void Camera::Update()
 {
+	// Orbit camera
+	if (CameraOrbit)
+	{
+		glm::vec3 orbitCenter = glm::vec3(9000.0f, 0.0, 9000.0f);
+		mPosition.x = orbitCenter.x + sin(glfwGetTime()) * 500.0f;
+		mPosition.z = orbitCenter.z + cos(glfwGetTime()) * 500.0f;
+		View = glm::lookAt(mPosition,
+			orbitCenter,
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		CameraFrustrum.SetPlanes(Projection * View);
+		return;
+	}
+
+	// Fly camera
     if (Input::GetInstance()->GetKey(INPUT_KEY_L))
     {
         LockMouse = !LockMouse;

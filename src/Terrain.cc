@@ -490,6 +490,8 @@ void Terrain::RenderBlackPass()
     glw::SetUniformTexture("uHeightMap", mTerrainBlackMaterial.Id, mHeightMap.Id, 0);
     // We wont need clip planes
     glw::SetClipPlane(0, glm::vec4(0.0f, 1.0f, 0.0f, 99999.0f), mTerrainBlackMaterial.Id);
+	glw::SetUniform1f("uTerrainHeightScale", mTerrainBlackMaterial.Id,&HeightScale);
+	glw::SetUniform1f("uTerrainScale", mTerrainBlackMaterial.Id, &MapScale);
 
     // Render visible chunks
     if (FrustrumCulling)

@@ -39,6 +39,7 @@ public:
     float Sensitivity = 0.25f;
     float Speed = 1.0f;
     bool LockMouse = true;
+	bool CameraOrbit = true;
 
 private:
     void UpdateMouseLook();
