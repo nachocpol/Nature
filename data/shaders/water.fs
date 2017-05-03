@@ -16,6 +16,7 @@ uniform sampler2D uRefractionTexture;
 uniform sampler2D uDudvTexture;
 uniform sampler2D uNormTexture;
 uniform sampler2D uTerrainTexture;
+uniform sampler2D uTerrainDepth;
 uniform	float uWaveSize;
 uniform	float uWaveStrength;
 uniform	float uNormStrenght;//bigger smother
@@ -68,6 +69,30 @@ float GetDistanceToFloor()
 	float curHeight = iWPos.y;
 
 	return curHeight - tHeight;
+	
+
+	/*
+	float terrainHeight = 0.0f;
+	vec2 texelSize = 1.0f / textureSize(uTerrainTexture,0).xy;
+	for(int u=-2;u<3;u++)
+	{
+		for(int v=-2;v<3;v++)
+		{
+			terrainHeight += texture(uTerrainTexture,
+									 iTexcoord + (vec2(u,v) * texelSize)).x;
+		}
+	}
+	terrainHeight /= 25.0f;
+	return iWPos.y - (terrainHeight * uTerrainScale * uTerrainHeightScale); 
+	*/
+	/*
+	vec2 uv = iCPos.xy / iCPos.w;
+	uv = uv * 0.5f + 0.5f;
+
+	float d = texture(uTerrainDepth,uv).x;
+
+	return d;
+	*/
 }
 
 float GetWaterFade(float dist)

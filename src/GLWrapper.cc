@@ -404,6 +404,7 @@ bool glw::Material::Init(const char * vs, const char * fs)
     {
         glGetProgramInfoLog(Id, 512, nullptr, log);
         printf(" ERROR: Failed to create material:\n %s \n", log);
+		printf("  SHADER:%s\n", vs);
         Release();
         return false;
     }

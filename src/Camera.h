@@ -39,10 +39,11 @@ public:
     float Sensitivity = 0.25f;
     float Speed = 1.0f;
     bool LockMouse = true;
-	bool CameraOrbit = true;
+	bool CameraOrbit = false;
 
 private:
     void UpdateMouseLook();
+	glm::mat4 PerspectiveInverseMap(float aspect);
 
     glm::vec3 mUp;
     glm::vec3 mPosition;

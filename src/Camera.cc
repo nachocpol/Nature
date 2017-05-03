@@ -12,7 +12,7 @@ Camera::Camera():
     mPosition(10048.0f,50.0f, 10048.0f),
     mFront(mPosition + glm::vec3(0.0f,0.0f,-1.0f)),
     mNear(0.2f),
-    mFar(70000000.0f)
+    mFar(1000000.0f)
 {
     SetFov(75.0f);
 }
@@ -24,6 +24,7 @@ Camera::~Camera()
 void Camera::Init(float aspect)
 {
     Projection = glm::perspective(mFovRad, aspect, mNear, mFar);
+	//Projection = PerspectiveInverseMap(aspect);
     View = glm::lookAt(mPosition, mFront, mUp);
     CameraFrustrum.SetPlanes(Projection * View);
     mAspect = aspect;
@@ -32,6 +33,7 @@ void Camera::Init(float aspect)
 void Camera::Resize(float aspect)
 {
     Projection = glm::perspective(mFovRad, aspect, mNear, mFar);
+	//Projection = PerspectiveInverseMap(aspect);
     CameraFrustrum.SetPlanes(Projection * View);
     mAspect = aspect;
 }
@@ -102,6 +104,7 @@ void Camera::SetFov(float angle)
     mFovDegree = angle;
     mFovRad = glm::radians(angle);
     Projection = glm::perspective(mFovRad, mAspect, mNear, mFar);
+	//Projection = PerspectiveInverseMap(mAspect);
 }
 
 void Camera::UpdateMouseLook()
@@ -122,4 +125,36 @@ void Camera::UpdateMouseLook()
     // Clamp
     if (mPitch > 89.0f)mPitch = 89.0f;
     if (mPitch < -89.0f) mPitch = -89.0f;
+}
+
+glm::mat4 Camera::PerspectiveInverseMap(float aspect)
+{
+	glm::mat4 stdPerspective = glm::perspective(mFovRad, aspect, mNear, mFar);
+	return stdPerspective;
+	/*
+	tdPerspective[2][2] = mNear / (mNear - mFar);
+	stdPerspective[2][3] = stdPerspective[2][2] == 0.0f ? mNear : (mFar * mNear / (mFar - mNear));
+	return stdPerspective;
+	*/
+
+	/*
+	return glm::mat4
+	(
+		mFovRad/aspect, 0.0f,	0.0f,	0.0f,
+		0.0f,			mFovRad,0.0f,	0.0f,
+		0.0f,			0.0f,	0.0f,	-1.0f,
+		0.0f,			0.0f,	mNear,	0.0f
+	);
+	*/
+
+	/*
+	float f = 1.0f / tan(mFovRad * 0.5f);
+	return glm::mat4
+	(
+		f/aspect,		0.0f,	0.0f,	0.0f,
+		0.0f,			f,		0.0f,	0.0f,
+		0.0f,			0.0f,	0.0f,	-1.0f,
+		0.0f,			0.0f,	mNear,	0.0f
+	);
+	*/
 }

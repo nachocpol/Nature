@@ -57,10 +57,10 @@ bool GLApp::Init()
     // Init scene render target
     std::vector<BasicVertex> vert =
     {
-        BasicVertex(-1,-1,0,    0,0),
-        BasicVertex(1,-1,0,    1,0),
-        BasicVertex(1, 1,0,    1,1),
-        BasicVertex(-1, 1,0,    0,1)
+        BasicVertex(-1,-1,-1,    0,0),
+        BasicVertex(1,-1,-1,    1,0),
+        BasicVertex(1, 1,-1,    1,1),
+        BasicVertex(-1, 1,-1,    0,1)
     };
     std::vector<unsigned int> ele =
     {
@@ -220,6 +220,11 @@ bool GLApp::Init()
 
 	mSkyReflect.Init();
 	mSkyFinal.Init();
+
+	// GL setup
+	//glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+	//glClearDepth(0.0f);
+	//glDepthFunc(GL_GREATER);
 
     return true;
 }
