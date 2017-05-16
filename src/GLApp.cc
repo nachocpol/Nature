@@ -729,6 +729,7 @@ void GLApp::RenderUi()
 
         // Camera
         ImGui::Text("Camera");
+		ImGui::Text("Camera position:%f,%f,%f", mCamera.GetPosition().x, mCamera.GetPosition().y, mCamera.GetPosition().z);
         ImGui::DragFloat("Camera speed", &mCamera.Speed, 0.1f, 0.01f, 4.0f);
         ImGui::DragFloat("Camera sensitivity", &mCamera.Sensitivity, 0.05f, 0.1f, 1.0f);
         ImGui::Checkbox("Camera Locked", &mCamera.LockMouse);
@@ -736,6 +737,7 @@ void GLApp::RenderUi()
         float tmpFov = *mCamera.GetFov();
         ImGui::InputFloat("Camera FOV", &tmpFov);
         mCamera.SetFov(tmpFov);
+		ImGui::Checkbox("Update fustrum", &mCamera.UpdateFustrum);
         ImGui::Separator();
 
         // Water

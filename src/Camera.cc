@@ -14,7 +14,7 @@ Camera::Camera():
     mNear(0.2f),
     mFar(1000000.0f)
 {
-    SetFov(75.0f);
+    SetFov(85.0f);
 }
 
 Camera::~Camera()
@@ -91,7 +91,10 @@ void Camera::UpdateView()
     View = glm::lookAt(mPosition,
         mPosition + mFront,
         mUp);
-    CameraFrustrum.SetPlanes(Projection * View);
+	if (UpdateFustrum)
+	{
+		CameraFrustrum.SetPlanes(Projection * View);
+	}
 }
 
 void Camera::SetYInverse(bool newInv)

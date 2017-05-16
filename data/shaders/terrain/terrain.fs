@@ -171,6 +171,48 @@ vec3 GetFog(vec3 c, float d,float h)
     return mix(c,fogColor,fogMod);
 }
 
+const float PI = 3.14159265359;
+
+vec3 FresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}  
+
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float a      = roughness*roughness;
+    float a2     = a*a;
+    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+    
+    float nom   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+    
+    return nom / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float nom   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+    
+    return nom / denom;
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2  = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1  = GeometrySchlickGGX(NdotL, roughness);
+    
+    return ggx1 * ggx2;
+}
+
 void main()
 {
     // Load normal and hack to work with world machine normals
@@ -179,11 +221,33 @@ void main()
     normal.z *= -1.0f;
     normal = GetNormal(normal,normalize(uCampos - iPosition));
 
-    // Lambert
-    vec3 base = GetBaseColor();
-    float l = max(dot(normalize(normal),normalize(uSunPosition)),0.15f);
-    oColor = vec4(base * l,1.0f) * CloudsShadowing();
+    // Shading
+    float metallic = 0.0f;
+    float roughness = 1.0;
+    vec3 V = normalize(uCampos - iPosition);
+    vec3 H = normalize(normalize(uSunPosition) + V);
+    vec3 albedo = GetBaseColor();
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0,albedo,metallic);
+    vec3 F  = FresnelSchlick(max(dot(H, V), 0.0), F0);
+    float NDF = DistributionGGX(normal, H, roughness);       
+    float G   = GeometrySmith(normal, V, normalize(uSunPosition), roughness);  
+    vec3 nominator    = NDF * G * F;
+    float denominator = 4 * max(dot(normal, V), 0.0) * max(dot(normal, normalize(uSunPosition)), 0.0) + 0.001; 
+    vec3 specular     = nominator / denominator; 
+
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+  
+    kD *= 1.0 - metallic;
+  
+    float NdotL = max(dot(normal, normalize(uSunPosition)), 0.2);        
+    oColor.xyz = (kD * albedo / PI + specular) * vec3(1.0) * NdotL;
     oColor *= uNightAten;
+
+    //float l = max(dot(normalize(normal),normalize(uSunPosition)),0.15f);
+    //oColor = vec4(base * l,1.0f) * CloudsShadowing();
+    //oColor *= uNightAten;
     
     // Fog
     //oColor.xyz = GetFog(oColor.xyz,distance(uCampos,iPosition),iPosition.y);

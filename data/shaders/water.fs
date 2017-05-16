@@ -128,7 +128,7 @@ vec4 GetWaterColor()
 
 	// Reduce displacement at the shore
 	float distToFloor = GetDistanceToFloor();
-	float shoreFact = clamp(distToFloor/50.0f,0.0f,1.0f);
+	float shoreFact = clamp(distToFloor/5.0f,0.0f,1.0f);
 	uv += GetUv(shoreFact);
 
 	// Clamp to remove wavy edges on the screen
@@ -152,7 +152,7 @@ vec4 GetWaterColor()
 	vec3 specColor = uSpecColor * spec;
 
 	// Fade the water at the shore
-	return vec4(c + specColor,GetWaterFade(distToFloor));
+	return vec4(c + specColor,/*GetWaterFade(distToFloor)*/shoreFact);
 }
 
 vec3 GetFog(   in vec3  rgb,        // original color of the pixel

@@ -19,12 +19,17 @@ Window::~Window()
 bool Window::Init(const char * title, glm::uvec2 size)
 {
     glfwInit();
+
+	// Monitor and vid mode
+	auto mainMonitor = glfwGetPrimaryMonitor();
+	auto vidMode = glfwGetVideoMode(mainMonitor);
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-    mWindowHandle = glfwCreateWindow(size.x, size.y, title, nullptr, nullptr);
+    mWindowHandle = glfwCreateWindow(vidMode->width, vidMode->height, title, mainMonitor, nullptr);
     if (!mWindowHandle)
     {
         return false;

@@ -109,6 +109,7 @@ void Terrain::Init()
             unsigned int yDataIdx = (int)bSpherePos.z * HeightMapSize + (int)bSpherePos.x;
             unsigned char yData = hMap.Data[yDataIdx];
             bSpherePos.y = ((float)yData / 255.0f) * HeightScale;
+			bSpherePos.y *= 0.5f;
             mChunks[idx].BSphere = BoundingSphere(bSpherePos * MapScale, diagonal * MapScale); 
 
             // Add grass
@@ -290,12 +291,12 @@ void Terrain::Render(bool useClip, glm::vec4 plane, bool blackPass)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glm::mat4 curModel;
         unsigned int loc = 0;
-        for (unsigned int i = 0; i < mChunks.size(); i++)
+        for (unsigned int i = 0; i < mChunksVisible.size(); i++)
         {
             mSphereMat.Use();
             curModel = glm::mat4();
-            curModel = glm::translate(curModel, mChunks[i].BSphere.Position);
-            curModel = glm::scale(curModel, glm::vec3(mChunks[i].BSphere.Radius));
+            curModel = glm::translate(curModel, mChunksVisible[i].BSphere.Position);
+            curModel = glm::scale(curModel, glm::vec3(mChunksVisible[i].BSphere.Radius));
             glw::SetTransform(mSphereMat.Id, &curModel[0][0]);
             mSphereMesh.Render();
         }
@@ -461,7 +462,7 @@ void Terrain::AddGrass(Chunk& chunk,glm::ivec2 p)
             // Check min max height
             unsigned int vIdx = (int)cj * HeightMapSize + (int)ci;
             float vY = mHmapF.Data[vIdx] * HeightScale * MapScale;
-            if (vY > 230.0f || vY < 210.0f)continue;
+            if (vY > 280.0f || vY < 278.0f)continue;
             glm::vec3 vp = glm::vec3(ci, 0.0f, cj) * MapScale;
             glm::vec2 randPos = glm::diskRand(10.0f);
             vp.x += randPos.x;

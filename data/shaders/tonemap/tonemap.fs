@@ -58,6 +58,6 @@ void main()
 	scene += godRays;
 	
 	vec3 corrected = ReinhardToneMapping(scene);
-	corrected = Vignette(corrected,iTexcoord);
+	//corrected = Vignette(corrected,iTexcoord);
 	oColor = vec4(corrected,1.0f);
 }

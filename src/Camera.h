@@ -40,6 +40,7 @@ public:
     float Speed = 1.0f;
     bool LockMouse = true;
 	bool CameraOrbit = false;
+	bool UpdateFustrum = true;
 
 private:
     void UpdateMouseLook();
