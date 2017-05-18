@@ -749,6 +749,7 @@ void glw::RenderTarget::Disable()
 
 void glw::GpuTimer::Init()
 {
+    TimerMili = TimerSeconds = 0.0f;
 	glGenQueries(1, &StartQuery);
 	glGenQueries(1, &EndQuery);
 }
@@ -761,11 +762,12 @@ void glw::GpuTimer::Release()
 
 void glw::GpuTimer::Start()
 { 
-	glQueryCounter(StartQuery, GL_TIMESTAMP);
+	//glQueryCounter(StartQuery, GL_TIMESTAMP);
 }
 
 float glw::GpuTimer::End()
 {
+    return 0.0f;
 	GLint done = 1;
 	GLuint64 timeStart = 0;
 	GLuint64 timeEnd = 0;

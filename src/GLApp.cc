@@ -217,6 +217,7 @@ bool GLApp::Init()
 	mLensFlaresFinal.Init();
 	mToneMapFinal.Init();
 	mFxaaFinal.Init();
+    mGodRaysFinal.Init();
 
 	mSkyReflect.Init();
 	mSkyFinal.Init();
@@ -462,7 +463,10 @@ void GLApp::Render()
     }
     mBaseRt.Disable();
 
+    mPostProcessing.Start();
+
     // God rays (black pass)
+    mGodRaysFinal.Start();
     mGodRaysBlackPRt.Enable();
     {
         // Sky
@@ -522,9 +526,7 @@ void GLApp::Render()
         mBaseQuadRt.Render();
     }
     mGodRaysRt.Disable();
-   
-
-	mPostProcessing.Start();
+    mGodRaysFinal.End();
     // Bloom
     // Horizontal blur
 	mBloomFinalTimer.Start();
@@ -680,6 +682,7 @@ void GLApp::RenderUi()
 		ImGui::Text("Lens flare time:           %f", mLensFlaresFinal.TimerMili);
 		ImGui::Text("ToneMap time:              %f", mToneMapFinal.TimerMili);
 		ImGui::Text("Fxaa time:                 %f", mFxaaFinal.TimerMili);
+        ImGui::Text("God rays time:             %f", mGodRaysFinal.TimerMili);
 		ImGui::Separator();
 		ImGui::Text("Sky reflect time:          %f", mSkyReflect.TimerMili);
 		ImGui::Text("Sky final time:            %f", mSkyFinal.TimerMili);

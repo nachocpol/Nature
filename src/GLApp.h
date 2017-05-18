@@ -41,6 +41,7 @@ private:
 	glw::GpuTimer mLensFlaresFinal;
 	glw::GpuTimer mToneMapFinal;
 	glw::GpuTimer mFxaaFinal;
+    glw::GpuTimer mGodRaysFinal;
 
 	glw::GpuTimer mSkyReflect;
 	glw::GpuTimer mSkyFinal;
