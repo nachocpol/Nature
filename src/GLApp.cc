@@ -315,7 +315,7 @@ void GLApp::Render()
         mToneMapRt.Resize(ws);
         mFxaaRt.Resize(ws);
         mGodRaysBlackPRt.Resize(ws);
-        mGodRaysRt.Resize(ws);
+        mGodRaysRt.Resize(windowDown2);
     }
 
 	mFrameTimer.Start();

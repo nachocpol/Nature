@@ -143,10 +143,10 @@ private:
     glw::RenderTarget mGodRaysBlackPRt;
     glw::RenderTarget mGodRaysRt;
     glw::Material mGodRaysMat;
-    int mGodRaysSamples = 100;
+    int mGodRaysSamples = 40;
     float mGodRaysExposure = 0.0003f;
     float mGodRaysDecay = 0.94f;
-    float mGodRaysDensity = 0.3f;
+    float mGodRaysDensity = 0.2f;
     float mGodRaysWeight = 150.0f;
     glm::vec3 mSunNormCoords;
 };
